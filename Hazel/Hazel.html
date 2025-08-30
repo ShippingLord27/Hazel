@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAZEL: RENTAL ONLINE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="Hazel.css">
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo" id="homeLogo">HAZEL<span></span></a>
+            
+            <nav class="main-nav">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search for items..." id="searchInput">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                <ul>
+                    <li><a href="#" class="nav-link" data-page="home">Home</a></li>
+                    <li class="has-dropdown" id="categoriesNavDropdown">
+                        <a href="#" class="nav-link categories-dropdown-toggle">Categories <i class="fas fa-chevron-down dropdown-icon"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="nav-link" data-page="all-products" data-filter-target="tools">Tools</a></li>
+                            <li><a href="#" class="nav-link" data-page="all-products" data-filter-target="electronics">Electronics</a></li>
+                            <li><a href="#" class="nav-link" data-page="all-products" data-filter-target="vehicles">Vehicles</a></li>
+                            <li><a href="#" class="nav-link" data-page="all-products" data-filter-target="party">Party</a></li>
+                            <li><a href="#" class="nav-link" data-page="all-products" data-filter-target="sports">Sports</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" class="nav-link" data-page="all-products">Products</a></li>
+                    <li><a href="#" class="nav-link" data-page="about-page">About</a></li>
+                    <li><a href="#" class="nav-link" data-page="contact-page">Contact</a></li>
+                </ul>
+                    
+                <div class="nav-buttons">
+                    <button class="dark-mode-toggle" id="darkModeToggle">
+                        <i class="far fa-moon"></i> Dark mode
+                    </button>
+                    
+                    <div class="auth-nav-state" id="loggedOutNavButtons">
+                        <button class="btn btn-outline" id="loginBtn">Login</button>
+                        <button class="btn btn-primary signup-trigger-btn">Sign Up</button>
+                    </div>
+
+                    <div class="auth-nav-state" id="loggedInNavButtons" style="display:none;">
+                        <a href="#" class="header-cart-link" id="headerCartLink">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span id="cartItemCount">0</span>
+                        </a>
+                        <a href="#" class="header-admin-link" id="adminDashboardLink" style="display:none;">
+                            <i class="fas fa-user-shield"></i> Admin
+                        </a>
+                        <a href="#" class="header-profile-link" id="headerProfileLink">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a>
+                        <button class="btn btn-outline" id="headerLogoutBtn">Logout</button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    
+    <div class="page active" id="home-page">
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Borrow What You Need, When You Need It</h1>
+                <p>Discover the best rental items for your needs at affordable prices. From tools to electronics, we've got you covered.</p>
+                <button class="btn btn-primary" id="browseBtn">Browse Items</button>
+            </div>
+        </section>
+
+        
+        <section class="products" id="products">
+            <div class="container">
+                <div class="products-header">
+                    <div class="section-title">
+                        <h2>Popular Items</h2>
+                    </div>
+                    
+                    <ul class="products-filter">
+                        <li class="active" data-filter="all">All</li>
+                        <li data-filter="tools">Tools</li>
+                        <li data-filter="electronics">Electronics</li>
+                        <li data-filter="vehicles">Vehicles</li>
+                        <li data-filter="party">Party</li>
+                        <li data-filter="sports">Sports</li>
+                    </ul>
+                </div>
+                
+                <div class="products-grid">
+                    
+                    <div class="product-card" data-category="electronics" data-product-id="1">
+                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Camera" class="product-img">
+                        <div class="product-info">
+                            <span class="product-category">Electronics</span>
+                            <h3 class="product-title">DSLR Camera</h3>
+                            <div class="product-price">₱25/day</div>
+                            <div class="product-meta">
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <button class="btn btn-primary view-listing" data-id="1">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="product-card" data-category="vehicles" data-product-id="2">
+                        <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Bike" class="product-img">
+                        <div class="product-info">
+                            <span class="product-category">Vehicles</span>
+                            <h3 class="product-title">Mountain Bike</h3>
+                            <div class="product-price">₱20/day</div>
+                            <div class="product-meta">
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <button class="btn btn-primary view-listing" data-id="2">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="product-card" data-category="tools" data-product-id="3">
+                        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Power Tools" class="product-img">
+                        <div class="product-info">
+                            <span class="product-category">Tools</span>
+                            <h3 class="product-title">Power Drill Set</h3>
+                            <div class="product-price">₱15/day</div>
+                            <div class="product-meta">
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <button class="btn btn-primary view-listing" data-id="3">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="product-card" data-category="party" data-product-id="4">
+                        <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Bounce House" class="product-img">
+                        <div class="product-info">
+                            <span class="product-category">Party</span>
+                            <h3 class="product-title">Bounce House</h3>
+                            <div class="product-price">₱75/day</div>
+                            <div class="product-meta">
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <button class="btn btn-primary view-listing" data-id="4">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="product-card" data-category="sports" data-product-id="5">
+                        <img src="https://images.unsplash.com/photo-1509587584298-0f3b3a3a1797?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Kayak" class="product-img">
+                        <div class="product-info">
+                            <span class="product-category">Sports</span>
+                            <h3 class="product-title">Single Kayak</h3>
+                            <div class="product-price">₱35/day</div>
+                            <div class="product-meta">
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <button class="btn btn-primary view-listing" data-id="5">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="product-card" data-category="electronics" data-product-id="6">
+                        <img src="https://images.unsplash.com/photo-1547721064-da6cfb341d50?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Projector" class="product-img">
+                        <div class="product-info">
+                            <span class="product-category">Electronics</span>
+                            <h3 class="product-title">HD Projector</h3>
+                            <div class="product-price">₱30/day</div>
+                            <div class="product-meta">
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <button class="btn btn-primary view-listing" data-id="6">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="about" id="about">
+            <div class="container">
+                <div class="about-container">
+                    <div class="about-img">
+                        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="About Us">
+                    </div>
+                    
+                    <div class="about-content">
+                        <h2>About Our Rental Service</h2>
+                        <p>We started with a simple idea: to make renting items as easy as possible. Our platform connects people who need items with those who have them to rent.</p>
+                        <p>With over 10,000 satisfied customers and thousands of items available, we're proud to be the leading rental platform in the region.</p>
+                        <a href="#" class="btn btn-primary nav-link" data-page="about-page">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <footer class="common-footer" id="contact">
+            
+        </footer>
+    </div>
+
+    
+    <div class="page" id="all-products-page" style="display:none;">
+        <div class="container products-page-container">
+            <section class="products-page-header-section">
+                <h1>Our Full Catalog</h1>
+                <p>Browse all available items for rent. Use the filters and search to find exactly what you need.</p>
+            </section>
+
+            <section class="products-page-controls">
+                <div class="products-page-search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search all products..." id="productsPageSearchInput">
+                </div>
+                <ul class="products-filter" id="productsPageFilter">
+                    <li class="active" data-filter="all">All</li>
+                    <li data-filter="tools">Tools</li>
+                    <li data-filter="electronics">Electronics</li>
+                    <li data-filter="vehicles">Vehicles</li>
+                    <li data-filter="party">Party</li>
+                    <li data-filter="sports">Sports</li>
+                </ul>
+            </section>
+
+            <div class="products-grid" id="allProductsGrid">
+                
+            </div>
+            <div class="no-products-found" id="noProductsFoundMessage" style="display:none;">
+                <p>No products match your current filters or search term.</p>
+            </div>
+        </div>
+        
+        <footer class="common-footer"></footer>
+    </div>
+
+
+    
+    <div class="page" id="about-page" style="display:none;">
+      <div class="container about-page-container">
+            
+            <section class="about-hero">
+                <div class="about-hero-content">
+                    <h1>About HAZEL</h1>
+                    <p>Connecting people with the things they need through a trusted rental community</p>
+                </div>
+            </section>
+
+            
+            <section class="our-story">
+                <div class="section-title">
+                    <h2>Our Story</h2>
+                </div>
+                <div class="about-container">
+                    <div class="about-content">
+                        <p>HAZEL was founded in 2025 with a simple mission: to make renting items as easy as possible. The 4 founders, recognized that many people own items they rarely use, while others need those same items for short periods.</p>
+                        <p>What started as a small local platform has grown into a nationwide rental community with thousands of users. We've helped people save money, reduce waste, and build connections in their communities.</p>
+                        <p>Today, we're proud to be the leading peer-to-peer rental platform, offering everything from power tools to party equipment and more.</p>
+                    </div>
+                    <div class="about-img">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Our Team">
+                    </div>
+                </div>
+            </section>
+
+            
+            <section class="mission-vision">
+                <div class="mission">
+                    <h2>Our Mission</h2>
+                    <p>To create a sustainable sharing economy by making rental access to goods more convenient and affordable than ownership, while building trust between community members.</p>
+                </div>
+                <div class="vision">
+                    <h2>Our Vision</h2>
+                    <p>We envision a world where people have access to what they need without the burden of ownership, reducing waste and consumption while strengthening local communities.</p>
+                </div>
+            </section>
+
+            
+            <section class="team-section">
+                <div class="section-title">
+                    <h2>Meet Our Team</h2>
+                    <p>The passionate people behind HAZEL</p>
+                </div>
+                <div class="team-grid">
+                    <div class="team-member">
+                        <img src="https://i.ibb.co/HT0Nz7j1/download-12.jpg" alt="Jace Torres" class="team-member-img">
+                        <div class="team-member-info">
+                            <h3>Jace R. Torres</h3>
+                            <p>Main Developer / Documentation</p>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img src="https://i.ibb.co/MDQJNcRS/download-14.jpg" alt="Gurkarn Singh" class="team-member-img">
+                        <div class="team-member-info">
+                            <h3>Gurkarn Q. Singh</h3>
+                            <p>Backup Developer / Documentation</p>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img src="https://i.ibb.co/xt0g4cPP/download-13.jpg" alt="Olive Mendoza" class="team-member-img">
+                        <div class="team-member-info">
+                            <h3>Olive Leigh A. Mendoza</h3>
+                            <p>Front End Developer / Design / Documentation</p>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img src="https://i.ibb.co/fGCqLmjw/494888334-1322942232103903-4287235928389679842-n.jpg" alt="Romeo Nogaliza" class="team-member-img">
+                        <div class="team-member-info">
+                            <h3>Romeo Victor D. Nogaliza</h3>
+                            <p>Spokeperson / Documentation</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section class="values-section">
+                <div class="section-title">
+                    <h2>Our Values</h2>
+                    <p>The principles that guide everything we do</p>
+                </div>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>Trust</h3>
+                        <p>We build trust through verification systems, secure payments, and community reviews.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h3>Sustainability</h3>
+                        <p>We promote the sharing economy to reduce waste and overconsumption.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Community</h3>
+                        <p>We believe in bringing people together and strengthening local connections.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <h3>Quality</h3>
+                        <p>We maintain high standards for the items listed on our platform.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <footer class="common-footer"></footer>
+    </div>
+    
+    <div class="page" id="cart-page" style="display:none;">
+        <div class="container cart-page-container">
+             <section class="checkout-header-section">
+                <h1>Your Shopping Cart</h1>
+                <p>Review the items you've selected for rental.</p>
+            </section>
+            <div class="cart-grid">
+                <div class="cart-items-list">
+                    <div id="cartItemsContainer">
+                       
+                    </div>
+                </div>
+                <aside class="cart-summary">
+                    <h2>Summary</h2>
+                    <div class="price-row">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal">₱0.00</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Service Fee (5%):</span>
+                        <span id="cartServiceFee">₱0.00</span>
+                    </div>
+                    <hr>
+                    <div class="price-row total-row">
+                        <span>Total:</span>
+                        <span id="cartTotal">₱0.00</span>
+                    </div>
+                    <div class="cart-discount-section">
+                        <label for="cartDiscountInput">Discount Code:</label>
+                        <input type="text" id="cartDiscountInput" placeholder="Enter code">
+                        <button class="btn btn-outline" id="cartApplyDiscountBtn">Apply</button>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="proceedToCheckoutBtn">Proceed to Checkout</button>
+                </aside>
+            </div>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+
+    
+    <div class="page" id="contact-page" style="display:none;">
+        <div class="container contact-page-container">
+            <section class="contact-hero">
+                <div class="contact-hero-content">
+                    <h1>Get in Touch</h1>
+                    <p>We'd love to hear from you! Whether you have a question, feedback, or just want to say hello.</p>
+                </div>
+            </section>
+            <section class="contact-content-section">
+                <div class="contact-form-container">
+                    <h2>Send Us a Message</h2>
+                    <form id="contactForm">
+                        <div class="form-group"><label for="contactName">Full Name*</label><input type="text" id="contactName" name="contactName" required><div class="error-message" id="nameError"></div></div>
+                        <div class="form-group"><label for="contactEmail">Email Address*</label><input type="email" id="contactEmail" name="contactEmail" required><div class="error-message" id="emailError"></div></div>
+                        <div class="form-group"><label for="contactSubject">Subject*</label><input type="text" id="contactSubject" name="contactSubject" required><div class="error-message" id="subjectError"></div></div>
+                        <div class="form-group"><label for="contactMessage">Message*</label><textarea id="contactMessage" name="contactMessage" rows="6" required></textarea><div class="error-message" id="messageError"></div></div>
+                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                        <div id="contactFormMessage" class="form-message" style="margin-top: 15px; display: none;"></div>
+                    </form>
+                </div>
+                <div class="contact-details-container">
+                    <h2>Contact Information</h2>
+                    <p>Feel free to reach out to us through any of the following channels:</p>
+                    <ul class="contact-info-list">
+                        <li><i class="fas fa-map-marker-alt"></i><span>123 Rental St, City, Country 12345</span></li>
+                        <li><i class="fas fa-phone"></i><span>(02) 8123-4567</span></li>
+                        <li><i class="fas fa-envelope"></i><span>info@hazel.com</span></li>
+                        <li><i class="fas fa-clock"></i><span>Mon - Fri: 9:00 AM - 6:00 PM</span></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+
+    
+    <div class="page" id="faq-page" style="display:none;">
+        <div class="container faq-page-container">
+            <section class="faq-hero">
+                <div class="faq-hero-content">
+                    <h1>Frequently Asked Questions</h1>
+                    <p>Find answers to common questions about using HAZEL.</p>
+                </div>
+            </section>
+            <section class="faq-list">
+                <div class="faq-accordion">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>How does HAZEL work?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>HAZEL is a peer-to-peer rental platform. Owners list their items for rent, and renters can browse and book these items for a specific duration. We handle secure payments and provide a framework for communication and trust between users.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Is it safe to rent items from others?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes. We prioritize safety and trust. We encourage all users to complete our Identity Verification process. Additionally, our review system allows you to see feedback from other users, and our secure messaging system lets you communicate with the owner before you rent.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>What happens if an item I rent gets damaged?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Renters are responsible for the items during the rental period. We recommend you communicate with the owner immediately if any damage occurs. Many owners specify their own terms regarding damages and late fees in the listing description. Disputes can be mediated through our support team.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>How do I get paid as an owner?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Payments are processed securely through our platform. Once a rental is completed successfully, the earnings (minus our service fee) are transferred to your connected bank account or payment method. You can track your earnings in your profile dashboard.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>What is the service fee?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>HAZEL charges a small service fee to both the renter and the owner. This fee helps us operate the platform, provide customer support, and continuously improve our services to ensure a safe and reliable experience for everyone.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+
+    
+    <div class="page" id="privacy-policy-page" style="display:none;">
+        <div class="container privacy-policy-page-container">
+            <section class="privacy-policy-hero">
+                <div class="privacy-policy-hero-content">
+                    <h1>Privacy Policy</h1>
+                    <p>Last updated: October 26, 2025</p>
+                </div>
+            </section>
+            <section class="privacy-policy-content">
+                <p>HAZEL ("us", "we", or "our") operates the HAZEL website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.</p>
+                
+                <h2>Information Collection and Use</h2>
+                <p>We collect several different types of information for various purposes to provide and improve our Service to you.</p>
+                <h3>Types of Data Collected</h3>
+                <ul>
+                    <li><strong>Personal Data:</strong> While using our Service, we may ask you to provide us with certain personally identifiable information that can be used to contact or identify you ("Personal Data"). This may include, but is not limited to: Email address, First name and last name, Phone number, Address, and payment information.</li>
+                    <li><strong>Usage Data:</strong> We may also collect information on how the Service is accessed and used ("Usage Data"). This may include your computer's IP address, browser type, pages visited, and other diagnostic data.</li>
+                </ul>
+
+                <h2>How We Use Your Information</h2>
+                <p>We use the collected data for various purposes:</p>
+                <ul>
+                    <li>To provide and maintain our Service.</li>
+                    <li>To notify you about changes to our Service.</li>
+                    <li>To allow you to participate in interactive features of our Service.</li>
+                    <li>To provide customer support.</li>
+                    <li>To gather analysis or valuable information so that we can improve our Service.</li>
+                    <li>To monitor the usage of our Service.</li>
+                </ul>
+
+                <h2>Information Sharing and Disclosure</h2>
+                <p>We do not sell your Personal Data. We may share your information with third-party service providers to facilitate our Service, such as payment processors and identity verification services. These third parties have access to your Personal Data only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.</p>
+
+                <h2>Data Security</h2>
+                <p>The security of your data is important to us, but remember that no method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.</p>
+            </section>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+
+    
+    <div class="modal" id="authModal" style="display:none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modalTitle">Login</h2>
+                <button class="modal-close-btn" aria-label="Close modal" onclick="hideModal('authModal')">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="tab-container">
+                    <div class="tab active" id="loginTab">Login</div>
+                    <div class="tab" id="signupTab">Sign Up</div>
+                </div>
+                
+                <form id="loginForm" class="form-container active">
+                    <div class="form-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required></div>
+                    <div class="form-group"><label for="loginPassword">Password</label><input type="password" id="loginPassword" required></div>
+                    <div id="loginErrorMessage" class="error-message"></div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <div class="form-footer"><p>Don't have an account? <a href="#" id="switchToSignup">Sign Up</a></p></div>
+                </form>
+                
+                <form id="signupForm" class="form-container">
+                    <div class="form-group"><label for="firstName">First Name</label><input type="text" id="firstName" required></div>
+                    <div class="form-group"><label for="lastName">Last Name</label><input type="text" id="lastName" required></div>
+                    <div class="form-group"><label for="signupEmail">Email</label><input type="email" id="signupEmail" required></div>
+                    <div class="form-group"><label for="signupPassword">Password</label><input type="password" id="signupPassword" required></div>
+                    <div class="form-group"><label for="confirmPassword">Confirm Password</label><input type="password" id="confirmPassword" required></div>
+                    <div id="signupErrorMessage" class="error-message"></div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                    <div class="form-footer"><p>Already have an account? <a href="#" id="switchToLogin">Login</a></p></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="modal" id="reviewModal" style="display:none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="reviewModalTitle">Leave a Review</h2>
+                <button class="modal-close-btn" aria-label="Close modal" onclick="hideModal('reviewModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <input type="hidden" id="reviewProductId" name="productId">
+                    <div class="form-group star-rating-container">
+                        <label for="reviewRatingValue">Your Rating*</label>
+                        <div class="star-rating" id="reviewStarRating">
+                            <i class="fas fa-star star" data-value="1"></i><i class="fas fa-star star" data-value="2"></i><i class="fas fa-star star" data-value="3"></i><i class="fas fa-star star" data-value="4"></i><i class="fas fa-star star" data-value="5"></i>
+                        </div>
+                        <input type="hidden" id="reviewRatingValue" name="rating" required>
+                        <div class="error-message" id="ratingError"></div>
+                    </div>
+                    <div class="form-group"><label for="reviewerName">Your Name*</label><input type="text" id="reviewerName" name="reviewerName" required><div class="error-message" id="reviewerNameError"></div></div>
+                    <div class="form-group"><label for="reviewText">Your Review*</label><textarea id="reviewText" name="reviewText" rows="5" required></textarea><div class="error-message" id="reviewTextError"></div></div>
+                    <div id="reviewFormMessage" class="form-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="modal" id="createListingModal" style="display:none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="createListingModalTitle">Create New Listing</h2>
+                <button class="modal-close-btn" aria-label="Close modal" onclick="hideModal('createListingModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="createListingForm">
+                    <div class="form-group"><label for="createListingTitleInput">Title*</label><input type="text" id="createListingTitleInput" required><div class="error-message" id="createListingTitleError"></div></div>
+                     <div class="form-group"><label for="createListingFullTitleInput">Full Title*</label><input type="text" id="createListingFullTitleInput" required><div class="error-message" id="createListingFullTitleError"></div></div>
+                    <div class="form-group">
+                        <label for="createListingCategorySelect">Category*</label>
+                        <select id="createListingCategorySelect" required><option value="" disabled selected>Select</option><option value="tools">Tools</option><option value="electronics">Electronics</option><option value="vehicles">Vehicles</option><option value="party">Party</option><option value="sports">Sports</option><option value="other">Other</option></select>
+                        <div class="error-message" id="createListingCategoryError"></div>
+                    </div>
+                    <div class="form-group"><label for="createListingPriceInput">Price (e.g., ₱1000/day)*</label><input type="text" id="createListingPriceInput" required><div class="error-message" id="createListingPriceError"></div></div>
+                    <div class="form-group"><label for="createListingImageInput">Image URL*</label><input type="url" id="createListingImageInput" placeholder="https://..." required><div class="error-message" id="createListingImageError"></div></div>
+                    <div class="form-group"><label for="createListingTrackingTagInput">Unique Tracking Tag ID*</label><input type="text" id="createListingTrackingTagInput" placeholder="e.g., HZL-XYZ-123" required><div class="error-message" id="createListingTrackingTagError"></div></div>
+                    <div class="form-group"><label for="createListingDescriptionTextarea">Description*</label><textarea id="createListingDescriptionTextarea" rows="4" required></textarea><div class="error-message" id="createListingDescriptionError"></div></div>
+                    <div class="form-group"><label for="createListingOwnerTermsTextarea">Custom Terms (Optional)</label><textarea id="createListingOwnerTermsTextarea" rows="3" placeholder="e.g., Late fee is ₱500/day"></textarea></div>
+                    <div id="createListingFormMessage" class="form-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Listing</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    
+    <div class="modal" id="editListingModal" style="display:none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="editListingModalTitle">Edit Listing</h2>
+                <button class="modal-close-btn" aria-label="Close modal" onclick="hideModal('editListingModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="editListingForm">
+                    <input type="hidden" id="editListingProductId">
+                    <div class="form-group"><label for="editListingTitleInput">Title*</label><input type="text" id="editListingTitleInput" required><div class="error-message" id="editListingTitleError"></div></div>
+                     <div class="form-group"><label for="editListingFullTitleInput">Full Title*</label><input type="text" id="editListingFullTitleInput" required><div class="error-message" id="editListingFullTitleError"></div></div>
+                    <div class="form-group">
+                        <label for="editListingCategorySelect">Category*</label>
+                        <select id="editListingCategorySelect" required><option value="tools">Tools</option><option value="electronics">Electronics</option><option value="vehicles">Vehicles</option><option value="party">Party</option><option value="sports">Sports</option><option value="other">Other</option></select>
+                        <div class="error-message" id="editListingCategoryError"></div>
+                    </div>
+                    <div class="form-group"><label for="editListingPriceInput">Price*</label><input type="text" id="editListingPriceInput" required><div class="error-message" id="editListingPriceError"></div></div>
+                    <div class="form-group"><label for="editListingImageInput">Image URL*</label><input type="url" id="editListingImageInput" required><div class="error-message" id="editListingImageError"></div></div>
+                    <div class="form-group"><label for="editListingTrackingTagInput">Unique Tracking Tag ID*</label><input type="text" id="editListingTrackingTagInput" required><div class="error-message" id="editListingTrackingTagError"></div></div>
+                    <div class="form-group"><label for="editListingDescriptionTextarea">Description*</label><textarea id="editListingDescriptionTextarea" rows="4" required></textarea><div class="error-message" id="editListingDescriptionError"></div></div>
+                    <div class="form-group"><label for="editListingOwnerTermsTextarea">Custom Terms (Optional)</label><textarea id="editListingOwnerTermsTextarea" rows="3"></textarea></div>
+                    <div id="editListingFormMessage" class="form-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    
+    <div class="page" id="profilePage" style="display:none;">
+        <div class="container profile-page-main-container"> 
+            <div class="profile-container">
+                <aside class="profile-sidebar">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile Picture" class="profile-pic" id="profilePicSidebar">
+                    <h3 id="profileSidebarName">John Doe</h3>
+                    <p id="profileSidebarEmail">admin@test.com</p>
+                    <ul class="sidebar-menu">
+                        <li><a href="#" data-view="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                        <li><a href="#" data-view="my-listings"><i class="fas fa-list"></i> My Listings</a></li>
+                        <li><a href="#" data-view="favorites"><i class="fas fa-heart"></i> Favorites</a></li>
+                        <li><a href="#" data-view="rental-tracker"><i class="fas fa-route"></i> Rental Tracker</a></li>
+                        <li><a href="#" data-view="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                        <li><a href="#" id="logoutBtnProfile"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                </aside>
+                <main class="profile-main-content">
+                    
+                    <div class="profile-view active-profile-view" id="profile-dashboard-view">
+                        <div class="profile-view-header"><h1>Welcome, <span id="profileWelcomeName">User</span>!</h1><p>Here's an overview of your rental activity.</p></div>
+                        <div class="profile-analytics-dashboard">
+                            <div class="section-title"><h2>Activity Dashboard</h2></div>
+                            <div class="analytics-grid">
+                                <div class="analytics-card"><i class="fas fa-list-alt analytics-icon"></i><div class="analytics-value" id="analyticsTotalListings">0</div><div class="analytics-label">Total Listings</div></div>
+                                <div class="analytics-card"><i class="fas fa-receipt analytics-icon"></i><div class="analytics-value" id="analyticsActiveRentals">0</div><div class="analytics-label">Active Rentals</div></div>
+                                <div class="analytics-card"><i class="fas fa-dollar-sign analytics-icon"></i><div class="analytics-value" id="analyticsTotalEarnings">₱0.00</div><div class="analytics-label">Total Earnings</div></div>
+                                <div class="analytics-card"><i class="fas fa-eye analytics-icon"></i><div class="analytics-value" id="analyticsListingViews">0</div><div class="analytics-label">Listing Views</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="profile-view" id="profile-my-listings-view" style="display:none;">
+                        <div class="profile-view-header"><h1>My Listings</h1><button class="btn btn-primary" id="addListingFromProfileBtn">Add New Listing</button></div>
+                        <div class="products-grid" id="myListingsGrid"></div>
+                        <p id="noMyListingsMessage" style="display:none; text-align:center; margin-top: 20px;">You haven't listed any items yet.</p>
+                    </div>
+                    
+                    <div class="profile-view" id="profile-favorites-view" style="display:none;">
+                        <div class="profile-view-header"><h1>My Favorites</h1></div>
+                        <div class="products-grid" id="favoritesGrid"></div>
+                         <p id="noFavoritesMessage" style="display:none;">You haven't favorited any items yet.</p>
+                    </div>
+
+                    <div class="profile-view" id="profile-rental-tracker-view" style="display:none;">
+                        <div class="profile-view-header"><h1>Rental Tracker</h1><p>Track the status of your current rentals and lent items.</p></div>
+                        <div id="rentalTrackerGrid"></div>
+                        <p id="noRentalsMessage" style="display:none; text-align:center; margin-top: 20px;">You have no active rentals or lent items.</p>
+                    </div>
+                    
+                    <div class="profile-view" id="profile-settings-view" style="display:none;">
+                        <div class="profile-view-header"><h1>Settings</h1><p>Manage your account details and preferences.</p></div>
+                        <form id="profileSettingsForm">
+                            <h3>Personal Information</h3>
+                            <div class="form-group"><label for="settingsFirstName">First Name*</label><input type="text" id="settingsFirstName" required><div class="error-message" id="settingsFirstNameError"></div></div>
+                            <div class="form-group"><label for="settingsLastName">Last Name*</label><input type="text" id="settingsLastName" required><div class="error-message" id="settingsLastNameError"></div></div>
+                            <div class="form-group"><label for="settingsEmail">Email</label><input type="email" id="settingsEmail" required readonly></div>
+                            <div class="form-group"><label for="settingsProfilePicUrl">Profile Picture URL</label><input type="url" id="settingsProfilePicUrl"><div class="error-message" id="settingsProfilePicUrlError"></div></div>
+                            <div class="form-group"><label for="settingsLocation">Location</label><input type="text" id="settingsLocation"><div class="error-message" id="settingsLocationError"></div></div>
+                            <hr>
+                            <h3>Identity Verification</h3>
+                            <div id="profileVerificationSection">
+                                <p id="verificationStatus">Your current status is: <span class="status-unverified"><i class="fas fa-times-circle"></i> Unverified</span></p>
+                                <div class="form-group"><label for="uploadIdInput">Upload a valid government ID (PDF, JPG, PNG):</label><input type="file" id="uploadIdInput" accept=".pdf,.jpg,.jpeg,.png"></div>
+                                <button type="button" class="btn btn-outline" id="startFaceScanBtn"><i class="fas fa-camera"></i> Start Face Scan (Simulated)</button>
+                            </div>
+                            <hr>
+                            <h3>Change Password</h3>
+                            <div class="form-group"><label for="settingsCurrentPassword">Current Password</label><input type="password" id="settingsCurrentPassword"> <div class="error-message" id="settingsCurrentPasswordError"></div></div>
+                            <div class="form-group"><label for="settingsNewPassword">New Password</label><input type="password" id="settingsNewPassword"><div class="error-message" id="settingsNewPasswordError"></div></div>
+                            <div class="form-group"><label for="settingsConfirmNewPassword">Confirm New Password</label><input type="password" id="settingsConfirmNewPassword"><div class="error-message"  id="settingsConfirmNewPasswordError"></div></div>
+                            <div id="settingsFormMessage" class="form-message" style="display: none;"></div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+
+    
+    <div class="page" id="checkout-page" style="display:none;">
+        <div class="container checkout-page-container">
+            <section class="checkout-header-section">
+                <h1>Complete Your Rental</h1>
+                <p>Please review and agree to the terms before payment.</p>
+            </section>
+            <div class="checkout-content-grid">
+                <div class="checkout-forms-container">
+                    <div id="checkout-agreement-section">
+                        <h3>Rental Agreement</h3>
+                        <div class="agreement-content"></div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="checkoutAgreementCheckbox" style="width: auto;">
+                            <label for="checkoutAgreementCheckbox" style="margin-bottom: 0;">I have read and agree to the terms for all items in this rental.</label>
+                        </div>
+                    </div>
+                    <div id="checkout-payment-section" class="disabled">
+                        <form id="checkoutForm">
+                            <div class="checkout-section"><h3>Your Information</h3><div class="form-group"><label for="checkoutFullName">Full Name</label><input type="text" id="checkoutFullName" required><div class="error-message" id="checkoutFullNameError"></div></div><div class="form-group"><label for="checkoutEmail">Email Address</label><input type="email" id="checkoutEmail" required><div class="error-message" id="checkoutEmailError"></div></div><div class="form-group"><label for="checkoutPhone">Phone Number (Optional)</label><input type="tel" id="checkoutPhone"></div></div>
+                            <div class="checkout-section"><h3>Payment Details</h3><div class="form-group"><label for="checkoutCardNumber">Card Number</label><input type="text" id="checkoutCardNumber" placeholder="XXXX XXXX XXXX XXXX" required><div class="error-message" id="checkoutCardNumberError"></div></div><div class="form-group-row"><div class="form-group"><label for="checkoutExpiryDate">Expiry Date</label><input type="text" id="checkoutExpiryDate" placeholder="MM/YY" required><div class="error-message" id="checkoutExpiryDateError"></div></div><div class="form-group"><label for="checkoutCvv">CVV</label><input type="text" id="checkoutCvv" placeholder="XXX" required><div class="error-message" id="checkoutCvvError"></div></div></div></div>
+                            <div id="checkoutFormMessage" class="form-message" style="display: none;"></div>
+                            <button type="submit" class="btn btn-primary btn-block" id="checkoutConfirmPayBtn" disabled>Confirm & Pay</button>
+                        </form>
+                        <div id="checkoutConfirmationSection" style="display:none;">
+                            <i class="fas fa-check-circle"></i>
+                            <h2>Rental Confirmed!</h2>
+                            <p>Thank you for your order. A receipt has been generated for your records.</p>
+                            <button class="btn btn-success" id="checkoutDownloadReceiptBtn"><i class="fas fa-download"></i> Download Receipt</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="checkout-order-summary">
+                    <h2>Order Summary</h2>
+                    <div id="checkoutItemDetails"></div>
+                    <div class="checkout-price-breakdown">
+                        <div class="price-row"><span class="label">Rental Cost:</span> <span id="checkoutRentalCost">₱0.00</span></div>
+                        <div class="price-row"><span class="label">Delivery Fee:</span> <span id="checkoutDeliveryFee">₱0.00</span></div>
+                        <div class="price-row"><span class="label">Service Fee (5%):</span> <span id="checkoutServiceFee">₱0.00</span></div>
+                        <hr>
+                        <div class="price-row total"><span class="label">Total:</span> <span id="checkoutTotalAmount">₱0.00</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+    
+    
+    <div class="page" id="adminDashboardPage" style="display:none;">
+        <div class="container admin-dashboard-container">
+            <aside class="admin-sidebar">
+                <img src="https://randomuser.me/api/portraits/lego/0.jpg" alt="Admin Profile Picture" id="adminSidebarPic">
+                <h3 id="adminSidebarName">Super Admin</h3>
+                <p id="adminSidebarEmail">superadmin@hazel.com</p>
+                <ul class="sidebar-menu">
+                    <li><a href="#" data-view="overview" class="active-admin-view"><i class="fas fa-chart-line"></i> Overview</a></li>
+                    <li><a href="#" data-view="user-management"><i class="fas fa-users-cog"></i> User Management</a></li>
+                    <li><a href="#" data-view="listing-management"><i class="fas fa-tasks"></i> Listing Management</a></li>
+                    <li><a href="#" data-view="content-management"><i class="fas fa-file-alt"></i> Content Templates</a></li>
+                    <li><a href="#" data-view="settings"><i class="fas fa-user-cog"></i> Admin Settings</a></li>
+                    <li><a href="#" id="logoutBtnAdminDashboard"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </aside>
+            <main class="admin-main-content">
+                
+                <div class="admin-view active-admin-view" id="admin-overview-view">
+                    <div class="admin-view-header"><h1>Admin Overview</h1><p>Site-wide statistics and activity.</p></div>
+                    <div class="analytics-grid" id="adminAnalyticsGrid">
+                        <div class="analytics-card"><i class="fas fa-users analytics-icon"></i><div class="analytics-value" id="adminTotalUsers">0</div><div class="analytics-label">Total Users</div></div>
+                        <div class="analytics-card"><i class="fas fa-list-alt analytics-icon"></i><div class="analytics-value" id="adminTotalListings">0</div><div class="analytics-label">Total Listings</div></div>
+                        <div class="analytics-card"><i class="fas fa-receipt analytics-icon"></i><div class="analytics-value" id="adminActiveRentals">0</div><div class="analytics-label">Active Rentals (Site)</div></div>
+                        <div class="analytics-card"><i class="fas fa-dollar-sign analytics-icon"></i><div class="analytics-value" id="adminTotalSiteEarnings">₱0.00</div><div class="analytics-label">Total Site Earnings</div></div>
+                    </div>
+                </div>
+
+                
+                <div class="admin-view" id="admin-user-management-view" style="display:none;">
+                    <div class="admin-view-header"><h1>User Management</h1><p>View and manage user accounts.</p></div>
+                    <div class="admin-table-container">
+                        <table class="admin-table" id="adminUserTable">
+                            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Verification</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <p id="adminNoUsersMessage" style="display:none; text-align:center; margin-top: 20px;">No users found.</p>
+                </div>
+
+                
+                <div class="admin-view" id="admin-listing-management-view" style="display:none;">
+                    <div class="admin-view-header"><h1>Listing Management</h1><p>View, edit, or delete any listing on the platform.</p></div>
+                    <div class="products-grid" id="adminListingsGrid"></div>
+                    <p id="adminNoListingsMessage" style="display:none; text-align:center; margin-top: 20px;">No listings found on the platform.</p>
+                </div>
+
+                
+                <div class="admin-view" id="admin-content-management-view" style="display:none;">
+                    <div class="admin-view-header"><h1>Content & Template Management</h1><p>Edit site-wide templates and important text content.</p></div>
+                    <div class="form-group"><label for="adminContactUsTemplate">Contact Us Reply Template:</label><textarea id="adminContactUsTemplate" rows="8"></textarea></div>
+                    <div class="form-group"><label for="adminRentalAgreementTemplate">Standard Rental Agreement Snippet:</label><textarea id="adminRentalAgreementTemplate" rows="10"></textarea></div>
+                    <button class="btn btn-primary" id="adminSaveTemplatesBtn">Save Templates (Mock)</button>
+                    <div id="adminTemplatesFormMessage" class="form-message" style="display: none; margin-top:15px;"></div>
+                </div>
+
+                
+                <div class="admin-view" id="admin-settings-view" style="display:none;">
+                    <div class="admin-view-header"><h1>Admin Account Settings</h1><p>Manage your administrator account details.</p></div>
+                    <form id="adminSettingsForm">
+                        <div class="form-group"><label for="adminSettingsFirstName">First Name*</label><input type="text" id="adminSettingsFirstName" required><div class="error-message" id="adminSettingsFirstNameError"></div></div>
+                        <div class="form-group"><label for="adminSettingsLastName">Last Name*</label><input type="text" id="adminSettingsLastName" required><div class="error-message" id="adminSettingsLastNameError"></div></div>
+                        <div class="form-group"><label for="adminSettingsEmail">Email</label><input type="email" id="adminSettingsEmail" required readonly></div>
+                        <div class="form-group"><label for="adminSettingsProfilePicUrl">Profile Picture URL</label><input type="url" id="adminSettingsProfilePicUrl"><div class="error-message" id="adminSettingsProfilePicUrlError"></div></div>
+                        <hr>
+                        <h3>Change Password</h3>
+                        <div class="form-group"><label for="adminSettingsCurrentPassword">Current Password</label><input type="password" id="adminSettingsCurrentPassword"><div class="error-message" id="adminSettingsCurrentPasswordError"></div></div>
+                        <div class="form-group"><label for="adminSettingsNewPassword">New Password</label><input type="password" id="adminSettingsNewPassword"><div class="error-message" id="adminSettingsNewPasswordError"></div></div>
+                        <div class="form-group"><label for="adminSettingsConfirmNewPassword">Confirm New Password</label><input type="password" id="adminSettingsConfirmNewPassword"><div class="error-message" id="adminSettingsConfirmNewPasswordError"></div></div>
+                        <div id="adminSettingsFormMessage" class="form-message" style="display: none;"></div>
+                        <button type="submit" class="btn btn-primary">Save Admin Settings</button>
+                    </form>
+                </div>
+            </main>
+        </div>
+        <footer class="common-footer"></footer>
+    </div>
+
+    
+    <div class="toast" id="toast"></div>
+
+    
+    <div class="chat-widget-container">
+        <div class="chat-widget" id="chatWidget">
+            <div class="chat-header"><span class="chat-header-contact-name" id="chatHeaderContactName">Chat</span><button class="chat-close-btn" id="closeChatWidgetBtn" aria-label="Close chat">×</button></div>
+            <div class="chat-messages-container" id="chatMessagesContainer"></div>
+            <div class="chat-input-area"><input type="text" class="chat-message-input" id="chatMessageInput" placeholder="Type your message..."><button class="chat-send-message-btn" id="chatSendMessageBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button></div>
+        </div>
+        <button class="chat-toggle-btn" id="chatToggleBtn" aria-label="Toggle chat"><i class="fas fa-comments"></i></button>
+    </div>
+    <script src="Hazel.js"></script>
+</body>
+</html>

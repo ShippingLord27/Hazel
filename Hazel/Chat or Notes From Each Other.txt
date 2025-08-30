@@ -1,0 +1,40 @@
+Just chat or talk here if you want to leave notes or real time chats
+
+Chats: 
+...........
+...........
+...........
+...........
+
+
+-------------------------------------------------------------------------------------
+Notes Area:
+
+User and Password: 
+John (Main User) (Verified): 
+user: john.doe@example.com
+password: 123
+
+Alice (Second User) (Pending):
+user: alice.photo@example.com
+password: 123
+
+Bob (Last User) (Needs Picture and Face Scan):
+user: bob.rider@example.com
+password: 123
+
+Super Admin:
+user: admin@hazel.com
+password: admin
+
+NOTES FROM GC:
+• ID for identification and security (UMID/GSIS, Drivers, POSTAL, PASSPORT, Senior ID, National ID) (Can put image for this one before the Face Scan)
+• Tagging for Tracking Items (Already Have Item IDs this time, but can't be used yet, I think?)
+• Terms & Agreement (This is the asshole)
+• Face Scanner (Not Active, but there has a button and auto pass it since it is not real yet)
+• Downloadable Reciept (Not Tested yet)
+• Whole Cart Module and Discounts  (Mostly Done I think?)
+• Under profile: tracker (This exist, but not sure if works since no database)
+• 
+•
+•
