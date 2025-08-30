@@ -179,6 +179,24 @@ header {
     cursor: pointer;
 }
 
+.btn-secondary {
+    background-color: var(--gray-color);
+    color: var(--light-color);
+    border: 1px solid var(--gray-color);
+}
+.btn-secondary:hover:not(:disabled) {
+    background-color: #6a6a6a;
+    border-color: #6a6a6a;
+}
+.dark-mode .btn-secondary {
+    background-color: #444;
+    border-color: #444;
+}
+.dark-mode .btn-secondary:hover:not(:disabled) {
+    background-color: #555;
+    border-color: #555;
+}
+
 .search-container {
     position: relative;
     margin-left: 25px;
@@ -3595,3 +3613,66 @@ body.mobile-menu-active {
 .admin-table .status-verified { color: var(--success-color); font-weight: bold; text-transform: capitalize;}
 .admin-table .status-pending { color: #ffc107; font-weight: bold; text-transform: capitalize;}
 .admin-table .status-unverified { color: var(--danger-color); font-weight: bold; text-transform: capitalize;}
+
+/* Rental Tracker Styles */
+.rental-tracker-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: var(--light-gray);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.dark-mode .rental-tracker-item { background: var(--footer-bg); }
+.rental-tracker-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
+.rental-tracker-info { flex-grow: 1; } /* Allow info to take up space */
+.rental-tracker-info h4 { margin-bottom: 5px; }
+.rental-tracker-info p { font-size: 0.9em; }
+.rental-tracker-actions { margin-left: auto; flex-shrink: 0; } /* Push button to the right */
+.status-active { color: var(--success-color); font-weight: bold; }
+.status-rented { color: var(--primary-color); font-weight: bold; }
+#rentalTrackerGrid h3 {
+    font-size: 1.2em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+}
+#rentalTrackerGrid h3:first-of-type { margin-top: 0; }
+.dark-mode #rentalTrackerGrid h3 { border-bottom-color: #444; }
+
+/* Modal Styles - Add new styles for role selection */
+.auth-role-selection {
+    padding: 20px;
+    text-align: center;
+}
+
+.auth-role-selection h3 {
+    margin-bottom: 25px;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.auth-role-selection .btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 12px;
+    font-size: 1.05em;
+}
+
+.modal-footer-back-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9em;
+    color: var(--secondary-color);
+    cursor: pointer;
+}
+.dark-mode .modal-footer-back-link {
+    color: var(--light-gray);
+}
+.modal-footer-back-link:hover {
+    color: var(--primary-color);
+}

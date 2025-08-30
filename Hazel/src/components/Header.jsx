@@ -76,14 +76,14 @@ const Header = () => {
                 </div>
               ) : (
                 <div className="auth-nav-state" id="loggedInNavButtons">
-                  {!currentUser.isAdmin && (
+                  {currentUser.role === 'user' && (
                     <Link to="/cart" className="header-cart-link">
                       <i className="fas fa-shopping-cart"></i>
                       {cartItemCount > 0 && <span id="cartItemCount" style={{display: 'flex'}}>{cartItemCount}</span>}
                     </Link>
                   )}
-                  {currentUser.isAdmin && ( <Link to="/admin" className="header-admin-link"><i className="fas fa-user-shield"></i> Admin</Link> )}
-                  {!currentUser.isAdmin && ( <Link to="/profile" className="header-profile-link"><i className="fas fa-user-circle"></i> Profile</Link> )}
+                  {currentUser.role === 'admin' && ( <Link to="/admin" className="header-admin-link"><i className="fas fa-user-shield"></i> Admin</Link> )}
+                  {currentUser.role !== 'admin' && ( <Link to="/profile" className="header-profile-link"><i className="fas fa-user-circle"></i> Profile</Link> )}
                   <button className="btn btn-outline" onClick={handleLogout}>Logout</button>
                 </div>
               )}

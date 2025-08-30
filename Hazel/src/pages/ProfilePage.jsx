@@ -9,12 +9,29 @@ const ProfilePage = () => {
     useEffect(() => {
         if (!currentUser) {
             navigate('/');
-        } else if (currentUser.isAdmin) {
+        } else if (currentUser.role === 'admin') {
             navigate('/admin');
         }
     }, [currentUser, navigate]);
 
-    if (!currentUser) return null;
+    if (!currentUser || currentUser.role === 'admin') return null;
+
+    // Define different menus for different roles
+    const ownerMenu = [
+        { path: "/profile", end: true, icon: "fas fa-tachometer-alt", label: "Dashboard" },
+        { path: "my-listings", icon: "fas fa-list", label: "My Listings" },
+        { path: "rental-tracker", icon: "fas fa-route", label: "Rental Tracker" },
+        { path: "settings", icon: "fas fa-cog", label: "Settings" }
+    ];
+
+    const userMenu = [
+        { path: "/profile", end: true, icon: "fas fa-tachometer-alt", label: "Dashboard" },
+        { path: "favorites", icon: "fas fa-heart", label: "Favorites" },
+        { path: "rental-tracker", icon: "fas fa-route", label: "Rental Tracker" },
+        { path: "settings", icon: "fas fa-cog", label: "Settings" }
+    ];
+    
+    const menuToRender = currentUser.role === 'owner' ? ownerMenu : userMenu;
 
     return (
         <div className="page active" id="profilePage" style={{ paddingTop: '70px' }}>
@@ -25,11 +42,13 @@ const ProfilePage = () => {
                         <h3>{currentUser.firstName} {currentUser.lastName}</h3>
                         <p>{currentUser.email}</p>
                         <ul className="sidebar-menu">
-                            <li><NavLink to="/profile" end><i className="fas fa-tachometer-alt"></i> Dashboard</NavLink></li>
-                            <li><NavLink to="/profile/my-listings"><i className="fas fa-list"></i> My Listings</NavLink></li>
-                            <li><NavLink to="/profile/favorites"><i className="fas fa-heart"></i> Favorites</NavLink></li>
-                            <li><NavLink to="/profile/rental-tracker"><i className="fas fa-route"></i> Rental Tracker</NavLink></li>
-                            <li><NavLink to="/profile/settings"><i className="fas fa-cog"></i> Settings</NavLink></li>
+                            {menuToRender.map(item => (
+                                <li key={item.path}>
+                                    <NavLink to={item.path} end={item.end}>
+                                        <i className={item.icon}></i> {item.label}
+                                    </NavLink>
+                                </li>
+                            ))}
                             <li><a href="#" onClick={logout}><i className="fas fa-sign-out-alt"></i> Logout</a></li>
                         </ul>
                     </aside>

@@ -1,10 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { initialProductData, initialSimulatedUsers, initialRentalAgreement } from '../data/initialData';
+import { initialProductData, initialSimulatedUsers, initialRentalAgreement, initialRentalHistory, initialOwnerLentHistory } from '../data/initialData';
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    // ... all state declarations remain the same ...
+    // ... states ...
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [products, setProducts] = useState(initialProductData);
     const [users, setUsers] = useState(initialSimulatedUsers);
@@ -13,9 +13,10 @@ export const AppProvider = ({ children }) => {
     const [toast, setToast] = useState({ show: false, message: '' });
     const [isChatOpen, setChatOpen] = useState(false);
     const [chatPartner, setChatPartner] = useState({ id: 'support', name: 'HAZEL Support', context: null });
+    const [rentalHistory, setRentalHistory] = useState(initialRentalHistory);
+    const [ownerLentHistory, setOwnerLentHistory] = useState(initialOwnerLentHistory);
     const [rentalAgreementTemplate, setRentalAgreementTemplate] = useState(initialRentalAgreement);
 
-    // ... all functions like showToast, login, logout, etc., remain the same ...
     useEffect(() => {
         document.body.classList.toggle('dark-mode', theme === 'dark');
         localStorage.setItem('theme', theme);
@@ -48,7 +49,7 @@ export const AppProvider = ({ children }) => {
         closeChat();
     };
 
-    const signup = (userData) => {
+    const signup = (userData, role) => { // Role parameter added
         if (users[userData.email]) {
             showToast('Email already registered.');
             return null;
@@ -57,9 +58,15 @@ export const AppProvider = ({ children }) => {
             ...userData,
             profilePic: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 9)}.jpg`,
             memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-            location: "New Member City, ST", myListingIds: [], favoriteListingIds: [],
-            activeRentalsCount: 0, totalEarningsAmount: 0, totalListingViews: 0,
-            isAdmin: false, verificationStatus: 'unverified'
+            location: "New Member City, ST",
+            myListingIds: [],
+            favoriteListingIds: [],
+            activeRentalsCount: 0,
+            totalEarningsAmount: 0,
+            totalListingViews: 0,
+            role: role, // Assign the role from the parameter ('user' or 'owner')
+            verificationStatus: 'unverified',
+            paymentInfo: null
         };
         setUsers(prev => ({ ...prev, [userData.email]: newUser }));
         setCurrentUser(newUser);
@@ -141,7 +148,10 @@ export const AppProvider = ({ children }) => {
     const clearCart = () => setCart([]);
 
     const toggleFavorite = (productId) => {
-        if (!currentUser) { showToast("Please login to manage favorites."); return; }
+        if (!currentUser || currentUser.role !== 'user') { 
+            showToast("Only users can have favorites."); 
+            return; 
+        }
         const isFavorite = currentUser.favoriteListingIds.includes(productId);
         const updatedFavorites = isFavorite
             ? currentUser.favoriteListingIds.filter(id => id !== productId)
@@ -163,19 +173,67 @@ export const AppProvider = ({ children }) => {
         else openChat({ id: 'support', name: 'HAZEL Support', context: null });
     };
 
-    // THE KEY CHANGE IS HERE: `getProductById` is removed from the value object.
+    const generateAndPrintReceipt = (orderDetails) => {
+        const itemsHtml = orderDetails.items.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            if (!product) return '';
+            return `
+                <p>
+                    <strong>${product.fullTitle}</strong><br>
+                    Duration: ${item.rentalDurationDays} day(s)
+                </p>
+            `;
+        }).join('');
+
+        const receiptContent = `
+            <html>
+                <head>
+                    <title>Rental Receipt - ${orderDetails.transactionId}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', sans-serif; margin: 40px; }
+                        h1 { color: #f33f3f; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+                        th { background-color: #f2f2f2; }
+                        .total { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h1>HAZEL Rental Receipt</h1>
+                    <p><strong>Transaction ID:</strong> ${orderDetails.transactionId}</p>
+                    <p><strong>Date:</strong> ${new Date(orderDetails.date).toLocaleDateString()}</p>
+                    <hr>
+                    <h3>Rented Item(s)</h3>
+                    ${itemsHtml}
+                    <table>
+                        <tr><td>Rental Cost</td><td>₱${orderDetails.rentalCost.toFixed(2)}</td></tr>
+                        <tr><td>Delivery Fee</td><td>₱${orderDetails.deliveryFee.toFixed(2)}</td></tr>
+                        <tr><td>Service Fee</td><td>₱${orderDetails.serviceFee.toFixed(2)}</td></tr>
+                        <tr class="total"><td>Total Paid</td><td>₱${orderDetails.totalAmount.toFixed(2)}</td></tr>
+                    </table>
+                    <p style="margin-top: 30px;">Thank you for using HAZEL!</p>
+                </body>
+            </html>
+        `;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(receiptContent);
+        printWindow.document.close();
+        printWindow.print();
+    };
+
     const value = {
         theme, toggleTheme,
         toast, showToast,
-        products, // We now pass the entire products array
+        products,
         addProduct, updateProduct, deleteProduct,
         users, currentUser, updateUser, login, logout, signup,
         cart, addToCart, removeFromCart, clearCart,
         rentalAgreementTemplate, setRentalAgreementTemplate,
         toggleFavorite,
-        isChatOpen, chatPartner, openChat, closeChat, toggleChat
+        isChatOpen, chatPartner, openChat, closeChat, toggleChat,
+        rentalHistory, ownerLentHistory, generateAndPrintReceipt
     };
-
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

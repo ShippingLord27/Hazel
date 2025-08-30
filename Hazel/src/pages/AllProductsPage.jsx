@@ -20,7 +20,7 @@ const ProductCard = ({ product }) => {
                     </div>
                     <div className="product-actions">
                          <button className="btn btn-primary view-listing btn-small" onClick={() => navigate(`/listing/${product.id}`)}>Details</button>
-                         {currentUser && !currentUser.isAdmin && (
+                         {currentUser && currentUser.role === 'user' && (
                             <button 
                                 className={`btn btn-icon favorite-toggle-btn ${isFavorite ? 'active' : ''}`} 
                                 aria-label="Toggle Favorite"

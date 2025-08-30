@@ -7,10 +7,8 @@ const renderStars = (rating) => { /* ... */ };
 const ListingDetailPage = () => {
 const { id } = useParams();
 const navigate = useNavigate();
-// GET products DIRECTLY FROM THE CONTEXT
 const { products, addToCart, currentUser, showToast, openChat } = useApp();
 
-   // ... other states ...
 const [product, setProduct] = useState(null);
 const [selectedImage, setSelectedImage] = useState('');
 const [rentalOptions, setRentalOptions] = useState({
@@ -22,7 +20,6 @@ const [isReviewModalOpen, setReviewModalOpen] = useState(false);
 
 useEffect(() => {
     window.scrollTo(0, 0);
-    // USE THE LOCAL `products` ARRAY TO FIND THE ITEM
     const foundProduct = products.find(p => p.id === parseInt(id));
     if (foundProduct) {
         setProduct(foundProduct);
@@ -31,14 +28,13 @@ useEffect(() => {
         showToast("Sorry, that listing could not be found.");
         navigate('/products');
     }
-}, [id, products, navigate, showToast]); // Dependency on `products` is now critical
+}, [id, products, navigate, showToast]);
 
-// ... rest of the component is unchanged ...
 const rentalPriceDetails = useMemo(() => {
     if (!product) return { total: 0, perDay: 0 };
     const basePrice = product.price;
     const days = parseInt(rentalOptions.days);
-    let total = basePrice * days; // Default calculation for 1 day
+    let total = basePrice * days;
     if (days === 3) total = basePrice * 2.5;
     if (days === 7) total = basePrice * 5;
     const perDay = total / days;
@@ -130,7 +126,7 @@ return (
                                 <input type="date" id="rentalDate" name="startDate" min={getTodayString()} value={rentalOptions.startDate} onChange={handleOptionChange} />
                             </div>
                         </div>
-                        {(!currentUser || !currentUser.isAdmin) && (
+                        {currentUser && currentUser.role === 'user' && (
                             <button className="btn btn-primary btn-block" onClick={handleAddToCart}><i className="fas fa-cart-plus"></i> Add to Cart</button>
                         )}
                         {currentUser && currentUser.email !== product.ownerId && (
@@ -145,7 +141,7 @@ return (
                     ) : (
                         <p>No reviews yet for this listing.</p>
                     )}
-                    {currentUser && !currentUser.isAdmin && (
+                    {currentUser && currentUser.role === 'user' && (
                          <button className="btn btn-outline" style={{ marginTop: '20px' }} onClick={() => setReviewModalOpen(true)}>Leave a Review</button>
                     )}
                 </div>

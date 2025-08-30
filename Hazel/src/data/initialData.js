@@ -101,12 +101,13 @@ export const initialSimulatedUsers = {
         memberSince: "June 2020",
         location: "San Francisco, CA",
         myListingIds: [3, 5],
-        favoriteListingIds: [1, 6],
+        favoriteListingIds: [],
         activeRentalsCount: 2,
         totalEarningsAmount: 12537.50,
         totalListingViews: 1230,
-        isAdmin: false,
-        verificationStatus: 'verified'
+        role: 'owner',
+        verificationStatus: 'verified',
+        paymentInfo: null
     },
       "jane.smith@example.com": {
                 firstName: "Jane",
@@ -121,8 +122,13 @@ export const initialSimulatedUsers = {
                 activeRentalsCount: 1,
                 totalEarningsAmount: 0,
                 totalListingViews: 0,
-                isAdmin: false,
-                verificationStatus: 'verified' 
+                role: 'user',
+                verificationStatus: 'verified',
+                paymentInfo: {
+                    cardNumber: '4242424242421234',
+                    expiryDate: '12/26',
+                    cvv: '123'
+                }
             },
             "admin@hazel.com": {
                 firstName: "Super",
@@ -137,8 +143,9 @@ export const initialSimulatedUsers = {
                 activeRentalsCount: 0,
                 totalEarningsAmount: 0,
                 totalListingViews: 0,
-                isAdmin: true,
-                verificationStatus: 'verified'
+                role: 'admin',
+                verificationStatus: 'verified',
+                paymentInfo: null
             },
             "alice.photo@example.com": { 
                 firstName: "Alice",
@@ -148,12 +155,13 @@ export const initialSimulatedUsers = {
                 profilePic: "https://randomuser.me/api/portraits/women/10.jpg",
                 location: "Los Angeles, CA",
                 myListingIds: [1, 4],
-                favoriteListingIds: [2],
+                favoriteListingIds: [],
                 activeRentalsCount: 1,
                 totalEarningsAmount: 5000.00,
                 totalListingViews: 500,
-                isAdmin: false,
-                verificationStatus: 'pending'
+                role: 'owner',
+                verificationStatus: 'pending',
+                paymentInfo: null
             },
             "bob.rider@example.com": { 
                 firstName: "Bob",
@@ -163,12 +171,42 @@ export const initialSimulatedUsers = {
                 profilePic: "https://randomuser.me/api/portraits/men/12.jpg",
                 location: "Denver, CO",
                 myListingIds: [2, 6],
-                favoriteListingIds: [5],
+                favoriteListingIds: [],
                 activeRentalsCount: 3,
                 totalEarningsAmount: 7525.00,
                 totalListingViews: 800,
-                isAdmin: false,
-                verificationStatus: 'unverified'
+                role: 'owner',
+                verificationStatus: 'unverified',
+                paymentInfo: null
             }
 };
 export const initialRentalAgreement = `By renting this item, you agree to the Hazel platform terms of service. You are responsible for the item during the rental period and must return it in the same condition you received it, accounting for normal wear and tear. Late returns may be subject to additional fees as specified by the owner. Please communicate promptly with the item owner regarding pickup, drop-off, and any issues that may arise.`;
+
+// Mock data for user's rental history
+export const initialRentalHistory = {
+    "jane.smith@example.com": [
+        {
+            transactionId: 'HZL-TRX-1667894400',
+            productId: 2, // Mountain Bike
+            rentalStartDate: '2025-10-15',
+            rentalDurationDays: 3,
+            rentalTotalCost: 50.00, // 20 * 2.5 for 3 days
+            deliveryFee: 15.00,
+            serviceFee: 2.50, // 5% of 50
+            totalAmount: 67.50
+        }
+    ]
+};
+
+// Mock data for owner's lent item history
+export const initialOwnerLentHistory = {
+    "bob.rider@example.com": [
+        {
+            transactionId: 'HZL-TRX-1667894400',
+            productId: 2, // Mountain Bike
+            renterName: "Jane Smith",
+            rentalStartDate: '2025-10-15',
+            status: 'Completed'
+        }
+    ]
+};
