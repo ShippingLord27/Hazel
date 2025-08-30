@@ -130,7 +130,9 @@ return (
                                 <input type="date" id="rentalDate" name="startDate" min={getTodayString()} value={rentalOptions.startDate} onChange={handleOptionChange} />
                             </div>
                         </div>
-                        <button className="btn btn-primary btn-block" onClick={handleAddToCart}><i className="fas fa-cart-plus"></i> Add to Cart</button>
+                        {(!currentUser || !currentUser.isAdmin) && (
+                            <button className="btn btn-primary btn-block" onClick={handleAddToCart}><i className="fas fa-cart-plus"></i> Add to Cart</button>
+                        )}
                         {currentUser && currentUser.email !== product.ownerId && (
                             <button className="btn btn-outline btn-block listing-chat-owner-btn" onClick={handleChatWithOwner}><i className="fas fa-comments"></i> Chat with Owner</button>
                         )}
@@ -143,7 +145,7 @@ return (
                     ) : (
                         <p>No reviews yet for this listing.</p>
                     )}
-                    {currentUser && (
+                    {currentUser && !currentUser.isAdmin && (
                          <button className="btn btn-outline" style={{ marginTop: '20px' }} onClick={() => setReviewModalOpen(true)}>Leave a Review</button>
                     )}
                 </div>

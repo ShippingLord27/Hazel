@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const ProductCard = ({ product }) => {
@@ -39,9 +39,25 @@ const ProductCard = ({ product }) => {
 
 const AllProductsPage = () => {
     const { products } = useApp();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    
+    const categoryQuery = searchParams.get('category');
+    
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeFilter, setActiveFilter] = useState('all');
+    const [activeFilter, setActiveFilter] = useState(categoryQuery || 'all');
+    
     const categories = ['all', 'tools', 'electronics', 'vehicles', 'party', 'sports'];
+
+    // Update filter when URL query param changes
+    useEffect(() => {
+        const categoryQuery = searchParams.get('category');
+        if (categoryQuery && categories.includes(categoryQuery)) {
+            setActiveFilter(categoryQuery);
+        } else {
+            setActiveFilter('all');
+        }
+    }, [searchParams]);
 
     const filteredProducts = useMemo(() => {
         return products.filter(product => {
@@ -52,6 +68,15 @@ const AllProductsPage = () => {
             return matchesCategory && matchesSearch;
         });
     }, [products, searchTerm, activeFilter]);
+
+    const handleFilterClick = (category) => {
+        setActiveFilter(category);
+        if (category === 'all') {
+            navigate('/products');
+        } else {
+            navigate(`/products?category=${category}`);
+        }
+    };
 
     return (
         <div className="page active" id="all-products-page" style={{ paddingTop: '70px' }}>
@@ -77,7 +102,7 @@ const AllProductsPage = () => {
                              <li 
                                 key={category}
                                 className={activeFilter === category ? 'active' : ''}
-                                onClick={() => setActiveFilter(category)}
+                                onClick={() => handleFilterClick(category)}
                             >
                                 {category.charAt(0).toUpperCase() + category.slice(1)}
                             </li>

@@ -27,7 +27,6 @@ import ListingManagement from './pages/admin/ListingManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import ContentManagement from './pages/admin/ContentManagement';
 
-
 function App() {
   return (
     <Routes>

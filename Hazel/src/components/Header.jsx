@@ -20,10 +20,20 @@ const Header = () => {
   const categories = ['Tools', 'Electronics', 'Vehicles', 'Party', 'Sports'];
 
   useEffect(() => {
+    // Close categories dropdown when main mobile menu closes
     if (!isMobileMenuOpen) {
       setCategoriesOpen(false);
     }
   }, [isMobileMenuOpen]);
+  
+  const handleProductsClick = (e) => {
+    // On mobile, prevent navigation and toggle the dropdown instead
+    if (window.innerWidth <= 768) {
+        e.preventDefault();
+        setCategoriesOpen(!isCategoriesOpen);
+    }
+    // On desktop, the NavLink will handle navigation, and hover is CSS-driven
+  };
 
   return (
     <>
@@ -36,13 +46,17 @@ const Header = () => {
             <ul>
               <li><NavLink to="/" className="nav-link">Home</NavLink></li>
               <li className={`has-dropdown ${isCategoriesOpen ? 'open' : ''}`}>
-                <a className="nav-link categories-dropdown-toggle" onClick={(e) => { e.preventDefault(); setCategoriesOpen(!isCategoriesOpen); }}>
-                  Products <i className="fas fa-chevron-down dropdown-icon"></i>
-                </a>
+                <NavLink to="/products" className="nav-link categories-dropdown-toggle" onClick={handleProductsClick}>
+                  Products
+                  <i className="fas fa-chevron-down dropdown-icon"></i>
+                </NavLink>
                 <ul className="dropdown-menu">
-                  <li><NavLink to="/products">All Products</NavLink></li>
                   {categories.map(category => (
-                      <li key={category}><NavLink to="/products">{category}</NavLink></li>
+                      <li key={category} onClick={() => setMobileMenuOpen(false)}>
+                        <NavLink to={`/products?category=${category.toLowerCase()}`}>
+                            {category}
+                        </NavLink>
+                      </li>
                   ))}
                 </ul>
               </li>
@@ -52,7 +66,7 @@ const Header = () => {
                 
             <div className="nav-buttons">
               <button className="dark-mode-toggle" id="darkModeToggle" onClick={toggleTheme}>
-                {theme === 'dark' ? <><i className="fas fa-sun"></i> Light mode</> : <><i className="far fa-moon"></i> Dark mode</>}
+                {theme === 'dark' ? <><i className="fas fa-sun"></i> Light</> : <><i className="far fa-moon"></i> Dark</>}
               </button>
               
               {!currentUser ? (
@@ -62,12 +76,14 @@ const Header = () => {
                 </div>
               ) : (
                 <div className="auth-nav-state" id="loggedInNavButtons">
-                  <Link to="/cart" className="header-cart-link">
-                    <i className="fas fa-shopping-cart"></i>
-                    {cartItemCount > 0 && <span id="cartItemCount" style={{display: 'flex'}}>{cartItemCount}</span>}
-                  </Link>
+                  {!currentUser.isAdmin && (
+                    <Link to="/cart" className="header-cart-link">
+                      <i className="fas fa-shopping-cart"></i>
+                      {cartItemCount > 0 && <span id="cartItemCount" style={{display: 'flex'}}>{cartItemCount}</span>}
+                    </Link>
+                  )}
                   {currentUser.isAdmin && ( <Link to="/admin" className="header-admin-link"><i className="fas fa-user-shield"></i> Admin</Link> )}
-                  <Link to="/profile" className="header-profile-link"><i className="fas fa-user-circle"></i> Profile</Link>
+                  {!currentUser.isAdmin && ( <Link to="/profile" className="header-profile-link"><i className="fas fa-user-circle"></i> Profile</Link> )}
                   <button className="btn btn-outline" onClick={handleLogout}>Logout</button>
                 </div>
               )}
