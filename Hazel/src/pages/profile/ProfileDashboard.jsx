@@ -13,11 +13,12 @@ const OwnerDashboard = ({ user }) => (
                 <div className="analytics-label">Total Listings</div>
             </div>
             <div className="analytics-card">
+                {/* FIX: Display the dynamic activeRentalsCount */}
                 <div className="analytics-value">{user.activeRentalsCount}</div>
-                <div className="analytics-label">Active Rentals</div>
+                <div className="analytics-label">Items Currently Rented Out</div>
             </div>
             <div className="analytics-card">
-                <div className="analytics-value">₱{user.totalEarningsAmount}</div>
+                <div className="analytics-value">₱{user.totalEarningsAmount.toFixed(2)}</div>
                 <div className="analytics-label">Total Earnings</div>
             </div>
             <div className="analytics-card">
@@ -40,20 +41,17 @@ const UserDashboard = ({ user }) => (
                 <div className="analytics-label">Favorited Items</div>
             </div>
             <div className="analytics-card">
+                {/* FIX: Display the dynamic activeRentalsCount */}
                 <div className="analytics-value">{user.activeRentalsCount}</div>
-                <div className="analytics-label">Items Rented</div>
+                <div className="analytics-label">Active Rentals</div>
             </div>
         </div>
     </>
 );
 
-
 const ProfileDashboard = () => {
     const { currentUser, users } = useApp();
-
-    // Get the most up-to-date user data from the master 'users' list.
     const freshUserData = currentUser ? users[currentUser.email] : null;
-
     if (!freshUserData) return null;
 
     return (

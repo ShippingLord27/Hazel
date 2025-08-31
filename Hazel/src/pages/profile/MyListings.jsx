@@ -3,6 +3,7 @@ import { useApp } from '../../hooks/useApp';
 import ListingModal from '../../components/ListingModal';
 
 const ProfileProductCard = ({ product, onEdit, onDelete }) => {
+    // This component is unchanged
     return (
         <div className="product-card">
             <img src={product.image} alt={product.title} className="product-img" />
@@ -20,7 +21,6 @@ const ProfileProductCard = ({ product, onEdit, onDelete }) => {
 };
 
 const MyListings = () => {
-    // 1. Get the full 'users' object and 'products' array from the context
     const { currentUser, users, products, deleteProduct } = useApp();
     const [isListingModalOpen, setListingModalOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
@@ -31,7 +31,7 @@ const MyListings = () => {
     };
 
     const handleAddListing = () => {
-        setProductToEdit(null);
+        setProductToEdit(null); // Ensure we are in "add" mode, not "edit" mode
         setListingModalOpen(true);
     };
 
@@ -41,19 +41,18 @@ const MyListings = () => {
         }
     };
 
-    // 2. Get the most up-to-date user data from the master 'users' list. This is the single source of truth.
+    // This logic for displaying listings is unchanged and correct
     const freshUserData = users[currentUser.email];
-
-    // 3. Use the IDs from this fresh user object to find the products.
     const myListings = freshUserData ? freshUserData.myListingIds
         .map(id => products.find(p => p.id === id))
-        .filter(Boolean) : []; // Gracefully handle if user somehow doesn't exist
+        .filter(Boolean) : [];
 
     return (
         <>
             <div className="profile-view">
                 <div className="profile-view-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     <h1>My Listings</h1>
+                    {/* The "Add New Listing" button which triggers the modal */}
                     <button className="btn btn-primary" onClick={handleAddListing}>Add New Listing</button>
                 </div>
                 {myListings.length > 0 ? (
@@ -61,10 +60,11 @@ const MyListings = () => {
                         {myListings.map(p => <ProfileProductCard key={p.id} product={p} onEdit={handleEditListing} onDelete={handleDeleteListing} />)}
                     </div>
                 ) : (
-                    <p>You haven't listed any items yet.</p>
+                    <p>You haven't listed any items yet. Click "Add New Listing" to get started!</p>
                 )}
             </div>
-             {isListingModalOpen && (
+            {/* The modal is rendered here when isListingModalOpen is true */}
+            {isListingModalOpen && (
                 <ListingModal 
                     productToEdit={productToEdit} 
                     closeModal={() => setListingModalOpen(false)}

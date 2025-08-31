@@ -1,120 +1,90 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
-
-const ProductCard = ({ product }) => {
-    const navigate = useNavigate();
-    const { currentUser, toggleFavorite } = useApp();
-    const isFavorite = currentUser?.favoriteListingIds.includes(product.id);
-
-    return (
-        <div className="product-card" data-product-id={product.id}>
-            <img src={product.image} alt={product.title} className="product-img" />
-            <div className="product-info">
-                <span className="product-category">{product.category}</span>
-                <h3 className="product-title">{product.title}</h3>
-                <div className="product-price">{product.priceDisplay}</div>
-                <div className="product-meta">
-                    <div className="product-rating">
-                        <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="far fa-star"></i>
-                    </div>
-                    <div className="product-actions">
-                         <button className="btn btn-primary view-listing btn-small" onClick={() => navigate(`/listing/${product.id}`)}>Details</button>
-                         {currentUser && currentUser.role === 'user' && (
-                            <button 
-                                className={`btn btn-icon favorite-toggle-btn ${isFavorite ? 'active' : ''}`} 
-                                aria-label="Toggle Favorite"
-                                onClick={() => toggleFavorite(product.id)}
-                            >
-                                <i className="fas fa-heart"></i>
-                            </button>
-                         )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
+import ProductCard from '../components/ProductCard';
 const AllProductsPage = () => {
-    const { products, currentUser } = useApp();
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
-    
-    const categoryQuery = searchParams.get('category');
-    
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeFilter, setActiveFilter] = useState(categoryQuery || 'all');
-    
-    const categories = ['all', 'tools', 'electronics', 'vehicles', 'party', 'sports'];
+const { products, currentUser, allTags } = useApp();
+const [searchParams, setSearchParams] = useSearchParams();
 
-    useEffect(() => {
-        const categoryQuery = searchParams.get('category');
-        if (categoryQuery && categories.includes(categoryQuery)) {
-            setActiveFilter(categoryQuery);
-        } else {
-            setActiveFilter('all');
-        }
-    }, [searchParams]);
+const tagQuery = searchParams.get('tag');
 
-    const filteredProducts = useMemo(() => {
-        const visibleProducts = currentUser?.role === 'admin' 
-            ? products 
-            : products.filter(p => p.status === 'approved');
+const [searchTerm, setSearchTerm] = useState('');
+const [activeFilter, setActiveFilter] = useState(tagQuery || 'all');
 
-        return visibleProducts.filter(product => {
-            const matchesCategory = activeFilter === 'all' || product.category.toLowerCase() === activeFilter;
-            const matchesSearch = searchTerm === '' || 
-                product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.description.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-    }, [products, searchTerm, activeFilter, currentUser]);
+const tagsForFilter = ['all', ...allTags.sort()];
 
-    const handleFilterClick = (category) => {
-        setActiveFilter(category);
-        if (category === 'all') {
-            navigate('/products');
-        } else {
-            navigate(`/products?category=${category}`);
-        }
-    };
+useEffect(() => {
+    const tagQuery = searchParams.get('tag');
+    if (tagQuery && tagsForFilter.includes(tagQuery)) {
+        setActiveFilter(tagQuery);
+    } else {
+        // If the tag from URL is invalid or not present, default to 'all'
+        setActiveFilter('all');
+    }
+}, [searchParams, tagsForFilter]);
 
-    return (
-        <div className="page active" id="all-products-page" style={{ paddingTop: '70px' }}>
-            <div className="container products-page-container">
-                <section className="products-page-header-section">
-                    <h1>Our Full Catalog</h1>
-                    <p>Browse all available items for rent. Use the filters and search to find exactly what you need.</p>
-                </section>
-                <section className="products-page-controls">
-                    <div className="products-page-search-container">
-                        <i className="fas fa-search search-icon"></i>
-                        <input type="text" className="search-input" placeholder="Search all products..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                    </div>
-                    <ul className="products-filter" id="productsPageFilter">
-                        {categories.map(category => (
-                             <li key={category} className={activeFilter === category ? 'active' : ''} onClick={() => handleFilterClick(category)}>
-                                {category.charAt(0).toUpperCase() + category.slice(1)}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-                {filteredProducts.length > 0 ? (
-                    <div className="products-grid" id="allProductsGrid">
-                        {filteredProducts.map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="no-products-found">
-                        <p>No products match your current filters or search term.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+const filteredProducts = useMemo(() => {
+    const visibleProducts = currentUser?.role === 'admin' 
+        ? products 
+        : products.filter(p => p.status === 'approved');
+
+    return visibleProducts.filter(product => {
+        const matchesTag = activeFilter === 'all' || (product.tags && product.tags.includes(activeFilter));
+        
+        const lowercasedTerm = searchTerm.toLowerCase();
+        const matchesSearch = searchTerm === '' || 
+            product.title.toLowerCase().includes(lowercasedTerm) ||
+            product.description.toLowerCase().includes(lowercasedTerm) ||
+            (product.tags && product.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm)));
+
+        return matchesTag && matchesSearch;
+    });
+}, [products, searchTerm, activeFilter, currentUser]);
+
+const handleFilterClick = (tag) => {
+    setActiveFilter(tag);
+    if (tag === 'all') {
+        // Clears the search params from the URL
+        setSearchParams({});
+    } else {
+        // Sets the ?tag=... search param in the URL
+        setSearchParams({ tag: tag });
+    }
 };
 
+return (
+    <div className="page active" id="all-products-page" style={{ paddingTop: '70px' }}>
+        <div className="container products-page-container">
+            <section className="products-page-header-section">
+                <h1>Our Full Catalog</h1>
+                <p>Browse all available items for rent. Use the filters and search to find exactly what you need.</p>
+            </section>
+            <section className="products-page-controls">
+                <div className="products-page-search-container">
+                    <i className="fas fa-search search-icon"></i>
+                    <input type="text" className="search-input" placeholder="Search by name or tag..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                </div>
+                <ul className="products-filter" id="productsPageFilter">
+                    {tagsForFilter.map(tag => (
+                         <li key={tag} className={activeFilter === tag ? 'active' : ''} onClick={() => handleFilterClick(tag)}>
+                            {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+            {filteredProducts.length > 0 ? (
+                <div className="products-grid" id="allProductsGrid">
+                    {filteredProducts.map(product => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
+            ) : (
+                <div className="no-products-found">
+                    <p>No products match your current filters or search term.</p>
+                </div>
+            )}
+        </div>
+    </div>
+);
+};
 export default AllProductsPage;

@@ -263,3 +263,21 @@ export const initialRentalHistoryData = [
         status: 'Completed'
     }
 ];
+export const initialTagsData = [
+{ name: 'electronics' }, { name: 'photography' }, { name: 'professional' },
+{ name: 'sports' }, { name: 'outdoor' }, { name: 'adventure' }, { name: 'vehicle' },
+{ name: 'tools' }, { name: 'diy' }, { name: 'home improvement' }, { name: 'power tool' },
+{ name: 'party' }, { name: 'kids' }, { name: 'event' },
+{ name: 'water sports' }, { name: 'home theater' }, { name: 'movie night' },
+{ name: 'gaming' }, { name: 'entertainment' }, { name: 'camping' }
+];
+export const initialProductTagsData = [
+{ product_id: 1, tag_name: 'electronics' }, { product_id: 1, tag_name: 'photography' }, { product_id: 1, tag_name: 'professional' },
+{ product_id: 2, tag_name: 'sports' }, { product_id: 2, tag_name: 'outdoor' }, { product_id: 2, tag_name: 'adventure' }, { product_id: 2, tag_name: 'vehicle' },
+{ product_id: 3, tag_name: 'tools' }, { product_id: 3, tag_name: 'diy' }, { product_id: 3, tag_name: 'home improvement' }, { product_id: 3, tag_name: 'power tool' },
+{ product_id: 4, tag_name: 'party' }, { product_id: 4, tag_name: 'kids' }, { product_id: 4, tag_name: 'event' }, { product_id: 4, tag_name: 'outdoor' },
+{ product_id: 5, tag_name: 'sports' }, { product_id: 5, tag_name: 'outdoor' }, { product_id: 5, tag_name: 'water sports' }, { product_id: 5, tag_name: 'adventure' },
+{ product_id: 6, tag_name: 'electronics' }, { product_id: 6, tag_name: 'home theater' }, { product_id: 6, tag_name: 'movie night' }, { product_id: 6, tag_name: 'event' },
+{ product_id: 7, tag_name: 'electronics' }, { product_id: 7, tag_name: 'gaming' }, { product_id: 7, tag_name: 'entertainment' },
+{ product_id: 8, tag_name: 'sports' }, { product_id: 8, tag_name: 'outdoor' }, { product_id: 8, tag_name: 'camping' }, { product_id: 8, tag_name: 'adventure' }
+];

@@ -10,22 +10,11 @@ const CheckoutPage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [completedOrder, setCompletedOrder] = useState(null);
-
     const [paymentDetails, setPaymentDetails] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
 
     useEffect(() => {
-        if (!currentUser || cart.length === 0) {
-            if (!isConfirmed) { // Prevent redirect after confirmation
-                 showToast("Your cart is empty or you are not logged in.");
-                 navigate('/products');
-            }
-        } else if (currentUser.paymentInfo) {
-            setPaymentDetails({
-                cardNumber: currentUser.paymentInfo.cardNumber || '',
-                expiryDate: currentUser.paymentInfo.expiryDate || '',
-                cvv: currentUser.paymentInfo.cvv || '',
-            });
-        }
+        if (!currentUser || cart.length === 0) { if (!isConfirmed) { showToast("Your cart is empty or you are not logged in."); navigate('/products'); } } 
+        else if (currentUser.paymentInfo) { setPaymentDetails({ cardNumber: currentUser.paymentInfo.cardNumber || '', expiryDate: currentUser.paymentInfo.expiryDate || '', cvv: currentUser.paymentInfo.cvv || '', }); }
     }, [currentUser, cart, navigate, showToast, isConfirmed]);
 
     const rentalCost = useMemo(() => cart.reduce((sum, item) => sum + item.rentalTotalCost, 0), [cart]);
@@ -34,22 +23,12 @@ const CheckoutPage = () => {
     const totalAmount = useMemo(() => rentalCost + deliveryFee + serviceFee, [rentalCost, deliveryFee, serviceFee]);
     
     const agreementContent = useMemo(() => {
-        // This function dynamically fills in the rental agreement template
         const renterName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "The Renter";
-        const itemsList = cart.map(item => {
-            const product = products.find(p => p.id === item.productId);
-            const owner = users[product?.ownerId];
-            return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${owner?.firstName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`;
-        }).join('');
-    
-        return rentalAgreementTemplate
-            .replace(/\[Renter Name\]/g, renterName)
-            .replace(/\[List of Items and Terms\]/g, `<ul>${itemsList}</ul>`);
+        const itemsList = cart.map(item => { const product = products.find(p => p.id === item.productId); const owner = users[product?.ownerId]; return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${owner?.firstName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`; }).join('');
+        return rentalAgreementTemplate.replace(/\[Renter Name\]/g, renterName).replace(/\[List of Items and Terms\]/g, `<ul>${itemsList}</ul>`);
     }, [cart, products, rentalAgreementTemplate, users, currentUser]);
 
-    const handlePaymentChange = (e) => {
-        setPaymentDetails({ ...paymentDetails, [e.target.id.replace('checkout', '')]: e.target.value });
-    };
+    const handlePaymentChange = (e) => { setPaymentDetails({ ...paymentDetails, [e.target.id.replace('checkout', '')]: e.target.value }); };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -58,7 +37,7 @@ const CheckoutPage = () => {
 
         const orderDetails = {
             transactionId: `HZL-TRX-${Date.now()}`,
-            date: new Date().toISOString(),
+            date: new Date().toISOString(), // Use ISO string for consistency
             items: [...cart],
             rentalCost,
             deliveryFee,
@@ -66,10 +45,7 @@ const CheckoutPage = () => {
             totalAmount,
         };
         
-        // Simulate payment processing
         await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Add the rental record to the database
         await addRentalRecord(orderDetails);
 
         setCompletedOrder(orderDetails);
@@ -113,19 +89,10 @@ const CheckoutPage = () => {
                             <div id="checkout-payment-section" className={!agreed ? 'disabled' : ''}>
                                 <form id="checkoutForm" onSubmit={handleSubmit}>
                                     <div className="checkout-section"><h3>Payment Details</h3></div>
-                                    <div className="form-group">
-                                        <label htmlFor="checkoutCardNumber">Card Number</label>
-                                        <input type="text" id="checkoutCardNumber" placeholder="4242 4242 4242 4242" required value={paymentDetails.cardNumber} onChange={handlePaymentChange} />
-                                    </div>
+                                    <div className="form-group"><label htmlFor="checkoutCardNumber">Card Number</label><input type="text" id="checkoutCardNumber" placeholder="4242 4242 4242 4242" required value={paymentDetails.cardNumber} onChange={handlePaymentChange} /></div>
                                     <div className="form-group-row">
-                                        <div className="form-group">
-                                            <label htmlFor="checkoutExpiryDate">Expiry Date</label>
-                                            <input type="text" id="checkoutExpiryDate" placeholder="MM/YY" required value={paymentDetails.expiryDate} onChange={handlePaymentChange}/>
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkoutCvv">CVV</label>
-                                            <input type="text" id="checkoutCvv" placeholder="123" required value={paymentDetails.cvv} onChange={handlePaymentChange} />
-                                        </div>
+                                        <div className="form-group"><label htmlFor="checkoutExpiryDate">Expiry Date</label><input type="text" id="checkoutExpiryDate" placeholder="MM/YY" required value={paymentDetails.expiryDate} onChange={handlePaymentChange}/></div>
+                                        <div className="form-group"><label htmlFor="checkoutCvv">CVV</label><input type="text" id="checkoutCvv" placeholder="123" required value={paymentDetails.cvv} onChange={handlePaymentChange} /></div>
                                     </div>
                                     <button type="submit" className="btn btn-primary btn-block" disabled={!agreed || isProcessing}>
                                         {isProcessing ? 'Processing...' : `Confirm & Pay ₱${totalAmount.toFixed(2)}`}
@@ -136,19 +103,7 @@ const CheckoutPage = () => {
                         <aside className="checkout-order-summary">
                             <h2>Order Summary</h2>
                             <div id="checkoutItemDetails">
-                                {cart.map(item => {
-                                    const product = products.find(p => p.id === item.productId);
-                                    if (!product) return null;
-                                    return (
-                                        <div className="checkout-summary-item" key={item.productId}>
-                                            <img src={product.image} alt={product.title} />
-                                            <div className="checkout-summary-item-info">
-                                                <h4>{product.title}</h4>
-                                                <p>{item.rentalDurationDays} day(s) at ₱{item.rentalTotalCost.toFixed(2)}</p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                {cart.map(item => { const product = products.find(p => p.id === item.productId); if (!product) return null; return ( <div className="checkout-summary-item" key={item.productId}><img src={product.image} alt={product.title} /><div className="checkout-summary-item-info"><h4>{product.title}</h4><p>{item.rentalDurationDays} day(s) at ₱{item.rentalTotalCost.toFixed(2)}</p></div></div> ); })}
                             </div>
                             <div className="checkout-price-breakdown">
                                 <div className="price-row"><span className="label">Rental Cost:</span> <span>₱{rentalCost.toFixed(2)}</span></div>

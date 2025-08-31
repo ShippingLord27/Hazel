@@ -1,125 +1,102 @@
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
-// Component for a User's rental history
-const UserRentalHistory = ({ userHistory, products, generateAndPrintReceipt }) => (
-    <>
-        <div className="profile-view-header">
-            <h1>My Rental History</h1>
-            <p>A log of all the items you've rented through HAZEL.</p>
-        </div>
-        <div id="rentalTrackerGrid">
-            {userHistory.length > 0 ? (
-                userHistory.map(rental => {
-                    const product = products.find(p => p.id === rental.productId);
-                    if (!product) return null;
-                    
-                    const handlePrint = () => {
-                        const orderDetails = {
-                            transactionId: rental.transactionId,
-                            date: rental.rentalStartDate,
-                            items: [{
-                                productId: rental.productId,
-                                rentalDurationDays: rental.rentalDurationDays,
-                                rentalTotalCost: rental.rentalTotalCost
-                            }],
-                            rentalCost: rental.rentalTotalCost,
-                            deliveryFee: rental.deliveryFee,
-                            serviceFee: rental.serviceFee,
-                            totalAmount: rental.totalAmount
-                        };
-                        generateAndPrintReceipt(orderDetails);
-                    };
-
-                    return (
-                        <div key={rental.transactionId} className="rental-tracker-item">
-                            <img src={product.image} alt={product.title} />
-                            <div className="rental-tracker-info">
-                                <h4>{product.title}</h4>
-                                <p>Rented on: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
-                                <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
-                            </div>
-                            <div className="rental-tracker-actions">
-                                <button 
-                                    className="btn btn-outline btn-small"
-                                    onClick={handlePrint}
-                                >
-                                    <i className="fas fa-print"></i> Print Receipt
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })
+const RentalItem = ({ rental, product, isOwnerView, onStatusUpdate, onPrint }) => (
+    <div className="rental-tracker-item">
+        <img src={product.image} alt={product.title} />
+        <div className="rental-tracker-info">
+            <h4>{product.title}</h4>
+            {isOwnerView ? (
+                <p>Rented by: {rental.renterName}</p>
             ) : (
-                <p>You have not rented any items yet.</p>
+                <p>Owner: {product.ownerName}</p>
+            )}
+            <p>Start Date: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
+            <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
+        </div>
+        <div className="rental-tracker-actions">
+            {isOwnerView && rental.status === 'Active' && (
+                <button 
+                    className="btn btn-success btn-small"
+                    onClick={() => onStatusUpdate(rental.transactionId, 'Completed')}
+                >
+                    Mark as Returned
+                </button>
+            )}
+            {!isOwnerView && (
+                <button className="btn btn-outline btn-small" onClick={() => onPrint(rental)}>
+                    <i className="fas fa-print"></i> Print Receipt
+                </button>
             )}
         </div>
-    </>
+    </div>
 );
-
-// Component for an Owner's lent items history
-const OwnerLentHistory = ({ lentHistory, products, updateRentalStatus }) => (
-    <>
-        <div className="profile-view-header">
-            <h1>Items You've Lent Out</h1>
-            <p>A history of your items that have been rented by others.</p>
-        </div>
-        <div id="rentalTrackerGrid">
-            {lentHistory.length > 0 ? (
-                 lentHistory.map(rental => {
-                    const product = products.find(p => p.id === rental.productId);
-                    if (!product) return null;
-                    return (
-                        <div key={rental.transactionId} className="rental-tracker-item">
-                            <img src={product.image} alt={product.title} />
-                            <div className="rental-tracker-info">
-                                <h4>{product.title}</h4>
-                                <p>Rented by: {rental.renterName}</p>
-                                <p>Start Date: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
-                                <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
-                            </div>
-                            <div className="rental-tracker-actions">
-                                {rental.status === 'Active' && (
-                                    <button 
-                                        className="btn btn-success btn-small"
-                                        onClick={() => updateRentalStatus(rental.transactionId, 'Completed')}
-                                    >
-                                        Mark as Returned
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })
-            ) : (
-                 <p>None of your items have been rented out yet.</p>
-            )}
-        </div>
-    </>
-);
-
 
 const RentalTracker = () => {
     const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt, updateRentalStatus } = useApp();
 
+    const handlePrintReceipt = (rental) => {
+        const orderDetails = {
+            transactionId: rental.transactionId, date: rental.rentalStartDate,
+            items: [{ productId: rental.productId, rentalDurationDays: rental.rentalDurationDays, rentalTotalCost: rental.rentalTotalCost }],
+            rentalCost: rental.rentalTotalCost, deliveryFee: rental.deliveryFee,
+            serviceFee: rental.serviceFee, totalAmount: rental.totalAmount
+        };
+        generateAndPrintReceipt(orderDetails);
+    };
+
+    const history = currentUser.role === 'owner' ? ownerLentHistory : rentalHistory;
+    const activeRentals = history.filter(r => r.status === 'Active');
+    const completedRentals = history.filter(r => r.status === 'Completed');
+
     if (!currentUser) return null;
-    
+
     return (
         <div className="profile-view">
-            {currentUser.role === 'user' && 
-                <UserRentalHistory 
-                    userHistory={rentalHistory} 
-                    products={products}
-                    generateAndPrintReceipt={generateAndPrintReceipt} 
-                />
-            }
-            {currentUser.role === 'owner' &&
-                <OwnerLentHistory 
-                    lentHistory={ownerLentHistory}
-                    products={products}
-                    updateRentalStatus={updateRentalStatus}
-                />
-            }
+            <div className="profile-view-header">
+                <h1>Rental Tracker</h1>
+                <p>
+                    {currentUser.role === 'owner' 
+                        ? "Track items you've lent out."
+                        : "Track items you've rented."
+                    }
+                </p>
+            </div>
+            <div id="rentalTrackerGrid">
+                <h3>Active Rentals</h3>
+                {activeRentals.length > 0 ? (
+                    activeRentals.map(rental => {
+                        const product = products.find(p => p.id === rental.productId);
+                        if (!product) return null;
+                        return <RentalItem 
+                                    key={rental.transactionId} 
+                                    rental={rental} 
+                                    product={product} 
+                                    isOwnerView={currentUser.role === 'owner'}
+                                    onStatusUpdate={updateRentalStatus}
+                                />;
+                    })
+                ) : (
+                    <p>You have no active rentals.</p>
+                )}
+
+                <h3>Completed Rentals</h3>
+                {completedRentals.length > 0 ? (
+                    completedRentals.map(rental => {
+                        const product = products.find(p => p.id === rental.productId);
+                        if (!product) return null;
+                        return <RentalItem 
+                                    key={rental.transactionId}
+                                    rental={rental}
+                                    product={product}
+                                    isOwnerView={currentUser.role === 'owner'}
+                                    onPrint={handlePrintReceipt}
+                                />;
+                    })
+                ) : (
+                    <p>You have no completed rentals.</p>
+                )}
+            </div>
         </div>
     );
 };

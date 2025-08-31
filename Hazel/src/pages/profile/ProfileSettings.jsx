@@ -4,7 +4,7 @@ import { useApp } from '../../hooks/useApp';
 const ProfileSettings = () => {
     const { currentUser, showToast, updateUser } = useApp();
 
-    const [settingsData, setSettingsData] = useState({ firstName: '', lastName: '', profilePic: '', location: '' });
+    const [settingsData, setSettingsData] = useState({ firstName: '', lastName: '', profilePic: '', location: '', email: '' });
     const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
     const [paymentData, setPaymentData] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
 
@@ -15,8 +15,10 @@ const ProfileSettings = () => {
                 lastName: currentUser.lastName || '',
                 profilePic: currentUser.profilePic || '',
                 location: currentUser.location || '',
+                email: currentUser.email || '',
             });
-            if (currentUser.role === 'user' && currentUser.paymentInfo) {
+            // FIX: Correctly check for paymentInfo on the currentUser object
+            if (currentUser.paymentInfo) {
                 setPaymentData({
                     cardNumber: currentUser.paymentInfo.cardNumber || '',
                     expiryDate: currentUser.paymentInfo.expiryDate || '',
@@ -32,6 +34,7 @@ const ProfileSettings = () => {
 
     const handleSaveChanges = (e) => {
         e.preventDefault();
+        const originalEmail = currentUser.email;
         const updates = { ...settingsData };
         if (passwordData.newPassword) {
             if (passwordData.newPassword !== passwordData.confirmNewPassword) { showToast("New passwords do not match."); return; }
@@ -39,7 +42,7 @@ const ProfileSettings = () => {
             updates.password = passwordData.newPassword;
         }
         if (currentUser.role === 'user') { updates.paymentInfo = paymentData; }
-        updateUser(currentUser.email, updates);
+        updateUser(originalEmail, updates);
         showToast("Settings updated successfully!");
         setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
     };
@@ -67,14 +70,15 @@ const ProfileSettings = () => {
                 <h3>Personal Information</h3>
                 <div className="form-group"><label>First Name*</label><input type="text" name="firstName" value={settingsData.firstName} onChange={handleSettingsChange} required /></div>
                 <div className="form-group"><label>Last Name*</label><input type="text" name="lastName" value={settingsData.lastName} onChange={handleSettingsChange} required /></div>
-                <div className="form-group"><label>Email</label><input type="email" value={currentUser.email} readOnly /></div>
+                <div className="form-group"><label>Email</label><input type="email" name="email" value={settingsData.email} onChange={handleSettingsChange} required /></div>
                 <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profilePic" value={settingsData.profilePic} onChange={handleSettingsChange} /></div>
                 <div className="form-group"><label>Location</label><input type="text" name="location" value={settingsData.location} onChange={handleSettingsChange} /></div>
                 <hr/>
+                {/* FIX: Correctly show verification section to owners */}
                 {currentUser.role === 'owner' && (
                     <>
                         <h3>Identity Verification</h3>
-                        <div>
+                        <div id="verificationStatus">
                             <p>Your current status is: <span className={`status-${currentUser.verificationStatus}`}>{currentUser.verificationStatus}</span></p>
                             {currentUser.verificationStatus === 'unverified' && (
                                 <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
@@ -86,6 +90,7 @@ const ProfileSettings = () => {
                         <hr/>
                     </>
                 )}
+                {/* FIX: Correctly show payment section to users */}
                 {currentUser.role === 'user' && (
                     <>
                         <h3>Payment Information</h3>

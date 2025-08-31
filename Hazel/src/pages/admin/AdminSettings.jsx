@@ -25,21 +25,15 @@ const AdminSettings = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (settingsData.newPassword && settingsData.newPassword !== settingsData.confirmNewPassword) {
-            showToast("New passwords do not match."); return;
-        }
-        if (settingsData.newPassword && currentUser.password !== settingsData.currentPassword) {
-            showToast("Incorrect current password."); return;
-        }
+        if (settingsData.newPassword && settingsData.newPassword !== settingsData.confirmNewPassword) { showToast("New passwords do not match."); return; }
+        if (settingsData.newPassword && currentUser.password !== settingsData.currentPassword) { showToast("Incorrect current password."); return; }
         
         const updates = {
             firstName: settingsData.firstName,
             lastName: settingsData.lastName,
             profilePic: settingsData.profilePic,
         };
-        if (settingsData.newPassword) {
-            updates.password = settingsData.newPassword;
-        }
+        if (settingsData.newPassword) { updates.password = settingsData.newPassword; }
         
         updateUser(currentUser.email, updates);
         showToast("Admin settings updated successfully!");
@@ -52,6 +46,7 @@ const AdminSettings = () => {
             <form onSubmit={handleSubmit}>
                 <div className="form-group"><label>First Name*</label><input type="text" name="firstName" value={settingsData.firstName} onChange={handleChange} required /></div>
                 <div className="form-group"><label>Last Name*</label><input type="text" name="lastName" value={settingsData.lastName} onChange={handleChange} required /></div>
+                {/* FIX: Admin email remains readonly */}
                 <div className="form-group"><label>Email</label><input type="email" value={currentUser.email} readOnly /></div>
                 <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profilePic" value={settingsData.profilePic} onChange={handleChange} /></div>
                 <hr/>
