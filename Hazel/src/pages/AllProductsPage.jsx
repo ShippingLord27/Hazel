@@ -38,7 +38,7 @@ const ProductCard = ({ product }) => {
 
 
 const AllProductsPage = () => {
-    const { products } = useApp();
+    const { products, currentUser } = useApp();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     
@@ -49,7 +49,6 @@ const AllProductsPage = () => {
     
     const categories = ['all', 'tools', 'electronics', 'vehicles', 'party', 'sports'];
 
-    // Update filter when URL query param changes
     useEffect(() => {
         const categoryQuery = searchParams.get('category');
         if (categoryQuery && categories.includes(categoryQuery)) {
@@ -60,14 +59,18 @@ const AllProductsPage = () => {
     }, [searchParams]);
 
     const filteredProducts = useMemo(() => {
-        return products.filter(product => {
+        const visibleProducts = currentUser?.role === 'admin' 
+            ? products 
+            : products.filter(p => p.status === 'approved');
+
+        return visibleProducts.filter(product => {
             const matchesCategory = activeFilter === 'all' || product.category.toLowerCase() === activeFilter;
             const matchesSearch = searchTerm === '' || 
                 product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.description.toLowerCase().includes(searchTerm.toLowerCase());
             return matchesCategory && matchesSearch;
         });
-    }, [products, searchTerm, activeFilter]);
+    }, [products, searchTerm, activeFilter, currentUser]);
 
     const handleFilterClick = (category) => {
         setActiveFilter(category);
@@ -85,31 +88,19 @@ const AllProductsPage = () => {
                     <h1>Our Full Catalog</h1>
                     <p>Browse all available items for rent. Use the filters and search to find exactly what you need.</p>
                 </section>
-
                 <section className="products-page-controls">
                     <div className="products-page-search-container">
                         <i className="fas fa-search search-icon"></i>
-                        <input 
-                            type="text" 
-                            className="search-input" 
-                            placeholder="Search all products..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                        <input type="text" className="search-input" placeholder="Search all products..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                     <ul className="products-filter" id="productsPageFilter">
                         {categories.map(category => (
-                             <li 
-                                key={category}
-                                className={activeFilter === category ? 'active' : ''}
-                                onClick={() => handleFilterClick(category)}
-                            >
+                             <li key={category} className={activeFilter === category ? 'active' : ''} onClick={() => handleFilterClick(category)}>
                                 {category.charAt(0).toUpperCase() + category.slice(1)}
                             </li>
                         ))}
                     </ul>
                 </section>
-
                 {filteredProducts.length > 0 ? (
                     <div className="products-grid" id="allProductsGrid">
                         {filteredProducts.map(product => (

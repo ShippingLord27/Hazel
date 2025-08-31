@@ -18,7 +18,11 @@ const UserRentalHistory = ({ userHistory, products, generateAndPrintReceipt }) =
                         const orderDetails = {
                             transactionId: rental.transactionId,
                             date: rental.rentalStartDate,
-                            items: [{...rental}], // Pass as an array of items
+                            items: [{
+                                productId: rental.productId,
+                                rentalDurationDays: rental.rentalDurationDays,
+                                rentalTotalCost: rental.rentalTotalCost
+                            }],
                             rentalCost: rental.rentalTotalCost,
                             deliveryFee: rental.deliveryFee,
                             serviceFee: rental.serviceFee,
@@ -33,7 +37,7 @@ const UserRentalHistory = ({ userHistory, products, generateAndPrintReceipt }) =
                             <div className="rental-tracker-info">
                                 <h4>{product.title}</h4>
                                 <p>Rented on: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
-                                <p>Status: <span className="status-active">Completed</span></p>
+                                <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
                             </div>
                             <div className="rental-tracker-actions">
                                 <button 
@@ -54,7 +58,7 @@ const UserRentalHistory = ({ userHistory, products, generateAndPrintReceipt }) =
 );
 
 // Component for an Owner's lent items history
-const OwnerLentHistory = ({ lentHistory, products }) => (
+const OwnerLentHistory = ({ lentHistory, products, updateRentalStatus }) => (
     <>
         <div className="profile-view-header">
             <h1>Items You've Lent Out</h1>
@@ -72,7 +76,17 @@ const OwnerLentHistory = ({ lentHistory, products }) => (
                                 <h4>{product.title}</h4>
                                 <p>Rented by: {rental.renterName}</p>
                                 <p>Start Date: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
-                                <p>Status: <span className="status-rented">{rental.status}</span></p>
+                                <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
+                            </div>
+                            <div className="rental-tracker-actions">
+                                {rental.status === 'Active' && (
+                                    <button 
+                                        className="btn btn-success btn-small"
+                                        onClick={() => updateRentalStatus(rental.transactionId, 'Completed')}
+                                    >
+                                        Mark as Returned
+                                    </button>
+                                )}
                             </div>
                         </div>
                     );
@@ -86,7 +100,7 @@ const OwnerLentHistory = ({ lentHistory, products }) => (
 
 
 const RentalTracker = () => {
-    const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt } = useApp();
+    const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt, updateRentalStatus } = useApp();
 
     if (!currentUser) return null;
     
@@ -103,6 +117,7 @@ const RentalTracker = () => {
                 <OwnerLentHistory 
                     lentHistory={ownerLentHistory}
                     products={products}
+                    updateRentalStatus={updateRentalStatus}
                 />
             }
         </div>

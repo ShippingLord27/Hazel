@@ -3,38 +3,30 @@ import { useApp } from '../hooks/useApp';
 import { useNavigate } from 'react-router-dom';
 
 const AuthModal = ({ closeModal, initialTab }) => {
-    const { login, signup } = useApp();
+    const { login, signup, logout } = useApp();
     const navigate = useNavigate();
 
-    // 'initial', 'user', 'owner', 'admin'
     const [view, setView] = useState('initial');
-    // 'login' or 'signup'
     const [activeTab, setActiveTab] = useState(initialTab || 'login');
     const [errorMessage, setErrorMessage] = useState('');
-
     const [loginData, setLoginData] = useState({ email: '', password: '' });
     const [signupData, setSignupData] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
     const handleLoginChange = (e) => setLoginData({ ...loginData, [e.target.name]: e.target.value });
     const handleSignupChange = (e) => setSignupData({ ...signupData, [e.target.name]: e.target.value });
-
-    const resetForms = () => {
-        setErrorMessage('');
-        setLoginData({ email: '', password: '' });
-        setSignupData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
-    };
-
-    const handleViewChange = (newView) => {
-        setView(newView);
-        setActiveTab(initialTab || 'login'); // Default to the tab the user initially clicked
-        resetForms();
-    };
+    const resetForms = () => { setErrorMessage(''); setLoginData({ email: '', password: '' }); setSignupData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' }); };
+    const handleViewChange = (newView) => { setView(newView); setActiveTab(initialTab || 'login'); resetForms(); };
 
     const handleLoginSubmit = (e) => {
         e.preventDefault();
         setErrorMessage('');
         const user = login(loginData.email, loginData.password);
         if (user) {
+            if (user.role !== view) {
+                setErrorMessage(`You have an account, but it's a '${user.role}' account. Please log in from the correct portal.`);
+                logout(); 
+                return;
+            }
             closeModal();
             if (user.role === 'admin') navigate('/admin');
             else navigate('/profile');
@@ -46,30 +38,13 @@ const AuthModal = ({ closeModal, initialTab }) => {
     const handleSignupSubmit = (e, role) => {
         e.preventDefault();
         setErrorMessage('');
-        if (signupData.password !== signupData.confirmPassword) {
-            setErrorMessage('Passwords do not match.');
-            return;
-        }
-        const user = signup({
-            firstName: signupData.firstName,
-            lastName: signupData.lastName,
-            email: signupData.email,
-            password: signupData.password
-        }, role);
-
-        if (user) {
-            closeModal();
-            navigate('/profile');
-        } else {
-            setErrorMessage('This email is already registered.');
-        }
+        if (signupData.password !== signupData.confirmPassword) { setErrorMessage('Passwords do not match.'); return; }
+        const user = signup({ firstName: signupData.firstName, lastName: signupData.lastName, email: signupData.email, password: signupData.password }, role);
+        if (user) { closeModal(); navigate('/profile'); } 
+        else { setErrorMessage('This email is already registered.'); }
     };
 
-    const BackLink = () => (
-        <a href="#" className="modal-footer-back-link" onClick={(e) => { e.preventDefault(); handleViewChange('initial'); }}>
-            &larr; Back to selection
-        </a>
-    );
+    const BackLink = () => (<a href="#" className="modal-footer-back-link" onClick={(e) => { e.preventDefault(); handleViewChange('initial'); }}>&larr; Back to selection</a>);
 
     return (
         <div className="modal" style={{ display: 'flex' }}>
@@ -83,7 +58,6 @@ const AuthModal = ({ closeModal, initialTab }) => {
                     </h2>
                     <button className="modal-close-btn" aria-label="Close modal" onClick={closeModal}>×</button>
                 </div>
-
                 <div className="modal-body">
                     {view === 'initial' && (
                         <div className="auth-role-selection">
@@ -93,21 +67,15 @@ const AuthModal = ({ closeModal, initialTab }) => {
                             <button className="btn btn-secondary" onClick={() => handleViewChange('admin')}>Admin Login</button>
                         </div>
                     )}
-
                     {(view === 'user' || view === 'owner') && (
                         <>
-                            <div className="tab-container">
-                                <div className={`tab ${activeTab === 'login' ? 'active' : ''}`} onClick={() => setActiveTab('login')}>Login</div>
-                                <div className={`tab ${activeTab === 'signup' ? 'active' : ''}`} onClick={() => setActiveTab('signup')}>Sign Up</div>
-                            </div>
-                            
+                            <div className="tab-container"><div className={`tab ${activeTab === 'login' ? 'active' : ''}`} onClick={() => setActiveTab('login')}>Login</div><div className={`tab ${activeTab === 'signup' ? 'active' : ''}`} onClick={() => setActiveTab('signup')}>Sign Up</div></div>
                             <form id="loginForm" className={`form-container ${activeTab === 'login' ? 'active' : ''}`} onSubmit={handleLoginSubmit}>
                                 <div className="form-group"><label>Email</label><input type="email" name="email" value={loginData.email} onChange={handleLoginChange} required /></div>
                                 <div className="form-group"><label>Password</label><input type="password" name="password" value={loginData.password} onChange={handleLoginChange} required /></div>
                                 {activeTab === 'login' && errorMessage && <div className="error-message">{errorMessage}</div>}
                                 <button type="submit" className="btn btn-primary">Login</button>
                             </form>
-                            
                             <form id="signupForm" className={`form-container ${activeTab === 'signup' ? 'active' : ''}`} onSubmit={(e) => handleSignupSubmit(e, view)}>
                                 <div className="form-group"><label>First Name</label><input type="text" name="firstName" value={signupData.firstName} onChange={handleSignupChange} required /></div>
                                 <div className="form-group"><label>Last Name</label><input type="text" name="lastName" value={signupData.lastName} onChange={handleSignupChange} required /></div>
@@ -117,11 +85,9 @@ const AuthModal = ({ closeModal, initialTab }) => {
                                 {activeTab === 'signup' && errorMessage && <div className="error-message">{errorMessage}</div>}
                                 <button type="submit" className="btn btn-primary">Sign Up as {view.charAt(0).toUpperCase() + view.slice(1)}</button>
                             </form>
-
                             <BackLink />
                         </>
                     )}
-
                     {view === 'admin' && (
                         <>
                             <form className="form-container active" onSubmit={handleLoginSubmit}>

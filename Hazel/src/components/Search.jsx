@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const Search = () => {
-    const { products } = useApp();
+    const { products, currentUser } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState([]);
     const [isResultsVisible, setResultsVisible] = useState(false);
@@ -12,7 +12,11 @@ const Search = () => {
 
     useEffect(() => {
         if (searchTerm.length > 1) {
-            const filtered = products.filter(p => 
+            const visibleProducts = currentUser?.role === 'admin' 
+                ? products 
+                : products.filter(p => p.status === 'approved');
+
+            const filtered = visibleProducts.filter(p => 
                 p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                 p.category.toLowerCase().includes(searchTerm.toLowerCase())
             );
@@ -22,7 +26,7 @@ const Search = () => {
             setResults([]);
             setResultsVisible(false);
         }
-    }, [searchTerm, products]);
+    }, [searchTerm, products, currentUser]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -31,9 +35,7 @@ const Search = () => {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleResultClick = (id) => {
@@ -45,14 +47,7 @@ const Search = () => {
     return (
         <div className="search-container" ref={searchRef}>
             <i className="fas fa-search search-icon"></i>
-            <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Search for items..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => searchTerm.length > 1 && setResultsVisible(true)}
-            />
+            <input type="text" className="search-input" placeholder="Search for items..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onFocus={() => searchTerm.length > 1 && setResultsVisible(true)} />
             {isResultsVisible && (
                 <div className="search-results active">
                     {results.length > 0 ? (

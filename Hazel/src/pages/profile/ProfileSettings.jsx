@@ -4,18 +4,9 @@ import { useApp } from '../../hooks/useApp';
 const ProfileSettings = () => {
     const { currentUser, showToast, updateUser } = useApp();
 
-    // State for general info
-    const [settingsData, setSettingsData] = useState({
-        firstName: '', lastName: '', profilePic: '', location: '',
-    });
-    // State for password change
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: '', newPassword: '', confirmNewPassword: ''
-    });
-    // State for user payment info
-    const [paymentData, setPaymentData] = useState({
-        cardNumber: '', expiryDate: '', cvv: ''
-    });
+    const [settingsData, setSettingsData] = useState({ firstName: '', lastName: '', profilePic: '', location: '' });
+    const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    const [paymentData, setPaymentData] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
 
     useEffect(() => {
         if (currentUser) {
@@ -41,25 +32,13 @@ const ProfileSettings = () => {
 
     const handleSaveChanges = (e) => {
         e.preventDefault();
-        
         const updates = { ...settingsData };
-        
-        // Handle password change
         if (passwordData.newPassword) {
-            if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-                showToast("New passwords do not match."); return;
-            }
-            if (currentUser.password !== passwordData.currentPassword) {
-                showToast("Incorrect current password."); return;
-            }
+            if (passwordData.newPassword !== passwordData.confirmNewPassword) { showToast("New passwords do not match."); return; }
+            if (currentUser.password !== passwordData.currentPassword) { showToast("Incorrect current password."); return; }
             updates.password = passwordData.newPassword;
         }
-
-        // Handle payment info for users
-        if (currentUser.role === 'user') {
-            updates.paymentInfo = paymentData;
-        }
-        
+        if (currentUser.role === 'user') { updates.paymentInfo = paymentData; }
         updateUser(currentUser.email, updates);
         showToast("Settings updated successfully!");
         setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
@@ -91,9 +70,7 @@ const ProfileSettings = () => {
                 <div className="form-group"><label>Email</label><input type="email" value={currentUser.email} readOnly /></div>
                 <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profilePic" value={settingsData.profilePic} onChange={handleSettingsChange} /></div>
                 <div className="form-group"><label>Location</label><input type="text" name="location" value={settingsData.location} onChange={handleSettingsChange} /></div>
-                
                 <hr/>
-                
                 {currentUser.role === 'owner' && (
                     <>
                         <h3>Identity Verification</h3>
@@ -109,7 +86,6 @@ const ProfileSettings = () => {
                         <hr/>
                     </>
                 )}
-
                 {currentUser.role === 'user' && (
                     <>
                         <h3>Payment Information</h3>
@@ -122,12 +98,10 @@ const ProfileSettings = () => {
                         <hr/>
                     </>
                 )}
-                
                 <h3>Change Password</h3>
                 <div className="form-group"><label>Current Password</label><input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} /></div>
                 <div className="form-group"><label>New Password</label><input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} /></div>
                 <div className="form-group"><label>Confirm New Password</label><input type="password" name="confirmNewPassword" value={passwordData.confirmNewPassword} onChange={handlePasswordChange} /></div>
-                
                 <button type="submit" className="btn btn-primary">Save All Changes</button>
             </form>
         </div>

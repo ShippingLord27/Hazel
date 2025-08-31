@@ -21,16 +21,20 @@ const ProductCard = ({ product }) => {
 };
 
 const HomePage = () => {
-    const { products } = useApp();
+    const { products, currentUser } = useApp();
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
 
     const popularProducts = useMemo(() => {
+        const visibleProducts = currentUser?.role === 'admin' 
+            ? products 
+            : products.filter(p => p.status === 'approved');
+
         const filtered = activeFilter === 'all' 
-            ? products
-            : products.filter(p => p.category.toLowerCase() === activeFilter);
+            ? visibleProducts
+            : visibleProducts.filter(p => p.category.toLowerCase() === activeFilter);
         return filtered.slice(0, 6);
-    }, [products, activeFilter]);
+    }, [products, activeFilter, currentUser]);
 
     const filters = ['all', 'tools', 'electronics', 'vehicles', 'party', 'sports'];
 

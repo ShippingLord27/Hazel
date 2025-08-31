@@ -1,60 +1,58 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../../hooks/useApp';
-import ListingModal from '../../components/ListingModal';
-
-const AdminProductCard = ({ product, onEdit, onDelete }) => {
-    const { users } = useApp();
-    const owner = users[product.ownerId];
-    return (
-        <div className="product-card">
-            <img src={product.image} alt={product.title} className="product-img" />
-            <div className="product-info">
-                <span className="product-category">{product.category}</span>
-                <h3 className="product-title">{product.title}</h3>
-                <div className="product-price">{product.priceDisplay}</div>
-                <div className="product-meta profile-card-meta">
-                    <button className="btn btn-outline btn-small" onClick={() => onEdit(product)}><i className="fas fa-edit"></i> Edit</button>
-                    <button className="btn btn-danger btn-small" onClick={() => onDelete(product.id)}><i className="fas fa-trash"></i> Delete</button>
-                </div>
-                <div className="admin-listing-owner-info" title={owner?.email}>Owner: {owner ? `${owner.firstName} ${owner.lastName}` : 'N/A'}</div>
-            </div>
-        </div>
-    );
-};
 
 const ListingManagement = () => {
-    const { products, deleteProduct } = useApp();
-    const [isListingModalOpen, setListingModalOpen] = useState(false);
-    const [productToEdit, setProductToEdit] = useState(null);
+    const { products, users, updateProductStatus, deleteProduct } = useApp();
 
-    const handleEditListing = (product) => {
-        setProductToEdit(product);
-        setListingModalOpen(true);
-    };
-
-    const handleDeleteListing = (productId) => {
-        if (window.confirm("ADMIN: Are you sure you want to PERMANENTLY delete this listing?")) {
+    const handleDelete = (productId) => {
+        if (window.confirm("ADMIN: Are you sure you want to PERMANENTLY delete this listing? This is irreversible.")) {
             deleteProduct(productId);
         }
-    };
-    
+    }
+
     return (
-        <>
-            <div className="admin-view">
-                <div className="admin-view-header"><h1>Listing Management</h1></div>
-                <div className="products-grid">
-                    {products.map(p => (
-                        <AdminProductCard key={p.id} product={p} onEdit={handleEditListing} onDelete={handleDeleteListing} />
-                    ))}
-                </div>
+        <div className="admin-view">
+            <div className="admin-view-header">
+                <h1>Listing Management</h1>
+                <p>Approve, reject, or delete user-submitted listings.</p>
             </div>
-            {isListingModalOpen && (
-                <ListingModal 
-                    productToEdit={productToEdit} 
-                    closeModal={() => setListingModalOpen(false)}
-                />
-            )}
-        </>
+            <div className="admin-table-container">
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products.map(product => {
+                            const owner = users[product.ownerId];
+                            return (
+                                <tr key={product.id}>
+                                    <td>{product.title}</td>
+                                    <td>{owner ? `${owner.firstName} ${owner.lastName}` : 'N/A'}</td>
+                                    <td><span className={`status-${product.status}`}>{product.status}</span></td>
+                                    <td className="actions-cell">
+                                        {product.status === 'pending' && (
+                                            <>
+                                                <button className="btn btn-success btn-small" onClick={() => updateProductStatus(product.id, 'approved')}>Approve</button>
+                                                <button className="btn btn-danger btn-small" onClick={() => updateProductStatus(product.id, 'rejected')}>Reject</button>
+                                            </>
+                                        )}
+                                        {product.status === 'rejected' && (
+                                             <button className="btn btn-success btn-small" onClick={() => updateProductStatus(product.id, 'approved')}>Re-Approve</button>
+                                        )}
+                                         <button className="btn btn-secondary btn-small" onClick={() => handleDelete(product.id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     );
 };
 
