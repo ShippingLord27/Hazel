@@ -1,0 +1,187 @@
+// src/data/initialData.jsx (Updated)
+
+export const initialProductData = [
+    // ... existing 6 products are here ...
+    {
+        id: 1,
+        title: "DSLR Camera",
+        fullTitle: "Canon EOS 90D DSLR Camera",
+        category: "Electronics",
+        price: 25, 
+        priceDisplay: "₱25/day",
+        image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Professional-grade Canon EOS 90D DSLR camera with 32.5MP APS-C sensor and 4K video capabilities.",
+        ownerId: "alice.photo@example.com",
+        ownerName: "Alice Photo",
+        reviews: [],
+        trackingTagId: "HZL-CAM-001",
+        ownerTerms: "Handle with extreme care. Renter is liable for any damage to the lens or sensor. Late fee is ₱500/day."
+    },
+    {
+        id: 2,
+        title: "Mountain Bike",
+        fullTitle: "Trek Marlin 5 Mountain Bike",
+        category: "Vehicles",
+        price: 20,
+        priceDisplay: "₱20/day",
+        image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "High-quality Trek Marlin 5 mountain bike perfect for trail riding and outdoor adventures.",
+        ownerId: "bob.rider@example.com",
+        ownerName: "Bob Rider",
+        reviews: [],
+        trackingTagId: "HZL-BIK-002",
+        ownerTerms: "Bike must be returned clean. No extreme downhill or stunt riding."
+    },
+    {
+        id: 3,
+        title: "Power Drill Set",
+        fullTitle: "DeWalt Power Drill Set",
+        category: "Tools",
+        price: 15,
+        priceDisplay: "₱15/day",
+        image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Professional power drill set with multiple attachments and accessories.",
+        ownerId: "john.doe@example.com", 
+        ownerName: "John Doe",
+        reviews: [],
+        trackingTagId: "HZL-TOL-003",
+        ownerTerms: ""
+    },
+    {
+        id: 4,
+        title: "Bounce House",
+        fullTitle: "Commercial Grade Bounce House",
+        category: "Party",
+        price: 75,
+        priceDisplay: "₱75/day",
+        image: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Commercial-grade bounce house perfect for birthday parties.",
+        ownerId: "alice.photo@example.com",
+        ownerName: "Alice Photo",
+        reviews: [],
+        trackingTagId: "HZL-PTY-004",
+        ownerTerms: "No shoes, sharp objects, or food/drinks allowed inside the bounce house."
+    },
+    {
+        id: 5,
+        title: "Single Kayak",
+        fullTitle: "Perception Pescador Pro 10.0 Kayak",
+        category: "Sports",
+        price: 35,
+        priceDisplay: "₱35/day",
+        image: "https://images.unsplash.com/photo-1509587584298-0f3b3a3a1797?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        description: "High-performance fishing kayak perfect for lakes and rivers.",
+        ownerId: "john.doe@example.com", 
+        ownerName: "John Doe",
+        reviews: [],
+        trackingTagId: "HZL-SPT-005",
+        ownerTerms: "Do not use in saltwater. Must be rinsed before return."
+    },
+    {
+        id: 6,
+        title: "HD Projector",
+        fullTitle: "Epson Home Cinema 1080 HD Projector",
+        category: "Electronics",
+        price: 30,
+        priceDisplay: "₱30/day",
+        image: "https://images.unsplash.com/photo-1547721064-da6cfb341d50?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "High-quality 1080p HD projector perfect for movie nights.",
+        ownerId: "bob.rider@example.com",
+        ownerName: "Bob Rider",
+        reviews: [],
+        trackingTagId: "HZL-ELC-006",
+        ownerTerms: ""
+    },
+    // --- NEW DATA ---
+    {
+        id: 7,
+        title: "Gaming Console",
+        fullTitle: "PlayStation 5 Console",
+        category: "Electronics",
+        price: 40,
+        priceDisplay: "₱40/day",
+        image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Next-gen gaming experience with the PS5. Includes two controllers and one game.",
+        ownerId: "jane.smith@example.com",
+        ownerName: "Jane Smith",
+        reviews: [],
+        trackingTagId: "HZL-ELC-007",
+        ownerTerms: "Controllers must be returned fully charged. Any game disc damage will be charged."
+    },
+    {
+        id: 8,
+        title: "Camping Tent",
+        fullTitle: "4-Person Coleman Camping Tent",
+        category: "Sports",
+        price: 22,
+        priceDisplay: "₱22/day",
+        image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Spacious and weather-resistant tent, perfect for a weekend getaway.",
+        ownerId: "carol.camper@example.com",
+        ownerName: "Carol Camper",
+        reviews: [],
+        trackingTagId: "HZL-SPT-008",
+        ownerTerms: "Must be returned dry and clean. Renter liable for any rips or broken poles."
+    }
+];
+
+export const initialSimulatedUsers = {
+    // ... existing users are here ...
+    "john.doe@example.com": { /* ... */ },
+    "jane.smith@example.com": { /* ... */ },
+    "admin@hazel.com": { /* ... */ },
+    "alice.photo@example.com": { /* ... */ },
+    "bob.rider@example.com": { /* ... */ },
+    // --- NEW USER ---
+    "carol.camper@example.com": { 
+        firstName: "Carol",
+        lastName: "Camper",
+        email: "carol.camper@example.com",
+        password: "123",
+        profilePic: "https://randomuser.me/api/portraits/women/21.jpg",
+        memberSince: "August 2022",
+        location: "Seattle, WA",
+        myListingIds: [8],
+        favoriteListingIds: [2],
+        activeRentalsCount: 0,
+        totalEarningsAmount: 850.00,
+        totalListingViews: 350,
+        role: 'owner',
+        verificationStatus: 'verified',
+        paymentInfo: null
+    }
+};
+
+export const initialRentalAgreement = `By renting this item, you agree to the Hazel platform terms of service. You are responsible for the item during the rental period and must return it in the same condition you received it, accounting for normal wear and tear. Late returns may be subject to additional fees as specified by the owner. Please communicate promptly with the item owner regarding pickup, drop-off, and any issues that may arise.`;
+
+// --- UPDATED RENTAL HISTORY ---
+export const initialRentalHistoryData = [
+    {
+        transactionId: 'HZL-TRX-1667894400',
+        productId: 2, // Mountain Bike
+        renterEmail: "jane.smith@example.com",
+        renterName: "Jane Smith",
+        ownerEmail: "bob.rider@example.com",
+        rentalStartDate: '2025-10-15',
+        rentalDurationDays: 3,
+        rentalTotalCost: 50.00,
+        deliveryFee: 15.00,
+        serviceFee: 2.50,
+        totalAmount: 67.50,
+        status: 'Completed'
+    },
+    {
+        transactionId: 'HZL-TRX-1667995511',
+        productId: 5, // Kayak
+        renterEmail: "carol.camper@example.com",
+        renterName: "Carol Camper",
+        ownerEmail: "john.doe@example.com",
+        rentalStartDate: '2025-09-20',
+        rentalDurationDays: 7,
+        rentalTotalCost: 175.00,
+        deliveryFee: 0.00,
+        serviceFee: 8.75,
+        totalAmount: 183.75,
+        status: 'Completed'
+    }
+];

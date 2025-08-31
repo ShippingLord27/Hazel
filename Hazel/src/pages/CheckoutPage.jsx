@@ -1,3 +1,5 @@
+// src/pages/CheckoutPage.jsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
@@ -34,8 +36,18 @@ const CheckoutPage = () => {
     const totalAmount = useMemo(() => rentalCost + deliveryFee + serviceFee, [rentalCost, deliveryFee, serviceFee]);
     
     const agreementContent = useMemo(() => {
-        // ... (This function remains unchanged)
-    }, [cart, products, rentalAgreementTemplate, users]);
+        // This function dynamically fills in the rental agreement template
+        const renterName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "The Renter";
+        const itemsList = cart.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            const owner = users[product?.ownerId];
+            return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${owner?.firstName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`;
+        }).join('');
+    
+        return rentalAgreementTemplate
+            .replace(/\[Renter Name\]/g, renterName)
+            .replace(/\[List of Items and Terms\]/g, `<ul>${itemsList}</ul>`);
+    }, [cart, products, rentalAgreementTemplate, users, currentUser]);
 
     const handlePaymentChange = (e) => {
         setPaymentDetails({ ...paymentDetails, [e.target.id.replace('checkout', '')]: e.target.value });
@@ -46,11 +58,10 @@ const CheckoutPage = () => {
         setIsProcessing(true);
         showToast("Processing payment...");
 
-        // Create order details object BEFORE clearing cart
         const orderDetails = {
             transactionId: `HZL-TRX-${Date.now()}`,
             date: new Date().toISOString(),
-            items: [...cart], // Important to copy the cart array
+            items: [...cart],
             rentalCost,
             deliveryFee,
             serviceFee,
@@ -142,7 +153,7 @@ const CheckoutPage = () => {
                                 <div className="price-row"><span className="label">Delivery Fee:</span> <span>₱{deliveryFee.toFixed(2)}</span></div>
                                 <div className="price-row"><span className="label">Service Fee (5%):</span> <span>₱{serviceFee.toFixed(2)}</span></div>
                                 <hr/>
-                                <div className="price-row total"><span className="label">Total:</span> <span>₱${totalAmount.toFixed(2)}</span></div>
+                                <div className="price-row total"><span className="label">Total:</span> <span>₱{totalAmount.toFixed(2)}</span></div>
                             </div>
                         </aside>
                     </div>

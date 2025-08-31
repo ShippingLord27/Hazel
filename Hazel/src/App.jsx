@@ -1,5 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+
+// Layout and Main Pages
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import AllProductsPage from './pages/AllProductsPage';
@@ -12,6 +14,9 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+
+// --- FIX: This path is correct if testdatasave.jsx is in `src/pages/` ---
+import TestDataSavePage from './data/testdatasave';
 
 // Profile Sub-pages
 import ProfileDashboard from './pages/profile/ProfileDashboard';
@@ -30,6 +35,7 @@ import ContentManagement from './pages/admin/ContentManagement';
 function App() {
   return (
     <Routes>
+      {/* This Route wraps all pages that should have the Header and Footer */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="products" element={<AllProductsPage />} />
@@ -41,6 +47,7 @@ function App() {
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         
+        {/* Nested Profile Routes */}
         <Route path="profile" element={<ProfilePage />}>
           <Route index element={<ProfileDashboard />} />
           <Route path="my-listings" element={<MyListings />} />
@@ -49,6 +56,7 @@ function App() {
           <Route path="settings" element={<ProfileSettings />} />
         </Route>
         
+        {/* Nested Admin Routes */}
         <Route path="admin" element={<AdminDashboardPage />}>
            <Route index element={<AdminOverview />} />
            <Route path="users" element={<UserManagement />} />
@@ -57,6 +65,10 @@ function App() {
            <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Route>
+
+      {/* This route is outside the main Layout, so it will be a blank page */}
+      <Route path="/seed-data" element={<TestDataSavePage />} />
+
     </Routes>
   );
 }

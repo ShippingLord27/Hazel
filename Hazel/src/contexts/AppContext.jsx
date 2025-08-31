@@ -1,40 +1,65 @@
+// src/contexts/AppContext.jsx (Completely Replaced)
+
 import React, { createContext, useState, useEffect } from 'react';
-import { initialProductData, initialSimulatedUsers, initialRentalAgreement, initialRentalHistory, initialOwnerLentHistory } from '../data/initialData';
+import supabase from '../supabaseClient'; // FIX: Correct default import
+import { initialRentalAgreement } from '../data/initialData'; // FIX: Correct relative path
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    // ... states ...
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-    const [products, setProducts] = useState(initialProductData);
-    const [users, setUsers] = useState(initialSimulatedUsers);
+    const [theme, setTheme] = useState(() => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+        return savedTheme;
+    });
+    const [products, setProducts] = useState([]);
+    const [users, setUsers] = useState({}); // Now an object keyed by email
     const [currentUser, setCurrentUser] = useState(null);
     const [cart, setCart] = useState([]);
     const [toast, setToast] = useState({ show: false, message: '' });
     const [isChatOpen, setChatOpen] = useState(false);
     const [chatPartner, setChatPartner] = useState({ id: 'support', name: 'HAZEL Support', context: null });
-    const [rentalHistory, setRentalHistory] = useState(initialRentalHistory);
-    const [ownerLentHistory, setOwnerLentHistory] = useState(initialOwnerLentHistory);
+    const [rentalHistory, setRentalHistory] = useState([]);
     const [rentalAgreementTemplate, setRentalAgreementTemplate] = useState(initialRentalAgreement);
+    const [isLoading, setIsLoading] = useState(true);
 
+    // --- DATA FETCHING ---
     useEffect(() => {
-        document.body.classList.toggle('dark-mode', theme === 'dark');
-        localStorage.setItem('theme', theme);
-    }, [theme]);
+        const fetchInitialData = async () => {
+            setIsLoading(true);
+            const [productsRes, profilesRes, rentalsRes] = await Promise.all([
+                supabase.from('products').select('*'),
+                supabase.from('profiles').select('*'),
+                supabase.from('rental_history').select('*')
+            ]);
 
-    const showToast = (message, duration = 3000) => {
-        setToast({ show: true, message });
-        setTimeout(() => setToast({ show: false, message: '' }), duration);
-    };
+            if (productsRes.error || profilesRes.error || rentalsRes.error) {
+                console.error("Error fetching data:", {
+                    productsError: productsRes.error,
+                    profilesError: profilesRes.error,
+                    rentalsError: rentalsRes.error
+                });
+                showToast("Failed to load app data.", "error");
+            } else {
+                setProducts(productsRes.data);
+                const usersObject = profilesRes.data.reduce((acc, user) => {
+                    acc[user.email] = user;
+                    return acc;
+                }, {});
+                setUsers(usersObject);
+                setRentalHistory(rentalsRes.data);
+            }
+            setIsLoading(false);
+        };
 
-    const toggleTheme = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-    };
-
+        fetchInitialData();
+    }, []);
+    
+    // --- AUTH FUNCTIONS ---
     const login = (email, password) => {
         const user = users[email];
         if (user && user.password === password) {
-            setCurrentUser(JSON.parse(JSON.stringify(user)));
+            setCurrentUser(user);
             showToast('Login successful!');
             return user;
         }
@@ -42,14 +67,7 @@ export const AppProvider = ({ children }) => {
         return null;
     };
 
-    const logout = () => {
-        setCurrentUser(null);
-        setCart([]);
-        showToast('You have been logged out.');
-        closeChat();
-    };
-
-    const signup = (userData, role) => { // Role parameter added
+    const signup = async (userData, role) => {
         if (users[userData.email]) {
             showToast('Email already registered.');
             return null;
@@ -64,89 +82,165 @@ export const AppProvider = ({ children }) => {
             activeRentalsCount: 0,
             totalEarningsAmount: 0,
             totalListingViews: 0,
-            role: role, // Assign the role from the parameter ('user' or 'owner')
+            role: role,
             verificationStatus: 'unverified',
             paymentInfo: null
         };
-        setUsers(prev => ({ ...prev, [userData.email]: newUser }));
-        setCurrentUser(newUser);
+
+        const { data, error } = await supabase.from('profiles').insert(newUser).select().single();
+
+        if (error) {
+            showToast("Signup failed. Please try again.");
+            console.error(error);
+            return null;
+        }
+
+        setUsers(prev => ({ ...prev, [data.email]: data }));
+        setCurrentUser(data);
         showToast('Account created successfully!');
-        return newUser;
+        return data;
     };
     
-    const updateUser = (email, updatedData) => {
-        setUsers(prevUsers => ({...prevUsers, [email]: {...prevUsers[email], ...updatedData }}));
+    const logout = () => {
+        setCurrentUser(null);
+        showToast('Logged out successfully.');
+    };
+    
+    const updateUser = async (email, updatedData) => {
+        const { data, error } = await supabase
+            .from('profiles')
+            .update(updatedData)
+            .eq('email', email)
+            .select()
+            .single();
+
+        if (error) {
+            showToast("Failed to update user profile.");
+            console.error("Update user error:", error);
+            return;
+        }
+
+        setUsers(prev => ({ ...prev, [email]: data }));
         if (currentUser && currentUser.email === email) {
-            setCurrentUser(prev => ({ ...prev, ...updatedData }));
+            setCurrentUser(data);
         }
     };
 
-    const addProduct = (productData) => {
-        const newProduct = { ...productData, id: Math.max(0, ...products.map(p => p.id)) + 1, reviews: [] };
+    // --- PRODUCT FUNCTIONS ---
+    const addProduct = async (productData) => {
+        const { data, error } = await supabase.from('products').insert(productData).select().single();
+        if (error) {
+            showToast("Failed to create listing.");
+            console.error("Add product error:", error);
+            return;
+        }
+        setProducts(prev => [...prev, data]);
+        const owner = users[data.ownerId];
+        if (owner) {
+            await updateUser(owner.email, {
+                myListingIds: [...(owner.myListingIds || []), data.id]
+            });
+        }
+    };
+
+    const updateProduct = async (updatedProduct) => {
+        const { data, error } = await supabase
+            .from('products')
+            .update(updatedProduct)
+            .eq('id', updatedProduct.id)
+            .select()
+            .single();
+            
+        if (error) { showToast("Failed to update listing."); console.error(error); return; }
         
-        setProducts(prev => [...prev, newProduct]);
-
-        setUsers(prevUsers => {
-            const owner = prevUsers[newProduct.ownerId];
-            if (!owner) return prevUsers;
-            const updatedOwner = {
-                ...owner,
-                myListingIds: [...owner.myListingIds, newProduct.id]
-            };
-            return { ...prevUsers, [newProduct.ownerId]: updatedOwner };
-        });
-
-        if (currentUser && currentUser.email === newProduct.ownerId) {
-            setCurrentUser(prevUser => ({
-                ...prevUser,
-                myListingIds: [...prevUser.myListingIds, newProduct.id]
-            }));
-        }
+        setProducts(prev => prev.map(p => p.id === data.id ? data : p));
     };
-
-    const updateProduct = (updatedProduct) => setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
     
-    const deleteProduct = (productId) => {
+    const deleteProduct = async (productId) => {
         const productToDelete = products.find(p => p.id === productId);
         if (!productToDelete) return;
+        
+        const { error } = await supabase.from('products').delete().eq('id', productId);
+        
+        if (error) { showToast("Failed to delete listing."); console.error(error); return; }
 
         setProducts(prev => prev.filter(p => p.id !== productId));
         
-        setUsers(prevUsers => {
-            const owner = prevUsers[productToDelete.ownerId];
-            if (!owner) return prevUsers;
-            const updatedOwner = {
-                ...owner,
+        const owner = users[productToDelete.ownerId];
+        if (owner) {
+            await updateUser(owner.email, {
                 myListingIds: owner.myListingIds.filter(id => id !== productId)
-            };
-            return { ...prevUsers, [productToDelete.ownerId]: updatedOwner };
-        });
-
-        if (currentUser && currentUser.email === productToDelete.ownerId) {
-             setCurrentUser(prevUser => ({
-                ...prevUser,
-                myListingIds: prevUser.myListingIds.filter(id => id !== productId)
-            }));
+            });
         }
 
-        showToast(`Listing ID: ${productId} has been deleted.`);
+        showToast(`Listing has been deleted.`);
+    };
+
+    // --- OTHER FUNCTIONS ---
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+        document.body.classList.toggle('dark-mode', newTheme === 'dark');
+    };
+    
+    const showToast = (message, duration = 3000) => {
+        setToast({ show: true, message });
+        setTimeout(() => setToast({ show: false, message: '' }), duration);
     };
     
     const addToCart = (item) => {
-        if (!currentUser) { showToast("Please login to add items to your cart."); return false; }
-        if (cart.find(cartItem => cartItem.productId === item.productId)) { showToast("This item is already in your cart."); return false; }
+        if (cart.some(cartItem => cartItem.productId === item.productId)) {
+            showToast("This item is already in your cart.");
+            return false;
+        }
         setCart(prev => [...prev, item]);
         showToast("Item added to cart!");
         return true;
     };
-
+    
     const removeFromCart = (productId) => {
         setCart(prev => prev.filter(item => item.productId !== productId));
         showToast("Item removed from cart.");
     };
 
     const clearCart = () => setCart([]);
+    
+    const openChat = (partnerDetails) => {
+        setChatPartner(partnerDetails);
+        setChatOpen(true);
+    };
 
+    const closeChat = () => setChatOpen(false);
+
+    const toggleChat = () => setChatOpen(prev => !prev);
+    
+    const generateAndPrintReceipt = (orderDetails) => {
+        const receiptWindow = window.open('', 'PRINT', 'height=600,width=800');
+        const itemsHtml = orderDetails.items.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            return `<tr><td>${product?.title || 'N/A'}</td><td>${item.rentalDurationDays} day(s)</td><td>₱${item.rentalTotalCost.toFixed(2)}</td></tr>`;
+        }).join('');
+
+        receiptWindow.document.write('<html><head><title>Hazel Receipt</title>');
+        receiptWindow.document.write('<style>body{font-family:sans-serif;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:8px; text-align:left;} h1,h2{text-align:center;}</style>');
+        receiptWindow.document.write('</head><body>');
+        receiptWindow.document.write('<h1>HAZEL Rental Receipt</h1>');
+        receiptWindow.document.write(`<p><strong>Transaction ID:</strong> ${orderDetails.transactionId}</p>`);
+        receiptWindow.document.write(`<p><strong>Date:</strong> ${new Date(orderDetails.date).toLocaleString()}</p>`);
+        receiptWindow.document.write('<h2>Rented Items</h2>');
+        receiptWindow.document.write(`<table><thead><tr><th>Item</th><th>Duration</th><th>Cost</th></tr></thead><tbody>${itemsHtml}</tbody></table>`);
+        receiptWindow.document.write('<h2>Summary</h2>');
+        receiptWindow.document.write(`<p><strong>Subtotal:</strong> ₱${orderDetails.rentalCost.toFixed(2)}</p>`);
+        receiptWindow.document.write(`<p><strong>Service Fee:</strong> ₱${orderDetails.serviceFee.toFixed(2)}</p>`);
+        receiptWindow.document.write(`<p><strong>Total Paid:</strong> ₱${orderDetails.totalAmount.toFixed(2)}</p>`);
+        receiptWindow.document.write('</body></html>');
+        receiptWindow.document.close();
+        receiptWindow.focus();
+        receiptWindow.print();
+        receiptWindow.close();
+    };
+    
     const toggleFavorite = (productId) => {
         if (!currentUser || currentUser.role !== 'user') { 
             showToast("Only users can have favorites."); 
@@ -156,70 +250,9 @@ export const AppProvider = ({ children }) => {
         const updatedFavorites = isFavorite
             ? currentUser.favoriteListingIds.filter(id => id !== productId)
             : [...currentUser.favoriteListingIds, productId];
+        
         showToast(isFavorite ? "Removed from favorites." : "Added to favorites.");
         updateUser(currentUser.email, { favoriteListingIds: updatedFavorites });
-    };
-
-    const openChat = (partnerDetails) => {
-        if (!currentUser) { showToast("Please login to chat."); return; }
-        setChatPartner(partnerDetails);
-        setChatOpen(true);
-    };
-
-    const closeChat = () => setChatOpen(false);
-
-    const toggleChat = () => {
-        if (isChatOpen) closeChat();
-        else openChat({ id: 'support', name: 'HAZEL Support', context: null });
-    };
-
-    const generateAndPrintReceipt = (orderDetails) => {
-        const itemsHtml = orderDetails.items.map(item => {
-            const product = products.find(p => p.id === item.productId);
-            if (!product) return '';
-            return `
-                <p>
-                    <strong>${product.fullTitle}</strong><br>
-                    Duration: ${item.rentalDurationDays} day(s)
-                </p>
-            `;
-        }).join('');
-
-        const receiptContent = `
-            <html>
-                <head>
-                    <title>Rental Receipt - ${orderDetails.transactionId}</title>
-                    <style>
-                        body { font-family: 'Segoe UI', sans-serif; margin: 40px; }
-                        h1 { color: #f33f3f; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
-                        th { background-color: #f2f2f2; }
-                        .total { font-weight: bold; }
-                    </style>
-                </head>
-                <body>
-                    <h1>HAZEL Rental Receipt</h1>
-                    <p><strong>Transaction ID:</strong> ${orderDetails.transactionId}</p>
-                    <p><strong>Date:</strong> ${new Date(orderDetails.date).toLocaleDateString()}</p>
-                    <hr>
-                    <h3>Rented Item(s)</h3>
-                    ${itemsHtml}
-                    <table>
-                        <tr><td>Rental Cost</td><td>₱${orderDetails.rentalCost.toFixed(2)}</td></tr>
-                        <tr><td>Delivery Fee</td><td>₱${orderDetails.deliveryFee.toFixed(2)}</td></tr>
-                        <tr><td>Service Fee</td><td>₱${orderDetails.serviceFee.toFixed(2)}</td></tr>
-                        <tr class="total"><td>Total Paid</td><td>₱${orderDetails.totalAmount.toFixed(2)}</td></tr>
-                    </table>
-                    <p style="margin-top: 30px;">Thank you for using HAZEL!</p>
-                </body>
-            </html>
-        `;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(receiptContent);
-        printWindow.document.close();
-        printWindow.print();
     };
 
     const value = {
@@ -232,8 +265,14 @@ export const AppProvider = ({ children }) => {
         rentalAgreementTemplate, setRentalAgreementTemplate,
         toggleFavorite,
         isChatOpen, chatPartner, openChat, closeChat, toggleChat,
-        rentalHistory, ownerLentHistory, generateAndPrintReceipt
+        rentalHistory: rentalHistory.filter(r => r.renterEmail === currentUser?.email),
+        ownerLentHistory: rentalHistory.filter(r => r.ownerEmail === currentUser?.email),
+        generateAndPrintReceipt
     };
 
-    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+    return (
+        <AppContext.Provider value={value}>
+            {isLoading ? <div style={{paddingTop: '200px', textAlign: 'center'}}><h1>Loading Hazel...</h1></div> : children}
+        </AppContext.Provider>
+    );
 };
