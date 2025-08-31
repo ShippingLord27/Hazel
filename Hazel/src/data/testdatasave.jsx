@@ -1,8 +1,6 @@
-// src/data/testdatasave.jsx (New Content)
-
 import React, { useState } from 'react';
 import supabase from '../supabaseClient';
-import { initialProductData, initialSimulatedUsers, initialRentalHistoryData } from './initialData';
+import { initialProductData, initialSimulatedUsers, initialRentalHistoryData } from '../data/initialData';
 
 const TestDataSavePage = () => {
     const [status, setStatus] = useState('Ready to seed data.');

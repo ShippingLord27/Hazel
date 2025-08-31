@@ -1,5 +1,3 @@
-// src/data/initialData.jsx (Updated)
-
 export const initialProductData = [
     // ... existing 6 products are here ...
     {
@@ -126,30 +124,110 @@ export const initialProductData = [
 ];
 
 export const initialSimulatedUsers = {
-    // ... existing users are here ...
-    "john.doe@example.com": { /* ... */ },
-    "jane.smith@example.com": { /* ... */ },
-    "admin@hazel.com": { /* ... */ },
-    "alice.photo@example.com": { /* ... */ },
-    "bob.rider@example.com": { /* ... */ },
-    // --- NEW USER ---
-    "carol.camper@example.com": { 
-        firstName: "Carol",
-        lastName: "Camper",
-        email: "carol.camper@example.com",
+    "john.doe@example.com": {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john.doe@example.com",
         password: "123",
-        profilePic: "https://randomuser.me/api/portraits/women/21.jpg",
-        memberSince: "August 2022",
-        location: "Seattle, WA",
-        myListingIds: [8],
-        favoriteListingIds: [2],
-        activeRentalsCount: 0,
-        totalEarningsAmount: 850.00,
-        totalListingViews: 350,
+        profilePic: "https://randomuser.me/api/portraits/men/32.jpg",
+        memberSince: "June 2020",
+        location: "San Francisco, CA",
+        myListingIds: [3, 5],
+        favoriteListingIds: [],
+        activeRentalsCount: 2,
+        totalEarningsAmount: 12537.50,
+        totalListingViews: 1230,
         role: 'owner',
         verificationStatus: 'verified',
         paymentInfo: null
-    }
+    },
+      "jane.smith@example.com": {
+                firstName: "Jane",
+                lastName: "Smith",
+                email: "jane.smith@example.com",
+                password: "123",
+                profilePic: "https://randomuser.me/api/portraits/women/44.jpg",
+                memberSince: "July 2021",
+                location: "New York, NY",
+                myListingIds: [],
+                favoriteListingIds: [3, 4],
+                activeRentalsCount: 1,
+                totalEarningsAmount: 0,
+                totalListingViews: 0,
+                role: 'user',
+                verificationStatus: 'verified',
+                paymentInfo: {
+                    cardNumber: '4242424242421234',
+                    expiryDate: '12/26',
+                    cvv: '123'
+                }
+            },
+            "admin@hazel.com": {
+                firstName: "Super",
+                lastName: "Admin",
+                email: "admin@hazel.com",
+                password: "admin",
+                profilePic: "https://randomuser.me/api/portraits/lego/0.jpg",
+                memberSince: "Jan 2024",
+                location: "Hazel HQ",
+                myListingIds: [],
+                favoriteListingIds: [],
+                activeRentalsCount: 0,
+                totalEarningsAmount: 0,
+                totalListingViews: 0,
+                role: 'admin',
+                verificationStatus: 'verified',
+                paymentInfo: null
+            },
+            "alice.photo@example.com": { 
+                firstName: "Alice",
+                lastName: "Photo",
+                email: "alice.photo@example.com",
+                password: "123",
+                profilePic: "https://randomuser.me/api/portraits/women/10.jpg",
+                location: "Los Angeles, CA",
+                myListingIds: [1, 4],
+                favoriteListingIds: [],
+                activeRentalsCount: 1,
+                totalEarningsAmount: 5000.00,
+                totalListingViews: 500,
+                role: 'owner',
+                verificationStatus: 'pending',
+                paymentInfo: null
+            },
+            "bob.rider@example.com": { 
+                firstName: "Bob",
+                lastName: "Rider",
+                email: "bob.rider@example.com",
+                password: "123",
+                profilePic: "https://randomuser.me/api/portraits/men/12.jpg",
+                location: "Denver, CO",
+                myListingIds: [2, 6],
+                favoriteListingIds: [],
+                activeRentalsCount: 3,
+                totalEarningsAmount: 7525.00,
+                totalListingViews: 800,
+                role: 'owner',
+                verificationStatus: 'unverified',
+                paymentInfo: null
+            },
+            "carol.camper@example.com": { 
+                firstName: "Carol",
+                lastName: "Camper",
+                email: "carol.camper@example.com",
+                password: "123",
+                profilePic: "https://randomuser.me/api/portraits/women/21.jpg",
+                memberSince: "August 2022",
+                location: "Seattle, WA",
+                myListingIds: [8],
+                favoriteListingIds: [2],
+                activeRentalsCount: 0,
+                totalEarningsAmount: 850.00,
+                totalListingViews: 350,
+                role: 'owner',
+                verificationStatus: 'verified',
+                paymentInfo: null
+            }
 };
 
 export const initialRentalAgreement = `By renting this item, you agree to the Hazel platform terms of service. You are responsible for the item during the rental period and must return it in the same condition you received it, accounting for normal wear and tear. Late returns may be subject to additional fees as specified by the owner. Please communicate promptly with the item owner regarding pickup, drop-off, and any issues that may arise.`;

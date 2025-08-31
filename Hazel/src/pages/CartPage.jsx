@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const CartPage = () => {
-    // GET `products` DIRECTLY
     const { cart, products, removeFromCart, currentUser } = useApp();
     const navigate = useNavigate();
     
-    // ... rest of component unchanged ...
     if (!currentUser) {
         return (
              <div className="page active" style={{ paddingTop: '70px', textAlign: 'center' }}>
@@ -36,7 +34,6 @@ const CartPage = () => {
                     <div className="cart-grid">
                         <div className="cart-items-list">
                             {cart.map(item => {
-                                // USE LOCAL `products` ARRAY
                                 const product = products.find(p => p.id === item.productId);
                                 if (!product) return null;
                                 return (

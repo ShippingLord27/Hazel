@@ -7,12 +7,12 @@ const AdminDashboardPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!currentUser || !currentUser.isAdmin) {
+        if (!currentUser || currentUser.role !== 'admin') {
             navigate('/');
         }
     }, [currentUser, navigate]);
 
-    if (!currentUser || !currentUser.isAdmin) return null;
+    if (!currentUser || currentUser.role !== 'admin') return null;
 
     return (
         <div className="page active" id="adminDashboardPage" style={{ paddingTop: '70px' }}>

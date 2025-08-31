@@ -1,11 +1,9 @@
-// src/pages/CheckoutPage.jsx
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const CheckoutPage = () => {
-    const { cart, currentUser, products, clearCart, showToast, rentalAgreementTemplate, users, generateAndPrintReceipt } = useApp();
+    const { cart, currentUser, products, clearCart, showToast, rentalAgreementTemplate, users, generateAndPrintReceipt, addRentalRecord } = useApp();
     const navigate = useNavigate();
     
     const [agreed, setAgreed] = useState(false);
@@ -53,7 +51,7 @@ const CheckoutPage = () => {
         setPaymentDetails({ ...paymentDetails, [e.target.id.replace('checkout', '')]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsProcessing(true);
         showToast("Processing payment...");
@@ -67,14 +65,18 @@ const CheckoutPage = () => {
             serviceFee,
             totalAmount,
         };
-        setCompletedOrder(orderDetails);
+        
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        setTimeout(() => {
-            setIsProcessing(false);
-            setIsConfirmed(true);
-            showToast("Rental Confirmed! Thank you.");
-            clearCart();
-        }, 2000);
+        // Add the rental record to the database
+        await addRentalRecord(orderDetails);
+
+        setCompletedOrder(orderDetails);
+        setIsProcessing(false);
+        setIsConfirmed(true);
+        showToast("Rental Confirmed! Thank you.");
+        clearCart();
     };
     
     return (

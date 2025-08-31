@@ -89,22 +89,19 @@ const RentalTracker = () => {
     const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt } = useApp();
 
     if (!currentUser) return null;
-
-    const userHistory = rentalHistory[currentUser.email] || [];
-    const lentHistory = ownerLentHistory[currentUser.email] || [];
     
     return (
         <div className="profile-view">
             {currentUser.role === 'user' && 
                 <UserRentalHistory 
-                    userHistory={userHistory} 
+                    userHistory={rentalHistory} 
                     products={products}
                     generateAndPrintReceipt={generateAndPrintReceipt} 
                 />
             }
             {currentUser.role === 'owner' &&
                 <OwnerLentHistory 
-                    lentHistory={lentHistory}
+                    lentHistory={ownerLentHistory}
                     products={products}
                 />
             }

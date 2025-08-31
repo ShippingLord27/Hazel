@@ -20,10 +20,10 @@ const UserManagement = () => {
                             <tr key={user.email}>
                                 <td>{user.firstName} {user.lastName}</td>
                                 <td>{user.email}</td>
-                                <td>{user.isAdmin ? 'Admin' : 'User'}</td>
+                                <td>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</td>
                                 <td><span className={`status-${user.verificationStatus}`}>{user.verificationStatus}</span></td>
                                 <td className="actions-cell">
-                                    {user.verificationStatus === 'pending' && !user.isAdmin && (
+                                    {user.verificationStatus === 'pending' && user.role !== 'admin' && (
                                         <>
                                             <button className="btn btn-success btn-small" onClick={() => handleVerification(user.email, 'verified')}>Approve</button>
                                             <button className="btn btn-danger btn-small" onClick={() => handleVerification(user.email, 'unverified')}>Reject</button>

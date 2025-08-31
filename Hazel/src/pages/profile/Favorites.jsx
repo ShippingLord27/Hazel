@@ -26,10 +26,8 @@ const FavoriteProductCard = ({ product }) => {
 };
 
 const Favorites = () => {
-    // 1. Get `products` directly from the context
     const { currentUser, products } = useApp();
 
-    // 2. Derive the list of favorite products using the user's IDs and the full products list
     const favoriteProducts = currentUser?.favoriteListingIds
         .map(id => products.find(p => p.id === id))
         .filter(Boolean) || [];
