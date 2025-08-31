@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '../hooks/useApp';
 import { useNavigate } from 'react-router-dom';
 
-const AuthModal = ({ closeModal }) => {
+const AuthModal = ({ closeModal, initialTab }) => {
     const { login, signup } = useApp();
     const navigate = useNavigate();
 
     // 'initial', 'user', 'owner', 'admin'
     const [view, setView] = useState('initial');
     // 'login' or 'signup'
-    const [activeTab, setActiveTab] = useState('login');
+    const [activeTab, setActiveTab] = useState(initialTab || 'login');
     const [errorMessage, setErrorMessage] = useState('');
 
     const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -26,7 +26,7 @@ const AuthModal = ({ closeModal }) => {
 
     const handleViewChange = (newView) => {
         setView(newView);
-        setActiveTab('login'); // Default to login tab
+        setActiveTab(initialTab || 'login'); // Default to the tab the user initially clicked
         resetForms();
     };
 

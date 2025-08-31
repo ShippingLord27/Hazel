@@ -4,390 +4,201 @@ import { initialProductData, initialSimulatedUsers, initialRentalHistoryData, in
 
 const AppContext = createContext();
 
-// --- Helper Functions for Data Transformation ---
-
-// Converts a user object from Supabase (flat) to the app's format (nested)
-const transformProfileFromDb = (dbProfile) => {
-    if (!dbProfile) return null;
-    return {
-        ...dbProfile,
-        // Convert comma-separated string to array of numbers, handle empty/null string
-        myListingIds: dbProfile.myListingIds ? dbProfile.myListingIds.split(',').map(Number) : [],
-        favoriteListingIds: dbProfile.favoriteListingIds ? dbProfile.favoriteListingIds.split(',').map(Number) : [],
-        // Reconstruct the paymentInfo object
-        paymentInfo: dbProfile.paymentCardNumber
-            ? {
-                cardNumber: dbProfile.paymentCardNumber,
-                expiryDate: dbProfile.paymentExpiryDate,
-                cvv: dbProfile.paymentCvv
-            }
-            : null
-    };
-};
-
-// Converts a user object from the app to Supabase's flat format
-const transformProfileToDb = (appProfile) => {
-    if (!appProfile) return null;
-    const dbData = { ...appProfile };
-
-    // Convert arrays to comma-separated strings
-    if (Array.isArray(dbData.myListingIds)) {
-        dbData.myListingIds = dbData.myListingIds.join(',');
-    }
-    if (Array.isArray(dbData.favoriteListingIds)) {
-        dbData.favoriteListingIds = dbData.favoriteListingIds.join(',');
-    }
-
-    // Flatten paymentInfo object
-    if (dbData.paymentInfo) {
-        dbData.paymentCardNumber = dbData.paymentInfo.cardNumber;
-        dbData.paymentExpiryDate = dbData.paymentInfo.expiryDate;
-        dbData.paymentCvv = dbData.paymentInfo.cvv;
-    } else {
-        dbData.paymentCardNumber = null;
-        dbData.paymentExpiryDate = null;
-        dbData.paymentCvv = null;
-    }
-
-    // Remove app-specific keys that don't exist in the DB
-    delete dbData.paymentInfo;
-    
-    return dbData;
-};
-
-
 export const AppProvider = ({ children }) => {
-// State Declarations
-const [theme, setTheme] = useState(() => {
-const savedTheme = localStorage.getItem('theme') || 'light';
-document.body.classList.toggle('dark-mode', savedTheme === 'dark');
-return savedTheme;
-});
-const [products, setProducts] = useState([]);
-const [users, setUsers] = useState({});
-const [currentUser, setCurrentUser] = useState(null);
-const [cart, setCart] = useState([]);
-const [toast, setToast] = useState({ show: false, message: '' });
-const [isChatOpen, setChatOpen] = useState(false);
-const [chatPartner, setChatPartner] = useState({ id: 'support', name: 'HAZEL Support', context: null });
-const [rentalHistory, setRentalHistory] = useState([]);
-const [rentalAgreementTemplate, setRentalAgreementTemplate] = useState(initialRentalAgreement);
-const [isLoading, setIsLoading] = useState(true);
+    // State Declarations
+    const [theme, setTheme] = useState(() => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+        return savedTheme;
+    });
+    const [products, setProducts] = useState([]);
+    const [users, setUsers] = useState({});
+    const [currentUser, setCurrentUser] = useState(null);
+    const [cart, setCart] = useState([]);
+    const [toast, setToast] = useState({ show: false, message: '' });
+    const [isChatOpen, setChatOpen] = useState(false);
+    const [chatPartner, setChatPartner] = useState({ id: 'support', name: 'HAZEL Support', context: null });
+    const [rentalHistory, setRentalHistory] = useState([]);
+    const [rentalAgreementTemplate, setRentalAgreementTemplate] = useState(initialRentalAgreement);
+    const [isLoading, setIsLoading] = useState(true);
 
-// --- DATA FETCHING ---
-useEffect(() => {
-    const fetchInitialData = async () => {
-        setIsLoading(true);
-        try {
-            // Using table names from `testdatasave.jsx`
-            const [productsRes, profilesRes, rentalsRes] = await Promise.all([
-                supabase.from('products').select('*'),
-                supabase.from('profiles').select('*'),
-                supabase.from('rental_history').select('*')
-            ]);
+    // --- DATA TRANSFORMATION UTILITIES ---
+    const transformUserForApp = (userFromDb) => {
+        if (!userFromDb) return null;
+        const appUser = {
+            email: userFromDb.email, password: userFromDb.password, role: userFromDb.role, location: userFromDb.location,
+            firstName: userFromDb.firstname, lastName: userFromDb.lastname, profilePic: userFromDb.profilepic,
+            memberSince: userFromDb.membersince, activeRentalsCount: userFromDb.activerentalscount,
+            totalEarningsAmount: userFromDb.totalearningsamount, totalListingViews: userFromDb.totallistingviews,
+            verificationStatus: userFromDb.verificationstatus,
+            myListingIds: userFromDb.mylistingids ? String(userFromDb.mylistingids).split(',').map(Number) : [],
+            favoriteListingIds: userFromDb.favoritelistingids ? String(userFromDb.favoritelistingids).split(',').map(Number) : [],
+            paymentInfo: null,
+        };
+        if (userFromDb.paymentcardnumber) {
+            appUser.paymentInfo = { cardNumber: userFromDb.paymentcardnumber, expiryDate: userFromDb.paymentexpirydate, cvv: userFromDb.paymentcvv };
+        }
+        return appUser;
+    };
+    const transformProductForApp = (productFromDb) => {
+        if (!productFromDb) return null;
+        return {
+            id: productFromDb.id, title: productFromDb.title, fullTitle: productFromDb.fulltitle,
+            category: productFromDb.category, price: productFromDb.price, priceDisplay: productFromDb.pricedisplay,
+            image: productFromDb.image, description: productFromDb.description, ownerId: productFromDb.ownerid,
+            ownerName: productFromDb.ownername, trackingTagId: productFromDb.trackingtagid,
+            ownerTerms: productFromDb.ownerterms, reviews: productFromDb.reviews || [],
+        };
+    };
+    const transformProductForDb = (productFromApp) => {
+        return {
+            id: productFromApp.id, title: productFromApp.title, fulltitle: productFromApp.fullTitle,
+            category: productFromApp.category, price: productFromApp.price, pricedisplay: productFromApp.priceDisplay,
+            image: productFromApp.image, description: productFromApp.description, ownerid: productFromApp.ownerId,
+            ownername: productFromApp.ownerName, trackingtagid: productFromApp.trackingTagId, ownerterms: productFromApp.ownerTerms,
+        };
+    };
+    // --- FIX: UTILITY to transform rental data from DB (lowercase) to App (camelCase) format ---
+    const transformRentalForApp = (rentalFromDb) => {
+        if (!rentalFromDb) return null;
+        return {
+            transactionId: rentalFromDb.transactionid,
+            productId: rentalFromDb.productid,
+            renterEmail: rentalFromDb.renteremail,
+            renterName: rentalFromDb.rentername,
+            ownerEmail: rentalFromDb.owneremail,
+            rentalStartDate: rentalFromDb.rentalstartdate,
+            rentalDurationDays: rentalFromDb.rentaldurationdays,
+            rentalTotalCost: rentalFromDb.rentaltotalcost,
+            deliveryFee: rentalFromDb.deliveryfee,
+            serviceFee: rentalFromDb.servicefee,
+            totalAmount: rentalFromDb.totalamount,
+            status: rentalFromDb.status,
+        };
+    };
 
-            const errors = { products: productsRes.error, profiles: profilesRes.error, rentals: rentalsRes.error };
-            if (errors.products || errors.profiles || errors.rentals) {
-                throw new Error(JSON.stringify(errors, null, 2));
-            }
+    // --- DATA FETCHING ---
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            setIsLoading(true);
+            try {
+                const [productsRes, profilesRes, rentalsRes] = await Promise.all([
+                    supabase.from('products').select('*'),
+                    supabase.from('profiles').select('*'),
+                    supabase.from('rental_history').select('*')
+                ]);
 
-            if (productsRes.data.length === 0 && profilesRes.data.length === 0) {
-                console.warn("Database appears empty. Loading initial local data for development. Please seed your database at /seed-data for persistence.");
-                setProducts(initialProductData);
-                setUsers(initialSimulatedUsers);
-                setRentalHistory(initialRentalHistoryData);
-            } else {
-                setProducts(productsRes.data);
+                if (productsRes.error || profilesRes.error || rentalsRes.error) {
+                    throw new Error(`Supabase error: ${productsRes.error?.message || profilesRes.error?.message || rentalsRes.error?.message}`);
+                }
+                
+                const transformedProducts = (productsRes.data || []).map(transformProductForApp);
+                setProducts(transformedProducts);
 
-                // Transform DB profiles to app format before setting state
-                const usersObject = profilesRes.data.reduce((acc, user) => {
-                    acc[user.email] = transformProfileFromDb(user);
+                // FIX: Transform rental data before setting state
+                const transformedRentals = (rentalsRes.data || []).map(transformRentalForApp);
+                setRentalHistory(transformedRentals);
+
+                const usersObject = (profilesRes.data || []).reduce((acc, user) => {
+                    acc[user.email] = transformUserForApp(user);
                     return acc;
                 }, {});
-
                 setUsers(usersObject);
-                setRentalHistory(rentalsRes.data);
+
+            } catch (error) {
+                 console.error("CRITICAL: Error fetching data from Supabase. Ensure tables are created and RLS is configured.", error);
+                 console.warn("Falling back to local data. Navigate to /seed-data to populate your database.");
+                 setProducts(initialProductData);
+                 setUsers(initialSimulatedUsers);
+                 setRentalHistory(initialRentalHistoryData);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-             console.error("CRITICAL: Error fetching data from Supabase. This could be due to incorrect .env variables or network issues.", error);
-             console.warn("Falling back to local initialData due to Supabase fetch error.");
-             setProducts(initialProductData);
-             setUsers(initialSimulatedUsers);
-             setRentalHistory(initialRentalHistoryData);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    fetchInitialData();
-}, []);
-
-// --- AUTH FUNCTIONS ---
-const login = (email, password) => {
-    const user = users[email];
-    if (user && user.password === password) {
-        setCurrentUser(user);
-        showToast('Login successful!');
-        return user;
-    }
-    showToast('Invalid email or password.');
-    return null;
-};
-
-const signup = async (userData, role) => {
-    if (users[userData.email]) {
-        showToast('Email already registered.');
-        return null;
-    }
-    const newUser = {
-        ...userData,
-        profilePic: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 9)}.jpg`,
-        memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        location: "New Member City, ST",
-        myListingIds: [], // App format
-        favoriteListingIds: [], // App format
-        activeRentalsCount: 0,
-        totalEarningsAmount: 0,
-        totalListingViews: 0,
-        role: role,
-        verificationStatus: 'unverified',
-        paymentInfo: null // App format
-    };
-
-    // Transform to DB format before inserting
-    const dbUser = transformProfileToDb(newUser);
-    const { data, error } = await supabase.from('profiles').insert(dbUser).select().single();
-
-    if (error) {
-        showToast("Signup failed. Please try again.");
-        console.error(error);
-        return null;
-    }
-
-    // Transform back to app format after receiving from DB
-    const appFormattedUser = transformProfileFromDb(data);
-    setUsers(prev => ({ ...prev, [appFormattedUser.email]: appFormattedUser }));
-    setCurrentUser(appFormattedUser);
-    showToast('Account created successfully!');
-    return appFormattedUser;
-};
-
-const logout = () => {
-    setCurrentUser(null);
-    showToast('Logged out successfully.');
-};
-
-const updateUser = async (email, updatedData) => {
-    // Transform data to DB format before updating
-    const dbUpdateData = transformProfileToDb(updatedData);
-
-    const { data, error } = await supabase
-        .from('profiles')
-        .update(dbUpdateData)
-        .eq('email', email)
-        .select()
-        .single();
-
-    if (error) {
-        showToast("Failed to update user profile.");
-        console.error("Update user error:", error);
-        return;
-    }
-    
-    // Transform back to app format for state consistency
-    const appFormattedUser = transformProfileFromDb(data);
-    setUsers(prev => ({ ...prev, [email]: appFormattedUser }));
-    if (currentUser && currentUser.email === email) {
-        setCurrentUser(appFormattedUser);
-    }
-};
-
-// --- PRODUCT FUNCTIONS ---
-const addProduct = async (productData) => {
-    const { data, error } = await supabase.from('products').insert(productData).select().single();
-    if (error) {
-        showToast("Failed to create listing.");
-        console.error("Add product error:", error);
-        return;
-    }
-    setProducts(prev => [...prev, data]);
-    const owner = users[data.ownerId];
-    if (owner) {
-        // updateUser handles the array -> string transformation internally
-        await updateUser(owner.email, {
-            myListingIds: [...(owner.myListingIds || []), data.id]
-        });
-    }
-};
-
-const updateProduct = async (updatedProduct) => {
-    const { data, error } = await supabase
-        .from('products')
-        .update(updatedProduct)
-        .eq('id', updatedProduct.id)
-        .select()
-        .single();
-        
-    if (error) { showToast("Failed to update listing."); console.error(error); return; }
-    
-    setProducts(prev => prev.map(p => p.id === data.id ? data : p));
-};
-
-const deleteProduct = async (productId) => {
-    const productToDelete = products.find(p => p.id === productId);
-    if (!productToDelete) return;
-    
-    const { error } = await supabase.from('products').delete().eq('id', productId);
-    
-    if (error) { showToast("Failed to delete listing."); console.error(error); return; }
-
-    setProducts(prev => prev.filter(p => p.id !== productId));
-    
-    const owner = users[productToDelete.ownerId];
-    if (owner) {
-        // updateUser handles the array -> string transformation internally
-        await updateUser(owner.email, {
-            myListingIds: owner.myListingIds.filter(id => id !== productId)
-        });
-    }
-
-    showToast(`Listing has been deleted.`);
-};
-
-// --- RENTAL FUNCTIONS ---
-const addRentalRecord = async (orderDetails) => {
-    const rentalRecords = orderDetails.items.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        const serviceFeePerItem = orderDetails.items.length > 0 ? orderDetails.serviceFee / orderDetails.items.length : 0;
-        return {
-            transactionId: orderDetails.transactionId,
-            productId: item.productId,
-            renterEmail: currentUser.email,
-            renterName: `${currentUser.firstName} ${currentUser.lastName}`,
-            ownerEmail: product.ownerId,
-            rentalStartDate: item.rentalStartDate,
-            rentalDurationDays: item.rentalDurationDays,
-            rentalTotalCost: item.rentalTotalCost,
-            deliveryFee: item.deliveryFee,
-            serviceFee: serviceFeePerItem,
-            totalAmount: item.rentalTotalCost + item.deliveryFee + serviceFeePerItem,
-            status: 'Completed' 
         };
-    });
 
-    const { data, error } = await supabase.from('rental_history').insert(rentalRecords).select();
+        fetchInitialData();
+    }, []);
 
-    if (error) {
-        showToast("Failed to record rental history.");
-        console.error("Add rental history error:", error);
-        return;
-    }
-
-    setRentalHistory(prev => [...prev, ...data]);
-};
-
-
-// --- OTHER FUNCTIONS ---
-const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.body.classList.toggle('dark-mode', newTheme === 'dark');
-};
-
-const showToast = (message, duration = 3000) => {
-    setToast({ show: true, message });
-    setTimeout(() => setToast({ show: false, message: '' }), duration);
-};
-
-const addToCart = (item) => {
-    if (cart.some(cartItem => cartItem.productId === item.productId)) {
-        showToast("This item is already in your cart.");
-        return false;
-    }
-    setCart(prev => [...prev, item]);
-    showToast("Item added to cart!");
-    return true;
-};
-
-const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(item => item.productId !== productId));
-    showToast("Item removed from cart.");
-};
-
-const clearCart = () => setCart([]);
-
-const openChat = (partnerDetails) => {
-    setChatPartner(partnerDetails);
-    setChatOpen(true);
-};
-
-const closeChat = () => setChatOpen(false);
-
-const toggleChat = () => setChatOpen(prev => !prev);
-
-const generateAndPrintReceipt = (orderDetails) => {
-    const receiptWindow = window.open('', 'PRINT', 'height=600,width=800');
-    const itemsHtml = orderDetails.items.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        return `<tr><td>${product?.title || 'N/A'}</td><td>${item.rentalDurationDays} day(s)</td><td>₱${item.rentalTotalCost.toFixed(2)}</td></tr>`;
-    }).join('');
-
-    receiptWindow.document.write('<html><head><title>Hazel Receipt</title>');
-    receiptWindow.document.write('<style>body{font-family:sans-serif;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:8px; text-align:left;} h1,h2{text-align:center;}</style>');
-    receiptWindow.document.write('</head><body>');
-    receiptWindow.document.write('<h1>HAZEL Rental Receipt</h1>');
-    receiptWindow.document.write(`<p><strong>Transaction ID:</strong> ${orderDetails.transactionId}</p>`);
-    receiptWindow.document.write(`<p><strong>Date:</strong> ${new Date(orderDetails.date).toLocaleString()}</p>`);
-    receiptWindow.document.write('<h2>Rented Items</h2>');
-    receiptWindow.document.write(`<table><thead><tr><th>Item</th><th>Duration</th><th>Cost</th></tr></thead><tbody>${itemsHtml}</tbody></table>`);
-    receiptWindow.document.write('<h2>Summary</h2>');
-    receiptWindow.document.write(`<p><strong>Subtotal:</strong> ₱${orderDetails.rentalCost.toFixed(2)}</p>`);
-    receiptWindow.document.write(`<p><strong>Service Fee:</strong> ₱${orderDetails.serviceFee.toFixed(2)}</p>`);
-    receiptWindow.document.write(`<p><strong>Total Paid:</strong> ₱${orderDetails.totalAmount.toFixed(2)}</p>`);
-    receiptWindow.document.write('</body></html>');
-    receiptWindow.document.close();
-    receiptWindow.focus();
-    receiptWindow.print();
-    receiptWindow.close();
-};
-
-const toggleFavorite = (productId) => {
-    if (!currentUser || currentUser.role !== 'user') { 
-        showToast("Only users can have favorites."); 
-        return; 
-    }
-    const isFavorite = currentUser.favoriteListingIds.includes(productId);
-    const updatedFavorites = isFavorite
-        ? currentUser.favoriteListingIds.filter(id => id !== productId)
-        : [...currentUser.favoriteListingIds, productId];
     
-    showToast(isFavorite ? "Removed from favorites." : "Added to favorites.");
-    // updateUser handles the array -> string transformation internally
-    updateUser(currentUser.email, { favoriteListingIds: updatedFavorites });
-};
+    // --- AUTH FUNCTIONS (UNCHANGED from previous fix) ---
+    const login = (email, password) => { const user = users[email]; if (user && user.password === password) { setCurrentUser(user); showToast('Login successful!'); return user; } showToast('Invalid email or password.'); return null; };
+    const signup = async (userData, role) => { if (users[userData.email]) { showToast('Email already registered.'); return null; } const newUserForDb = { firstname: userData.firstName, lastname: userData.lastName, email: userData.email, password: userData.password, profilepic: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 9)}.jpg`, membersince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), location: "New Member City, ST", mylistingids: "", favoritelistingids: "", activerentalscount: 0, totalearningsamount: 0, totallistingviews: 0, role: role, verificationstatus: 'unverified' }; const { data: dbUser, error } = await supabase.from('profiles').insert(newUserForDb).select().single(); if (error) { showToast("Signup failed. Please try again."); console.error(error); return null; } const appReadyUser = transformUserForApp(dbUser); setUsers(prev => ({ ...prev, [appReadyUser.email]: appReadyUser })); setCurrentUser(appReadyUser); showToast('Account created successfully!'); return appReadyUser; };
+    const logout = () => { setCurrentUser(null); showToast('Logged out successfully.'); };
+    const updateUser = async (email, updatedData) => { const dbReadyData = {}; for (const key in updatedData) { if (key === 'myListingIds') { dbReadyData['mylistingids'] = updatedData[key].join(','); } else if (key === 'favoriteListingIds') { dbReadyData['favoritelistingids'] = updatedData[key].join(','); } else if (key === 'paymentInfo') { if (updatedData.paymentInfo) { dbReadyData['paymentcardnumber'] = updatedData.paymentInfo.cardNumber; dbReadyData['paymentexpirydate'] = updatedData.paymentInfo.expiryDate; dbReadyData['paymentcvv'] = updatedData.paymentInfo.cvv; } } else { dbReadyData[key.toLowerCase()] = updatedData[key]; } } const { data: updatedDbUser, error } = await supabase.from('profiles').update(dbReadyData).eq('email', email).select().single(); if (error) { showToast("Failed to update user profile."); console.error("Update user error:", error); return; } const appReadyUser = transformUserForApp(updatedDbUser); setUsers(prev => ({ ...prev, [email]: appReadyUser })); if (currentUser && currentUser.email === email) { setCurrentUser(appReadyUser); } };
 
-const value = {
-    theme, toggleTheme,
-    toast, showToast,
-    products,
-    addProduct, updateProduct, deleteProduct,
-    users, currentUser, updateUser, login, logout, signup,
-    cart, addToCart, removeFromCart, clearCart,
-    rentalAgreementTemplate, setRentalAgreementTemplate,
-    addRentalRecord,
-    toggleFavorite,
-    isChatOpen, chatPartner, openChat, closeChat, toggleChat,
-    rentalHistory: rentalHistory.filter(r => r.renterEmail === currentUser?.email),
-    ownerLentHistory: rentalHistory.filter(r => r.ownerEmail === currentUser?.email),
-    generateAndPrintReceipt
-};
+    // --- PRODUCT FUNCTIONS (UNCHANGED from previous fix) ---
+    const addProduct = async (productData) => { const dbReadyProduct = transformProductForDb(productData); delete dbReadyProduct.id; const { data, error } = await supabase.from('products').insert(dbReadyProduct).select().single(); if (error) { showToast("Failed to create listing."); console.error("Add product error:", error); return; } const appReadyProduct = transformProductForApp(data); setProducts(prev => [...prev, appReadyProduct]); const owner = users[appReadyProduct.ownerId]; if (owner) { const updatedListingIds = [...owner.myListingIds, appReadyProduct.id]; await updateUser(owner.email, { myListingIds: updatedListingIds }); } };
+    const updateProduct = async (updatedProduct) => { const dbReadyProduct = transformProductForDb(updatedProduct); const { data, error } = await supabase.from('products').update(dbReadyProduct).eq('id', updatedProduct.id).select().single(); if (error) { showToast("Failed to update listing."); console.error(error); return; } const appReadyProduct = transformProductForApp(data); setProducts(prev => prev.map(p => p.id === appReadyProduct.id ? appReadyProduct : p)); };
+    const deleteProduct = async (productId) => { const productToDelete = products.find(p => p.id === productId); if (!productToDelete) return; const { error } = await supabase.from('products').delete().eq('id', productId); if (error) { showToast("Failed to delete listing."); console.error(error); return; } setProducts(prev => prev.filter(p => p.id !== productId)); const owner = users[productToDelete.ownerId]; if (owner) { const updatedListingIds = owner.myListingIds.filter(id => id !== productId); await updateUser(owner.email, { myListingIds: updatedListingIds }); } showToast(`Listing has been deleted.`); };
 
-return (
-    <AppContext.Provider value={value}>
-        {isLoading ? <div style={{paddingTop: '200px', textAlign: 'center'}}><h1>Loading Hazel...</h1></div> : children}
-    </AppContext.Provider>
-);
+    // --- RENTAL FUNCTIONS ---
+    const addRentalRecord = async (orderDetails) => {
+        // FIX: Create rental objects with lowercase keys for the database
+        const rentalRecordsForDb = orderDetails.items.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            const serviceFeePerItem = orderDetails.items.length > 0 ? orderDetails.serviceFee / orderDetails.items.length : 0;
+            return {
+                transactionid: `${orderDetails.transactionId}-${item.productId}`,
+                productid: item.productId,
+                renteremail: currentUser.email,
+                rentername: `${currentUser.firstName} ${currentUser.lastName}`,
+                owneremail: product.ownerId,
+                rentalstartdate: item.rentalStartDate,
+                rentaldurationdays: item.rentalDurationDays,
+                rentaltotalcost: item.rentalTotalCost,
+                deliveryfee: item.deliveryFee,
+                servicefee: serviceFeePerItem,
+                totalamount: item.rentalTotalCost + item.deliveryFee + serviceFeePerItem,
+                status: 'Completed' 
+            };
+        });
+
+        const { data, error } = await supabase.from('rental_history').insert(rentalRecordsForDb).select();
+        if (error) {
+            showToast("Failed to record rental history.");
+            console.error("Add rental history error:", error);
+            return;
+        }
+        
+        // FIX: Transform the returned data back for the app state
+        const transformedNewRentals = data.map(transformRentalForApp);
+        setRentalHistory(prev => [...prev, ...transformedNewRentals]);
+    };
+
+    // --- OTHER FUNCTIONS (UNCHANGED) ---
+    const toggleTheme = () => { const newTheme = theme === 'light' ? 'dark' : 'light'; setTheme(newTheme); localStorage.setItem('theme', newTheme); document.body.classList.toggle('dark-mode', newTheme === 'dark'); };
+    const showToast = (message, duration = 3000) => { setToast({ show: true, message }); setTimeout(() => setToast({ show: false, message: '' }), duration); };
+    const addToCart = (item) => { if (cart.some(cartItem => cartItem.productId === item.productId)) { showToast("This item is already in your cart."); return false; } setCart(prev => [...prev, item]); showToast("Item added to cart!"); return true; };
+    const removeFromCart = (productId) => { setCart(prev => prev.filter(item => item.productId !== productId)); showToast("Item removed from cart."); };
+    const clearCart = () => setCart([]);
+    const openChat = (partnerDetails) => { setChatPartner(partnerDetails); setChatOpen(true); };
+    const closeChat = () => setChatOpen(false);
+    const toggleChat = () => setChatOpen(prev => !prev);
+    const generateAndPrintReceipt = (orderDetails) => { const receiptWindow = window.open('', 'PRINT', 'height=600,width=800'); const itemsHtml = orderDetails.items.map(item => { const product = products.find(p => p.id === item.productId); return `<tr><td>${product?.title || 'N/A'}</td><td>${item.rentalDurationDays} day(s)</td><td>₱${item.rentalTotalCost.toFixed(2)}</td></tr>`; }).join(''); receiptWindow.document.write('<html><head><title>Hazel Receipt</title>'); receiptWindow.document.write('<style>body{font-family:sans-serif;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:8px; text-align:left;} h1,h2{text-align:center;}</style>'); receiptWindow.document.write('</head><body>'); receiptWindow.document.write('<h1>HAZEL Rental Receipt</h1>'); receiptWindow.document.write(`<p><strong>Transaction ID:</strong> ${orderDetails.transactionId}</p>`); receiptWindow.document.write(`<p><strong>Date:</strong> ${new Date(orderDetails.date).toLocaleString()}</p>`); receiptWindow.document.write('<h2>Rented Items</h2>'); receiptWindow.document.write(`<table><thead><tr><th>Item</th><th>Duration</th><th>Cost</th></tr></thead><tbody>${itemsHtml}</tbody></table>`); receiptWindow.document.write('<h2>Summary</h2>'); receiptWindow.document.write(`<p><strong>Subtotal:</strong> ₱${orderDetails.rentalCost.toFixed(2)}</p>`); receiptWindow.document.write(`<p><strong>Service Fee:</strong> ₱${orderDetails.serviceFee.toFixed(2)}</p>`); receiptWindow.document.write(`<p><strong>Total Paid:</strong> ₱${orderDetails.totalAmount.toFixed(2)}</p>`); receiptWindow.document.write('</body></html>'); receiptWindow.document.close(); receiptWindow.focus(); receiptWindow.print(); receiptWindow.close(); };
+    const toggleFavorite = (productId) => { if (!currentUser || currentUser.role !== 'user') { showToast("Only users can have favorites."); return; } const isFavorite = currentUser.favoriteListingIds.includes(productId); const updatedFavorites = isFavorite ? currentUser.favoriteListingIds.filter(id => id !== productId) : [...currentUser.favoriteListingIds, productId]; showToast(isFavorite ? "Removed from favorites." : "Added to favorites."); updateUser(currentUser.email, { favoriteListingIds: updatedFavorites }); };
+
+    const value = {
+        theme, toggleTheme,
+        toast, showToast,
+        products,
+        addProduct, updateProduct, deleteProduct,
+        users, currentUser, updateUser, login, logout, signup,
+        cart, addToCart, removeFromCart, clearCart,
+        rentalAgreementTemplate, setRentalAgreementTemplate,
+        addRentalRecord,
+        toggleFavorite,
+        isChatOpen, chatPartner, openChat, closeChat, toggleChat,
+        // These filters will now work correctly because the data in rentalHistory is camelCase
+        rentalHistory: rentalHistory.filter(r => r.renterEmail === currentUser?.email),
+        ownerLentHistory: rentalHistory.filter(r => r.ownerEmail === currentUser?.email),
+        generateAndPrintReceipt
+    };
+
+    return (
+        <AppContext.Provider value={value}>
+            {isLoading ? <div style={{paddingTop: '200px', textAlign: 'center'}}><h1>Loading Hazel from Supabase...</h1></div> : children}
+        </AppContext.Provider>
+    );
 };
 
 export default AppContext;

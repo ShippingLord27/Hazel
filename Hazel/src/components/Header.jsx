@@ -8,12 +8,18 @@ const Header = () => {
   const { theme, toggleTheme, currentUser, logout, cart } = useApp();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const [initialAuthTab, setInitialAuthTab] = useState('login');
   const [isCategoriesOpen, setCategoriesOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const openAuthModal = (tab) => {
+    setInitialAuthTab(tab);
+    setAuthModalOpen(true);
   };
   
   const cartItemCount = cart.length;
@@ -71,8 +77,8 @@ const Header = () => {
               
               {!currentUser ? (
                 <div className="auth-nav-state" id="loggedOutNavButtons">
-                  <button className="btn btn-outline" onClick={() => setAuthModalOpen(true)}>Login</button>
-                  <button className="btn btn-primary signup-trigger-btn" onClick={() => setAuthModalOpen(true)}>Sign Up</button>
+                  <button className="btn btn-outline" onClick={() => openAuthModal('login')}>Login</button>
+                  <button className="btn btn-primary signup-trigger-btn" onClick={() => openAuthModal('signup')}>Sign Up</button>
                 </div>
               ) : (
                 <div className="auth-nav-state" id="loggedInNavButtons">
@@ -95,7 +101,7 @@ const Header = () => {
           </div>
         </div>
       </header>
-      {isAuthModalOpen && <AuthModal closeModal={() => setAuthModalOpen(false)} />}
+      {isAuthModalOpen && <AuthModal closeModal={() => setAuthModalOpen(false)} initialTab={initialAuthTab} />}
     </>
   );
 };

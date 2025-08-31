@@ -17,7 +17,7 @@ const OwnerDashboard = ({ user }) => (
                 <div className="analytics-label">Active Rentals</div>
             </div>
             <div className="analytics-card">
-                <div className="analytics-value">₱{user.totalEarningsAmount.toFixed(2)}</div>
+                <div className="analytics-value">₱{user.totalEarningsAmount}</div>
                 <div className="analytics-label">Total Earnings</div>
             </div>
             <div className="analytics-card">
