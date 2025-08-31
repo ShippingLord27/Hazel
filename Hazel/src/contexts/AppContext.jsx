@@ -3,6 +3,59 @@ import supabase from '../supabaseClient';
 import { initialProductData, initialSimulatedUsers, initialRentalHistoryData, initialRentalAgreement } from '../data/initialData';
 
 const AppContext = createContext();
+
+// --- Helper Functions for Data Transformation ---
+
+// Converts a user object from Supabase (flat) to the app's format (nested)
+const transformProfileFromDb = (dbProfile) => {
+    if (!dbProfile) return null;
+    return {
+        ...dbProfile,
+        // Convert comma-separated string to array of numbers, handle empty/null string
+        myListingIds: dbProfile.myListingIds ? dbProfile.myListingIds.split(',').map(Number) : [],
+        favoriteListingIds: dbProfile.favoriteListingIds ? dbProfile.favoriteListingIds.split(',').map(Number) : [],
+        // Reconstruct the paymentInfo object
+        paymentInfo: dbProfile.paymentCardNumber
+            ? {
+                cardNumber: dbProfile.paymentCardNumber,
+                expiryDate: dbProfile.paymentExpiryDate,
+                cvv: dbProfile.paymentCvv
+            }
+            : null
+    };
+};
+
+// Converts a user object from the app to Supabase's flat format
+const transformProfileToDb = (appProfile) => {
+    if (!appProfile) return null;
+    const dbData = { ...appProfile };
+
+    // Convert arrays to comma-separated strings
+    if (Array.isArray(dbData.myListingIds)) {
+        dbData.myListingIds = dbData.myListingIds.join(',');
+    }
+    if (Array.isArray(dbData.favoriteListingIds)) {
+        dbData.favoriteListingIds = dbData.favoriteListingIds.join(',');
+    }
+
+    // Flatten paymentInfo object
+    if (dbData.paymentInfo) {
+        dbData.paymentCardNumber = dbData.paymentInfo.cardNumber;
+        dbData.paymentExpiryDate = dbData.paymentInfo.expiryDate;
+        dbData.paymentCvv = dbData.paymentInfo.cvv;
+    } else {
+        dbData.paymentCardNumber = null;
+        dbData.paymentExpiryDate = null;
+        dbData.paymentCvv = null;
+    }
+
+    // Remove app-specific keys that don't exist in the DB
+    delete dbData.paymentInfo;
+    
+    return dbData;
+};
+
+
 export const AppProvider = ({ children }) => {
 // State Declarations
 const [theme, setTheme] = useState(() => {
@@ -26,6 +79,7 @@ useEffect(() => {
     const fetchInitialData = async () => {
         setIsLoading(true);
         try {
+            // Using table names from `testdatasave.jsx`
             const [productsRes, profilesRes, rentalsRes] = await Promise.all([
                 supabase.from('products').select('*'),
                 supabase.from('profiles').select('*'),
@@ -44,10 +98,13 @@ useEffect(() => {
                 setRentalHistory(initialRentalHistoryData);
             } else {
                 setProducts(productsRes.data);
+
+                // Transform DB profiles to app format before setting state
                 const usersObject = profilesRes.data.reduce((acc, user) => {
-                    acc[user.email] = user;
+                    acc[user.email] = transformProfileFromDb(user);
                     return acc;
                 }, {});
+
                 setUsers(usersObject);
                 setRentalHistory(rentalsRes.data);
             }
@@ -87,17 +144,19 @@ const signup = async (userData, role) => {
         profilePic: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 9)}.jpg`,
         memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         location: "New Member City, ST",
-        myListingIds: [],
-        favoriteListingIds: [],
+        myListingIds: [], // App format
+        favoriteListingIds: [], // App format
         activeRentalsCount: 0,
         totalEarningsAmount: 0,
         totalListingViews: 0,
         role: role,
         verificationStatus: 'unverified',
-        paymentInfo: null
+        paymentInfo: null // App format
     };
 
-    const { data, error } = await supabase.from('profiles').insert(newUser).select().single();
+    // Transform to DB format before inserting
+    const dbUser = transformProfileToDb(newUser);
+    const { data, error } = await supabase.from('profiles').insert(dbUser).select().single();
 
     if (error) {
         showToast("Signup failed. Please try again.");
@@ -105,10 +164,12 @@ const signup = async (userData, role) => {
         return null;
     }
 
-    setUsers(prev => ({ ...prev, [data.email]: data }));
-    setCurrentUser(data);
+    // Transform back to app format after receiving from DB
+    const appFormattedUser = transformProfileFromDb(data);
+    setUsers(prev => ({ ...prev, [appFormattedUser.email]: appFormattedUser }));
+    setCurrentUser(appFormattedUser);
     showToast('Account created successfully!');
-    return data;
+    return appFormattedUser;
 };
 
 const logout = () => {
@@ -117,9 +178,12 @@ const logout = () => {
 };
 
 const updateUser = async (email, updatedData) => {
+    // Transform data to DB format before updating
+    const dbUpdateData = transformProfileToDb(updatedData);
+
     const { data, error } = await supabase
         .from('profiles')
-        .update(updatedData)
+        .update(dbUpdateData)
         .eq('email', email)
         .select()
         .single();
@@ -129,10 +193,12 @@ const updateUser = async (email, updatedData) => {
         console.error("Update user error:", error);
         return;
     }
-
-    setUsers(prev => ({ ...prev, [email]: data }));
+    
+    // Transform back to app format for state consistency
+    const appFormattedUser = transformProfileFromDb(data);
+    setUsers(prev => ({ ...prev, [email]: appFormattedUser }));
     if (currentUser && currentUser.email === email) {
-        setCurrentUser(data);
+        setCurrentUser(appFormattedUser);
     }
 };
 
@@ -147,6 +213,7 @@ const addProduct = async (productData) => {
     setProducts(prev => [...prev, data]);
     const owner = users[data.ownerId];
     if (owner) {
+        // updateUser handles the array -> string transformation internally
         await updateUser(owner.email, {
             myListingIds: [...(owner.myListingIds || []), data.id]
         });
@@ -178,6 +245,7 @@ const deleteProduct = async (productId) => {
     
     const owner = users[productToDelete.ownerId];
     if (owner) {
+        // updateUser handles the array -> string transformation internally
         await updateUser(owner.email, {
             myListingIds: owner.myListingIds.filter(id => id !== productId)
         });
@@ -295,6 +363,7 @@ const toggleFavorite = (productId) => {
         : [...currentUser.favoriteListingIds, productId];
     
     showToast(isFavorite ? "Removed from favorites." : "Added to favorites.");
+    // updateUser handles the array -> string transformation internally
     updateUser(currentUser.email, { favoriteListingIds: updatedFavorites });
 };
 

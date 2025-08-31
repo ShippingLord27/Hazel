@@ -6,14 +6,20 @@ const TestDataSavePage = () => {
     const [status, setStatus] = useState('Ready to seed data.');
     const [isLoading, setIsLoading] = useState(false);
 
-    const seedTable = async (tableName, data, options = {}) => {
+    const seedTable = async (tableName, data) => {
         setIsLoading(true);
         setStatus(`Clearing table: ${tableName}...`);
-        const { error: deleteError } = await supabase.from(tableName).delete().neq('id', 0); // Clear table
+
+        // Use a filter that always evaluates to true to delete all rows.
+        // For 'products' table, you can use 'id' if it's always present.
+        // For 'profiles' table, use 'email'.
+        const deleteFilterColumn = tableName === 'profiles' ? 'email' : 'id';
+        const { error: deleteError } = await supabase.from(tableName).delete().neq(deleteFilterColumn, 'this_is_a_dummy_value_to_delete_all');
+
         if (deleteError) {
             setStatus(`Error clearing ${tableName}: ${deleteError.message}`);
             setIsLoading(false);
-            return;
+            return false;
         }
 
         setStatus(`Seeding ${data.length} records into ${tableName}...`);
@@ -21,31 +27,63 @@ const TestDataSavePage = () => {
         if (insertError) {
             setStatus(`Error seeding ${tableName}: ${insertError.message}`);
             setIsLoading(false);
-            return;
+            return false;
         }
 
         setStatus(`Successfully seeded ${tableName}!`);
         setIsLoading(false);
+        return true;
     };
 
-    const handleSeedProducts = () => {
-        seedTable('products', initialProductData);
+    const handleSeedProducts = async () => {
+        await seedTable('products', initialProductData);
     };
 
-    const handleSeedProfiles = () => {
+    const handleSeedProfiles = async () => {
         // Supabase insert requires an array, so we convert the users object to an array
         const usersArray = Object.values(initialSimulatedUsers);
-        seedTable('profiles', usersArray);
+        
+        // Transform the data to match the database schema
+        const transformedUsers = usersArray.map(user => {
+            const dbUser = {
+                ...user,
+                // Convert arrays to comma-separated strings
+                myListingIds: user.myListingIds.join(','),
+                favoriteListingIds: user.favoriteListingIds.join(','),
+                // Flatten paymentInfo object
+                paymentCardNumber: user.paymentInfo?.cardNumber || null,
+                paymentExpiryDate: user.paymentInfo?.expiryDate || null,
+                paymentCvv: user.paymentInfo?.cvv || null,
+            };
+            // Remove the original nested object key
+            delete dbUser.paymentInfo;
+            return dbUser;
+        });
+
+        await seedTable('profiles', transformedUsers);
     };
 
-    const handleSeedRentals = () => {
-        seedTable('rental_history', initialRentalHistoryData);
+    const handleSeedRentals = async () => {
+        await seedTable('rental_history', initialRentalHistoryData);
     };
     
     const handleSeedAll = async () => {
-        await seedTable('products', initialProductData);
-        await seedTable('profiles', Object.values(initialSimulatedUsers));
-        await seedTable('rental_history', initialRentalHistoryData);
+        setIsLoading(true);
+        setStatus('Starting full database seed...');
+        
+        if (!await seedTable('profiles', (() => {
+            const transformed = Object.values(initialSimulatedUsers).map(user => {
+                const dbUser = { ...user, myListingIds: user.myListingIds.join(','), favoriteListingIds: user.favoriteListingIds.join(','), paymentCardNumber: user.paymentInfo?.cardNumber || null, paymentExpiryDate: user.paymentInfo?.expiryDate || null, paymentCvv: user.paymentInfo?.cvv || null };
+                delete dbUser.paymentInfo;
+                return dbUser;
+            });
+            return transformed;
+        })())) return; // Stop if seeding profiles fails
+
+        if (!await seedTable('products', initialProductData)) return; // Stop if seeding products fails
+        if (!await seedTable('rental_history', initialRentalHistoryData)) return; // Stop if seeding rentals fails
+        
+        setIsLoading(false);
         setStatus('All tables seeded successfully!');
     }
 
@@ -61,7 +99,7 @@ const TestDataSavePage = () => {
                 <button onClick={handleSeedAll} disabled={isLoading} style={{fontWeight: 'bold'}}>SEED ALL</button>
             </div>
             <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f0f0', border: '1px solid #ccc' }}>
-                <strong>Status:</strong> {isLoading ? 'Processing...' : status}
+                <strong>Status:</strong> {status}
             </div>
         </div>
     );
