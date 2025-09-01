@@ -4,8 +4,7 @@ import { useApp } from '../hooks/useApp';
 const ProductCard = ({ product }) => {
 const { currentUser, toggleFavorite } = useApp();
 const navigate = useNavigate();
-code
-Code
+
 // Check if the current user has favorited this product
 const isFavorite = currentUser?.favoriteListingIds.includes(product.id);
 
