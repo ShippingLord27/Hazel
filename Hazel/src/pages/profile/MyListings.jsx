@@ -3,7 +3,6 @@ import { useApp } from '../../hooks/useApp';
 import ListingModal from '../../components/ListingModal';
 
 const ProfileProductCard = ({ product, onEdit, onDelete }) => {
-    // This component is unchanged
     return (
         <div className="product-card">
             <img src={product.image} alt={product.title} className="product-img" />
@@ -21,7 +20,8 @@ const ProfileProductCard = ({ product, onEdit, onDelete }) => {
 };
 
 const MyListings = () => {
-    const { currentUser, users, products, deleteProduct } = useApp();
+    // FIX: Remove `users` as it's no longer needed for this logic.
+    const { currentUser, products, deleteProduct } = useApp();
     const [isListingModalOpen, setListingModalOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
     
@@ -31,7 +31,7 @@ const MyListings = () => {
     };
 
     const handleAddListing = () => {
-        setProductToEdit(null); // Ensure we are in "add" mode, not "edit" mode
+        setProductToEdit(null);
         setListingModalOpen(true);
     };
 
@@ -41,18 +41,17 @@ const MyListings = () => {
         }
     };
 
-    // This logic for displaying listings is unchanged and correct
-    const freshUserData = users[currentUser.email];
-    const myListings = freshUserData ? freshUserData.myListingIds
-        .map(id => products.find(p => p.id === id))
-        .filter(Boolean) : [];
+    // FIX: Find listings by filtering the main products array.
+    // This assumes the mock product data uses the user's EMAIL as the ownerId.
+    const myListings = currentUser 
+        ? products.filter(p => p.ownerId === currentUser.email) 
+        : [];
 
     return (
         <>
             <div className="profile-view">
                 <div className="profile-view-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     <h1>My Listings</h1>
-                    {/* The "Add New Listing" button which triggers the modal */}
                     <button className="btn btn-primary" onClick={handleAddListing}>Add New Listing</button>
                 </div>
                 {myListings.length > 0 ? (
@@ -63,7 +62,6 @@ const MyListings = () => {
                     <p>You haven't listed any items yet. Click "Add New Listing" to get started!</p>
                 )}
             </div>
-            {/* The modal is rendered here when isListingModalOpen is true */}
             {isListingModalOpen && (
                 <ListingModal 
                     productToEdit={productToEdit} 

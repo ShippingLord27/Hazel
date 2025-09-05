@@ -1,28 +1,29 @@
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
+// NOTE: The dashboard stats are placeholders for now.
+// In a real app, this data would need to be calculated from rental history, etc.
 const OwnerDashboard = ({ user }) => (
     <>
         <div className="profile-view-header">
-            <h1>Welcome, {user.firstName}!</h1>
+            <h1>Welcome, {user.first_name}!</h1>
             <p>Here's an overview of your rental activity.</p>
         </div>
         <div className="analytics-grid">
             <div className="analytics-card">
-                <div className="analytics-value">{user.myListingIds.length}</div>
+                <div className="analytics-value">0</div>
                 <div className="analytics-label">Total Listings</div>
             </div>
             <div className="analytics-card">
-                {/* FIX: Display the dynamic activeRentalsCount */}
-                <div className="analytics-value">{user.activeRentalsCount}</div>
+                <div className="analytics-value">0</div>
                 <div className="analytics-label">Items Currently Rented Out</div>
             </div>
             <div className="analytics-card">
-                <div className="analytics-value">₱{user.totalEarningsAmount.toFixed(2)}</div>
+                <div className="analytics-value">₱0.00</div>
                 <div className="analytics-label">Total Earnings</div>
             </div>
             <div className="analytics-card">
-                <div className="analytics-value">{user.totalListingViews}</div>
+                <div className="analytics-value">0</div>
                 <div className="analytics-label">Listing Views</div>
             </div>
         </div>
@@ -32,17 +33,16 @@ const OwnerDashboard = ({ user }) => (
 const UserDashboard = ({ user }) => (
      <>
         <div className="profile-view-header">
-            <h1>Welcome, {user.firstName}!</h1>
+            <h1>Welcome, {user.first_name}!</h1>
             <p>Here's a summary of your account.</p>
         </div>
         <div className="analytics-grid">
             <div className="analytics-card">
-                <div className="analytics-value">{user.favoriteListingIds.length}</div>
+                <div className="analytics-value">0</div>
                 <div className="analytics-label">Favorited Items</div>
             </div>
             <div className="analytics-card">
-                {/* FIX: Display the dynamic activeRentalsCount */}
-                <div className="analytics-value">{user.activeRentalsCount}</div>
+                <div className="analytics-value">0</div>
                 <div className="analytics-label">Active Rentals</div>
             </div>
         </div>
@@ -50,15 +50,19 @@ const UserDashboard = ({ user }) => (
 );
 
 const ProfileDashboard = () => {
-    const { currentUser, users } = useApp();
-    const freshUserData = currentUser ? users[currentUser.email] : null;
-    if (!freshUserData) return null;
+    const { currentUser } = useApp();
+
+    // FIX: Directly use the currentUser object from the context.
+    // It already has all the profile information. No lookup is needed.
+    if (!currentUser) {
+        return <p>Loading dashboard...</p>; // Or some other loading state
+    }
 
     return (
         <div className="profile-view">
-           {freshUserData.role === 'owner' 
-                ? <OwnerDashboard user={freshUserData} /> 
-                : <UserDashboard user={freshUserData} />
+           {currentUser.role === 'owner' 
+                ? <OwnerDashboard user={currentUser} /> 
+                : <UserDashboard user={currentUser} />
            }
         </div>
     );

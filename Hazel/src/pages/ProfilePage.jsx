@@ -3,20 +3,26 @@ import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const ProfilePage = () => {
-    const { currentUser, logout } = useApp();
+    const { currentUser, isLoading, logout } = useApp(); // FIX: Get isLoading state
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!currentUser) {
-            navigate('/');
-        } else if (currentUser.role === 'admin') {
-            navigate('/admin');
+        // FIX: Wait for loading to finish before checking the user
+        if (!isLoading) {
+            if (!currentUser) {
+                navigate('/');
+            } else if (currentUser.role === 'admin') {
+                navigate('/admin');
+            }
         }
-    }, [currentUser, navigate]);
+    }, [currentUser, isLoading, navigate]);
 
-    if (!currentUser || currentUser.role === 'admin') return null;
-
-    // Define different menus for different roles
+    // FIX: Show a loading state
+    if (isLoading || !currentUser) {
+        return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Loading Profile...</div>;
+    }
+    
+    // This part is for when the user is confirmed to be logged in
     const ownerMenu = [
         { path: "/profile", end: true, icon: "fas fa-tachometer-alt", label: "Dashboard" },
         { path: "my-listings", icon: "fas fa-list", label: "My Listings" },
@@ -38,8 +44,8 @@ const ProfilePage = () => {
             <div className="container profile-page-main-container"> 
                 <div className="profile-container">
                     <aside className="profile-sidebar">
-                        <img src={currentUser.profilePic} alt="Profile" className="profile-pic" />
-                        <h3>{currentUser.firstName} {currentUser.lastName}</h3>
+                        <img src={currentUser.profile_pic} alt="Profile" className="profile-pic" />
+                        <h3>{currentUser.first_name} {currentUser.last_name}</h3>
                         <p>{currentUser.email}</p>
                         <ul className="sidebar-menu">
                             {menuToRender.map(item => (

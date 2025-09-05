@@ -2,13 +2,16 @@ import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const AdminOverview = () => {
-    const { users, products } = useApp();
+    // FIX: Use `allProfiles` (an array) instead of `users` (which is gone).
+    const { allProfiles, products } = useApp();
+
     return (
         <div className="admin-view">
             <div className="admin-view-header"><h1>Admin Overview</h1></div>
             <div className="analytics-grid">
                 <div className="analytics-card">
-                    <div className="analytics-value">{Object.keys(users).length}</div>
+                    {/* FIX: Get the count from the array's length. */}
+                    <div className="analytics-value">{allProfiles.length}</div>
                     <div className="analytics-label">Total Users</div>
                 </div>
                 <div className="analytics-card">

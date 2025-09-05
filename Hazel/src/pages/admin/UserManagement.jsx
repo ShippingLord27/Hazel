@@ -2,11 +2,13 @@ import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const UserManagement = () => {
-    const { users, updateUser, showToast } = useApp();
+    // FIX: Use `allProfiles` array. The updateUser function now requires the user's UUID (id).
+    const { allProfiles, updateUser, showToast } = useApp();
 
-    const handleVerification = (email, status) => {
-        updateUser(email, { verificationStatus: status });
-        showToast(`Verification for ${email} has been set to ${status}.`);
+    const handleVerification = (userId, status) => {
+        // We pass the user's UUID (id) and the data to update.
+        updateUser(userId, { verification_status: status });
+        showToast(`Verification status has been updated to ${status}.`);
     };
 
     return (
@@ -16,17 +18,19 @@ const UserManagement = () => {
                 <table className="admin-table">
                     <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
-                        {Object.values(users).map(user => (
-                            <tr key={user.email}>
-                                <td>{user.firstName} {user.lastName}</td>
-                                <td>{user.email}</td>
-                                <td>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</td>
-                                <td><span className={`status-${user.verificationStatus}`}>{user.verificationStatus}</span></td>
+                        {/* FIX: Iterate over `allProfiles` array */}
+                        {allProfiles.map(profile => (
+                            <tr key={profile.id}>
+                                {/* FIX: Use snake_case properties from the database */}
+                                <td>{profile.first_name} {profile.last_name}</td>
+                                <td>{profile.email}</td>
+                                <td>{profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'N/A'}</td>
+                                <td><span className={`status-${profile.verification_status}`}>{profile.verification_status}</span></td>
                                 <td className="actions-cell">
-                                    {user.verificationStatus === 'pending' && user.role !== 'admin' && (
+                                    {profile.verification_status === 'pending' && profile.role !== 'admin' && (
                                         <>
-                                            <button className="btn btn-success btn-small" onClick={() => handleVerification(user.email, 'verified')}>Approve</button>
-                                            <button className="btn btn-danger btn-small" onClick={() => handleVerification(user.email, 'unverified')}>Reject</button>
+                                            <button className="btn btn-success btn-small" onClick={() => handleVerification(profile.id, 'verified')}>Approve</button>
+                                            <button className="btn btn-danger btn-small" onClick={() => handleVerification(profile.id, 'unverified')}>Reject</button>
                                         </>
                                     )}
                                 </td>

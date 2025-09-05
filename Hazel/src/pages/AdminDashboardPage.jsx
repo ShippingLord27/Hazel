@@ -3,23 +3,30 @@ import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const AdminDashboardPage = () => {
-    const { currentUser, logout } = useApp();
+    const { currentUser, isLoading, logout } = useApp(); // FIX: Get isLoading state
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!currentUser || currentUser.role !== 'admin') {
-            navigate('/');
+        // FIX: Wait for loading to finish before checking the user
+        if (!isLoading) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                navigate('/');
+            }
         }
-    }, [currentUser, navigate]);
+    }, [currentUser, isLoading, navigate]);
 
-    if (!currentUser || currentUser.role !== 'admin') return null;
-
+    // FIX: Show a loading state
+    if (isLoading || !currentUser) {
+        return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Loading Admin Dashboard...</div>;
+    }
+    
+    // This part is for when the user is confirmed to be an admin
     return (
         <div className="page active" id="adminDashboardPage" style={{ paddingTop: '70px' }}>
             <div className="container admin-dashboard-container">
                 <aside className="admin-sidebar">
-                    <img src={currentUser.profilePic} alt="Admin" id="adminSidebarPic" />
-                    <h3>{currentUser.firstName} {currentUser.lastName}</h3>
+                    <img src={currentUser.profile_pic} alt="Admin" id="adminSidebarPic" />
+                    <h3>{currentUser.first_name} {currentUser.last_name}</h3>
                     <p>{currentUser.email}</p>
                     <ul className="sidebar-menu">
                         <li><NavLink to="/admin" end><i className="fas fa-chart-line"></i> Overview</NavLink></li>
