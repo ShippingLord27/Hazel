@@ -2,48 +2,54 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const AdminSettings = () => {
-    const { currentUser, showToast, updateUser } = useApp();
-    const [formData, setFormData] = useState({ first_name: '', last_name: '', profile_pic: '' });
+    const { currentUser, showToast, updateUser, isLoading } = useApp();
+    // State to hold the form data
+    const [name, setName] = useState('');
+    const [profilePic, setProfilePic] = useState('');
 
     useEffect(() => {
-        if (currentUser) {
-            setFormData({
-                first_name: currentUser.first_name || '',
-                last_name: currentUser.last_name || '',
-                profile_pic: currentUser.profile_pic || '',
-            });
+        // When currentUser is loaded, populate the form
+        if (currentUser && currentUser.profile) {
+            setName(currentUser.profile.name || '');
+            setProfilePic(currentUser.profile.profile_pic || '');
         }
     }, [currentUser]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
-         if (!currentUser) {
-            showToast("You must be logged in to save changes.");
+        if (!currentUser || !currentUser.profile) {
+            showToast("User data not available.", "error");
             return;
         }
-        updateUser(currentUser.id, {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            profile_pic: formData.profile_pic
-        });
+        // Prepare the data with the correct database column names
+        const updates = {
+            name: name,
+            profile_pic: profilePic
+        };
+        // Call the context's updateUser function
+        updateUser(currentUser.id, currentUser.profile.role, updates);
     };
 
-    if (!currentUser) {
-        return <p>Loading admin settings...</p>;
+    if (isLoading || !currentUser) {
+        return <p>Loading settings...</p>;
     }
 
     return (
         <div className="admin-view">
             <div className="admin-view-header"><h1>Admin Account Settings</h1></div>
             <form onSubmit={handleSubmit}>
-                <div className="form-group"><label>First Name*</label><input type="text" name="first_name" value={formData.first_name} onChange={handleChange} required /></div>
-                <div className="form-group"><label>Last Name*</label><input type="text" name="last_name" value={formData.last_name} onChange={handleChange} required /></div>
-                <div className="form-group"><label>Email</label><input type="email" value={currentUser.email} readOnly /></div>
-                <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profile_pic" value={formData.profile_pic} onChange={handleChange} /></div>
+                <div className="form-group">
+                    <label>Full Name*</label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+                </div>
+                <div className="form-group">
+                    <label>Email</label>
+                    <input type="email" value={currentUser.email} readOnly />
+                </div>
+                 <div className="form-group">
+                    <label>Profile Picture URL</label>
+                    <input type="url" value={profilePic} onChange={(e) => setProfilePic(e.target.value)} />
+                </div>
                 <hr/>
                 <button type="submit" className="btn btn-primary">Save Changes</button>
             </form>

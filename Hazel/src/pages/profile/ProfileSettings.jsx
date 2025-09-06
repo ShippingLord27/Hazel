@@ -2,39 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const ProfileSettings = () => {
-    const { currentUser, showToast, updateUser } = useApp();
-    const [formData, setFormData] = useState({ first_name: '', last_name: '', profile_pic: '' });
+    const { currentUser, showToast, updateUser, isLoading } = useApp();
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
 
     useEffect(() => {
-        if (currentUser) {
-            setFormData({
-                first_name: currentUser.first_name || '',
-                last_name: currentUser.last_name || '',
-                profile_pic: currentUser.profile_pic || '',
-            });
+        if (currentUser && currentUser.profile) {
+            setName(currentUser.profile.name || '');
+            setPhone(currentUser.profile.phone || '');
+            setAddress(currentUser.profile.address || '');
         }
     }, [currentUser]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
     const handleSaveChanges = (e) => {
         e.preventDefault();
-        if (!currentUser) {
-            showToast("You must be logged in to save changes.");
-            return;
-        }
-        // We only send the fields that can be changed here.
-        // Role and email are not changed in this form.
-        updateUser(currentUser.id, {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            profile_pic: formData.profile_pic
-        });
+        if (!currentUser || !currentUser.profile) return;
+        
+        // Prepare data with correct database column names
+        const updates = {
+            name: name,
+            phone: phone,
+            address: address
+        };
+        
+        updateUser(currentUser.id, currentUser.profile.role, updates);
     };
 
-    if (!currentUser) {
+    if (isLoading || !currentUser || !currentUser.profile) {
         return <p>Loading settings...</p>;
     }
 
@@ -43,12 +38,25 @@ const ProfileSettings = () => {
             <div className="profile-view-header"><h1>Settings</h1></div>
             <form onSubmit={handleSaveChanges}>
                 <h3>Personal Information</h3>
-                <div className="form-group"><label>First Name*</label><input type="text" name="first_name" value={formData.first_name} onChange={handleChange} required /></div>
-                <div className="form-group"><label>Last Name*</label><input type="text" name="last_name" value={formData.last_name} onChange={handleChange} required /></div>
-                <div className="form-group"><label>Email</label><input type="email" name="email" value={currentUser.email} readOnly /></div>
-                <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profile_pic" value={formData.profile_pic} onChange={handleChange} /></div>
+                <div className="form-group">
+                    <label>Full Name*</label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+                </div>
+                <div className="form-group">
+                    <label>Email</label>
+                    <input type="email" value={currentUser.email} readOnly />
+                </div>
+                <div className="form-group">
+                    <label>Phone</label>
+                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+                 <div className="form-group">
+                    <label>Address</label>
+                    <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+                </div>
                 <hr/>
-                {/* Note: Password changes and other sections would be added here */}
+                {/* Password change would require Supabase's updatePassword function,
+                    which is more complex. We'll leave it out for now to ensure this part works. */}
                 <button type="submit" className="btn btn-primary">Save Changes</button>
             </form>
         </div>

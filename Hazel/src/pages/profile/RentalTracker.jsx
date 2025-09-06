@@ -33,7 +33,22 @@ const RentalItem = ({ rental, product, isOwnerView, onStatusUpdate, onPrint }) =
 );
 
 const RentalTracker = () => {
-    const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt, updateRentalStatus } = useApp();
+    // FIX: Get isLoading and the full rentalHistory array from context
+    const { currentUser, products, rentalHistory, isLoading, generateAndPrintReceipt, updateRentalStatus } = useApp();
+
+    // --- BULLETPROOF LOADING CHECK ---
+    if (isLoading || !currentUser) {
+        return (
+             <div className="profile-view">
+                <div className="profile-view-header"><h1>Rental Tracker</h1></div>
+                <p>Loading rental history...</p>
+            </div>
+        );
+    }
+    
+    // --- THE FIX: Component now filters the data it receives ---
+    const myRentalHistory = (rentalHistory || []).filter(r => r.renterEmail === currentUser.email);
+    const ownerLentHistory = (rentalHistory || []).filter(r => r.ownerEmail === currentUser.email);
 
     const handlePrintReceipt = (rental) => {
         const orderDetails = {
@@ -45,11 +60,10 @@ const RentalTracker = () => {
         generateAndPrintReceipt(orderDetails);
     };
 
-    const history = currentUser.role === 'owner' ? ownerLentHistory : rentalHistory;
+    const history = currentUser.role === 'owner' ? ownerLentHistory : myRentalHistory;
     const activeRentals = history.filter(r => r.status === 'Active');
     const completedRentals = history.filter(r => r.status === 'Completed');
 
-    if (!currentUser) return null;
 
     return (
         <div className="profile-view">
@@ -74,6 +88,7 @@ const RentalTracker = () => {
                                     product={product} 
                                     isOwnerView={currentUser.role === 'owner'}
                                     onStatusUpdate={updateRentalStatus}
+                                    onPrint={handlePrintReceipt}
                                 />;
                     })
                 ) : (
