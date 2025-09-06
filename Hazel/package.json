@@ -12,6 +12,8 @@
   "dependencies": {
     "@google/genai": "^1.16.0",
     "@google/generative-ai": "^0.24.1",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/material": "^7.3.2",
     "@supabase/supabase-js": "^2.56.1",
     "font-awesome": "^4.7.0",
     "postgres": "^3.4.7",

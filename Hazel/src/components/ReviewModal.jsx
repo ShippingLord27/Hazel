@@ -14,17 +14,10 @@ const StarRating = ({ rating, setRating }) => {
                             name="rating"
                             value={ratingValue}
                             onClick={() => setRating(ratingValue)}
-                            style={{ display: 'none' }}
+                            hidden
                         />
                         <i
-                            className="fas fa-star star"
-                            style={{
-                                color: ratingValue <= (hover || rating) ? '#ffc107' : '#e4e5e9',
-                                cursor: 'pointer',
-                                transition: 'color 200ms',
-                                fontSize: '1.5rem',
-                                marginRight: '5px'
-                            }}
+                            className={`fas fa-star star ${ratingValue <= (hover || rating) ? 'active' : ''}`}
                             onMouseEnter={() => setHover(ratingValue)}
                             onMouseLeave={() => setHover(0)}
                         ></i>
@@ -78,7 +71,7 @@ const ReviewModal = ({ productId, productTitle, closeModal }) => {
                             <input
                                 type="text"
                                 id="reviewerName"
-                                value={`${currentUser.firstName} ${currentUser.lastName}`}
+                                value={currentUser.profile.name || ''}
                                 readOnly
                                 required
                             />

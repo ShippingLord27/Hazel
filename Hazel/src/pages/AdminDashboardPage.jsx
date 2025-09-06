@@ -13,6 +13,13 @@ const AdminDashboardPage = () => {
         }
     }, [currentUser, isLoading, navigate]);
 
+    // FIX: Create an async handler to properly await logout before navigating
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        await logout();
+        navigate('/');
+    };
+
     // This guard clause prevents rendering with incomplete data
     if (isLoading || !currentUser || !currentUser.profile) {
         return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Authorizing...</div>;
@@ -33,7 +40,7 @@ const AdminDashboardPage = () => {
                         <li><NavLink to="/admin/listings"><i className="fas fa-tasks"></i> Listing Management</NavLink></li>
                         {/* We remove content management for now to simplify */}
                         <li><NavLink to="/admin/settings"><i className="fas fa-user-cog"></i> Admin Settings</NavLink></li>
-                        <li><a href="#" onClick={logout}><i className="fas fa-sign-out-alt"></i> Logout</a></li>
+                        <li><a href="#" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> Logout</a></li>
                     </ul>
                 </aside>
                 <main className="admin-main-content">

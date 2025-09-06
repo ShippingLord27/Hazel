@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const CheckoutPage = () => {
-    const { cart, currentUser, products, clearCart, showToast, rentalAgreementTemplate, users, generateAndPrintReceipt, addRentalRecord } = useApp();
+    const { cart, currentUser, products, clearCart, showToast, rentalAgreementTemplate, generateAndPrintReceipt, addRentalRecord } = useApp();
     const navigate = useNavigate();
     
     const [agreed, setAgreed] = useState(false);
@@ -14,7 +14,7 @@ const CheckoutPage = () => {
 
     useEffect(() => {
         if (!currentUser || cart.length === 0) { if (!isConfirmed) { showToast("Your cart is empty or you are not logged in."); navigate('/products'); } } 
-        else if (currentUser.paymentInfo) { setPaymentDetails({ cardNumber: currentUser.paymentInfo.cardNumber || '', expiryDate: currentUser.paymentInfo.expiryDate || '', cvv: currentUser.paymentInfo.cvv || '', }); }
+        else if (currentUser.profile.payment_info) { setPaymentDetails({ cardNumber: currentUser.profile.payment_info.cardNumber || '', expiryDate: currentUser.profile.payment_info.expiryDate || '', cvv: currentUser.profile.payment_info.cvv || '', }); }
     }, [currentUser, cart, navigate, showToast, isConfirmed]);
 
     const rentalCost = useMemo(() => cart.reduce((sum, item) => sum + item.rentalTotalCost, 0), [cart]);
@@ -23,10 +23,10 @@ const CheckoutPage = () => {
     const totalAmount = useMemo(() => rentalCost + deliveryFee + serviceFee, [rentalCost, deliveryFee, serviceFee]);
     
     const agreementContent = useMemo(() => {
-        const renterName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "The Renter";
-        const itemsList = cart.map(item => { const product = products.find(p => p.id === item.productId); const owner = users[product?.ownerId]; return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${owner?.firstName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`; }).join('');
+        const renterName = currentUser ? `${currentUser.profile.first_name} ${currentUser.profile.last_name}` : "The Renter";
+        const itemsList = cart.map(item => { const product = products.find(p => p.id === item.productId); return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${product?.ownerName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`; }).join('');
         return rentalAgreementTemplate.replace(/\[Renter Name\]/g, renterName).replace(/\[List of Items and Terms\]/g, `<ul>${itemsList}</ul>`);
-    }, [cart, products, rentalAgreementTemplate, users, currentUser]);
+    }, [cart, products, rentalAgreementTemplate, currentUser]);
 
     const handlePaymentChange = (e) => { setPaymentDetails({ ...paymentDetails, [e.target.id.replace('checkout', '')]: e.target.value }); };
 
@@ -37,7 +37,7 @@ const CheckoutPage = () => {
 
         const orderDetails = {
             transactionId: `HZL-TRX-${Date.now()}`,
-            date: new Date().toISOString(), // Use ISO string for consistency
+            date: new Date().toISOString(),
             items: [...cart],
             rentalCost,
             deliveryFee,

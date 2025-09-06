@@ -4,41 +4,39 @@ import { useApp } from '../hooks/useApp';
 import ProductCard from '../components/ProductCard';
 
 const AllProductsPage = () => {
-    const { products, currentUser, allTags } = useApp();
+    const { products, currentUser, categories } = useApp();
     const [searchParams, setSearchParams] = useSearchParams();
-    const tagQuery = searchParams.get('tag');
+    const categoryQuery = searchParams.get('category');
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeFilter, setActiveFilter] = useState(tagQuery || 'all');
-    const tagsForFilter = ['all', ...allTags.sort()];
+    const [activeFilter, setActiveFilter] = useState(categoryQuery || 'all');
+    const categoriesForFilter = ['all', ...categories.map(c => c.name).sort()];
 
     useEffect(() => {
-        const tagQuery = searchParams.get('tag');
-        if (tagQuery && tagsForFilter.includes(tagQuery)) {
-            setActiveFilter(tagQuery);
+        const categoryQuery = searchParams.get('category');
+        if (categoryQuery && categoriesForFilter.includes(categoryQuery)) {
+            setActiveFilter(categoryQuery);
         } else {
             setActiveFilter('all');
         }
-    }, [searchParams, tagsForFilter]);
+    }, [searchParams, categoriesForFilter]);
 
     const filteredProducts = useMemo(() => {
-        // FIX: Default to non-admin view if currentUser is not yet loaded or is not an admin
-        const isAdmin = currentUser?.role === 'admin';
+        const isAdmin = currentUser?.profile?.role === 'admin';
         const visibleProducts = isAdmin ? products : products.filter(p => p.status === 'approved');
 
         return visibleProducts.filter(product => {
-            const matchesTag = activeFilter === 'all' || (product.tags && product.tags.includes(activeFilter));
+            const matchesCategory = activeFilter === 'all' || product.category.toLowerCase() === activeFilter.toLowerCase();
             const lowercasedTerm = searchTerm.toLowerCase();
             const matchesSearch = searchTerm === '' ||
                 product.title.toLowerCase().includes(lowercasedTerm) ||
-                product.description.toLowerCase().includes(lowercasedTerm) ||
-                (product.tags && product.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm)));
-            return matchesTag && matchesSearch;
+                product.description.toLowerCase().includes(lowercasedTerm);
+            return matchesCategory && matchesSearch;
         });
-    }, [products, searchTerm, activeFilter, currentUser]);
+    }, [products, searchTerm, activeFilter, currentUser, categories]);
 
-    const handleFilterClick = (tag) => {
-        setActiveFilter(tag);
-        setSearchParams(tag === 'all' ? {} : { tag });
+    const handleFilterClick = (category) => {
+        setActiveFilter(category);
+        setSearchParams(category === 'all' ? {} : { category });
     };
 
     return (
@@ -54,9 +52,9 @@ const AllProductsPage = () => {
                         <input type="text" className="search-input" placeholder="Search by name or tag..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                     <ul className="products-filter" id="productsPageFilter">
-                        {tagsForFilter.map(tag => (
-                             <li key={tag} className={activeFilter === tag ? 'active' : ''} onClick={() => handleFilterClick(tag)}>
-                                {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                        {categoriesForFilter.map(cat => (
+                             <li key={cat} className={activeFilter === cat ? 'active' : ''} onClick={() => handleFilterClick(cat)}>
+                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
                             </li>
                         ))}
                     </ul>

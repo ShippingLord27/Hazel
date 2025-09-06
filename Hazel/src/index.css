@@ -3577,31 +3577,6 @@ body.mobile-menu-active {
     .cart-summary { position: static; margin-top: 30px; }
 }
 
-/* Rental Tracker Styles */
-.rental-tracker-item {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    background: var(--light-gray);
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-}
-.dark-mode .rental-tracker-item { background: var(--footer-bg); }
-.rental-tracker-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
-.rental-tracker-info h4 { margin-bottom: 5px; }
-.rental-tracker-info p { font-size: 0.9em; }
-.status-active { color: var(--success-color); font-weight: bold; }
-.status-rented { color: var(--primary-color); font-weight: bold; }
-#rentalTrackerGrid h3 {
-    font-size: 1.2em;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid var(--border-color);
-}
-#rentalTrackerGrid h3:first-of-type { margin-top: 0; }
-.dark-mode #rentalTrackerGrid h3 { border-bottom-color: #444; }
 
 
 /* Verification Status Styles */
@@ -3909,4 +3884,23 @@ body.mobile-menu-active {
 }
 .dark-mode .notification-badge {
     border-color: var(--dark-color);
+}
+/* Review Modal Star Rating */
+.star-rating-container {
+    margin-bottom: 20px;
+}
+.star-rating {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+.star-rating .star {
+    color: #e4e5e9;
+    cursor: pointer;
+    transition: color 200ms;
+    font-size: 1.8rem;
+    margin-right: 5px;
+}
+.star-rating .star.active {
+    color: #ffc107;
 }

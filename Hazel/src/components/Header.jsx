@@ -5,15 +5,15 @@ import AuthModal from './AuthModal';
 import Search from './Search';
 
 const Header = () => {
-    const { theme, toggleTheme, currentUser, logout, cart, isLoading } = useApp();
+    const { theme, toggleTheme, currentUser, logout, cart } = useApp();
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isAuthModalOpen, setAuthModalOpen] = useState(false);
     const [initialAuthTab, setInitialAuthTab] = useState('login');
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        // This function call is now guaranteed to work correctly.
-        logout();
+    const handleLogout = async () => {
+        // FIX: Wait for the logout process to complete before navigating
+        await logout();
         navigate('/');
     };
     
@@ -25,10 +25,6 @@ const Header = () => {
     const cartItemCount = cart ? cart.length : 0;
 
     const renderUserNav = () => {
-        if (isLoading) {
-            return null; // Don't render anything while checking auth status
-        }
-
         if (!currentUser) {
             return (
                 <div id="loggedOutNavButtons">
@@ -79,7 +75,7 @@ const Header = () => {
                         </ul>
                         <div className="nav-buttons">
                             <button className="dark-mode-toggle" onClick={toggleTheme}>
-                                {theme === 'dark' ? 'Light' : 'Dark'}
+                                {theme === 'dark' ? <><i className="fas fa-sun"></i> Light</> : <><i className="far fa-moon"></i> Dark</>}
                             </button>
                             {renderUserNav()}
                         </div>

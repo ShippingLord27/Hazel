@@ -33,11 +33,9 @@ const RentalItem = ({ rental, product, isOwnerView, onStatusUpdate, onPrint }) =
 );
 
 const RentalTracker = () => {
-    // FIX: Get isLoading and the full rentalHistory array from context
-    const { currentUser, products, rentalHistory, isLoading, generateAndPrintReceipt, updateRentalStatus } = useApp();
+    const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt, updateRentalStatus } = useApp();
 
-    // --- BULLETPROOF LOADING CHECK ---
-    if (isLoading || !currentUser) {
+    if (!currentUser) {
         return (
              <div className="profile-view">
                 <div className="profile-view-header"><h1>Rental Tracker</h1></div>
@@ -46,10 +44,6 @@ const RentalTracker = () => {
         );
     }
     
-    // --- THE FIX: Component now filters the data it receives ---
-    const myRentalHistory = (rentalHistory || []).filter(r => r.renterEmail === currentUser.email);
-    const ownerLentHistory = (rentalHistory || []).filter(r => r.ownerEmail === currentUser.email);
-
     const handlePrintReceipt = (rental) => {
         const orderDetails = {
             transactionId: rental.transactionId, date: rental.rentalStartDate,
@@ -60,7 +54,7 @@ const RentalTracker = () => {
         generateAndPrintReceipt(orderDetails);
     };
 
-    const history = currentUser.role === 'owner' ? ownerLentHistory : myRentalHistory;
+    const history = currentUser.profile.role === 'owner' ? ownerLentHistory : rentalHistory;
     const activeRentals = history.filter(r => r.status === 'Active');
     const completedRentals = history.filter(r => r.status === 'Completed');
 
@@ -70,7 +64,7 @@ const RentalTracker = () => {
             <div className="profile-view-header">
                 <h1>Rental Tracker</h1>
                 <p>
-                    {currentUser.role === 'owner' 
+                    {currentUser.profile.role === 'owner' 
                         ? "Track items you've lent out."
                         : "Track items you've rented."
                     }
@@ -86,7 +80,7 @@ const RentalTracker = () => {
                                     key={rental.transactionId} 
                                     rental={rental} 
                                     product={product} 
-                                    isOwnerView={currentUser.role === 'owner'}
+                                    isOwnerView={currentUser.profile.role === 'owner'}
                                     onStatusUpdate={updateRentalStatus}
                                     onPrint={handlePrintReceipt}
                                 />;
@@ -104,7 +98,7 @@ const RentalTracker = () => {
                                     key={rental.transactionId}
                                     rental={rental}
                                     product={product}
-                                    isOwnerView={currentUser.role === 'owner'}
+                                    isOwnerView={currentUser.profile.role === 'owner'}
                                     onPrint={handlePrintReceipt}
                                 />;
                     })

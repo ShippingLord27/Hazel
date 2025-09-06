@@ -20,7 +20,6 @@ const ProfileProductCard = ({ product, onEdit, onDelete }) => {
 };
 
 const MyListings = () => {
-    // FIX: Remove `users` as it's no longer needed for this logic.
     const { currentUser, products, deleteProduct } = useApp();
     const [isListingModalOpen, setListingModalOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
@@ -41,10 +40,8 @@ const MyListings = () => {
         }
     };
 
-    // FIX: Find listings by filtering the main products array.
-    // This assumes the mock product data uses the user's EMAIL as the ownerId.
     const myListings = currentUser 
-        ? products.filter(p => p.ownerId === currentUser.email) 
+        ? products.filter(p => p.ownerId === currentUser.id) 
         : [];
 
     return (

@@ -35,47 +35,51 @@ import ListingManagement from './pages/admin/ListingManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import ContentManagement from './pages/admin/ContentManagement';
 
+import { AppProvider } from './contexts/AppContext';
+
 function App() {
   return (
-    <Routes>
-      {/* This Route wraps all pages that should have the Header and Footer */}
-      <Route path="/" element={<Layout />}>
-        <Route index element={<HomePage />} />
-        <Route path="products" element={<AllProductsPage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="contact" element={<ContactPage />} />
-        <Route path="faq" element={<FaqPage />} />
-        <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
-        <Route path="listing/:id" element={<ListingDetailPage />} />
-        <Route path="cart" element={<CartPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
-        
-        {/* --- NEWLY ADDED CHAT ROUTE --- */}
-        {/* This makes the /chat URL render your new ChatPage component */}
-        <Route path="chat" element={<ChatPage />} />
+    <AppProvider>
+      <Routes>
+        {/* This Route wraps all pages that should have the Header and Footer */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="products" element={<AllProductsPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="faq" element={<FaqPage />} />
+          <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="listing/:id" element={<ListingDetailPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          
+          {/* --- NEWLY ADDED CHAT ROUTE --- */}
+          {/* This makes the /chat URL render your new ChatPage component */}
+          <Route path="chat" element={<ChatPage />} />
 
-        {/* Nested Profile Routes */}
-        <Route path="profile" element={<ProfilePage />}>
-          <Route index element={<ProfileDashboard />} />
-          <Route path="my-listings" element={<MyListings />} />
-          <Route path="favorites" element={<Favorites />} />
-          <Route path="rental-tracker" element={<RentalTracker />} />
-          <Route path="settings" element={<ProfileSettings />} />
+          {/* Nested Profile Routes */}
+          <Route path="profile" element={<ProfilePage />}>
+            <Route index element={<ProfileDashboard />} />
+            <Route path="my-listings" element={<MyListings />} />
+            <Route path="favorites" element={<Favorites />} />
+            <Route path="rental-tracker" element={<RentalTracker />} />
+            <Route path="settings" element={<ProfileSettings />} />
+          </Route>
+          
+          {/* Nested Admin Routes */}
+          <Route path="admin" element={<AdminDashboardPage />}>
+             <Route index element={<AdminOverview />} />
+             <Route path="users" element={<UserManagement />} />
+             <Route path="listings" element={<ListingManagement />} />
+             <Route path="content" element={<ContentManagement />} />
+             <Route path="settings" element={<AdminSettings />} />
+          </Route>
         </Route>
-        
-        {/* Nested Admin Routes */}
-        <Route path="admin" element={<AdminDashboardPage />}>
-           <Route index element={<AdminOverview />} />
-           <Route path="users" element={<UserManagement />} />
-           <Route path="listings" element={<ListingManagement />} />
-           <Route path="content" element={<ContentManagement />} />
-           <Route path="settings" element={<AdminSettings />} />
-        </Route>
-      </Route>
 
-      {/* This route is outside the main Layout, so it will be a blank page */}
-      <Route path="/seed-data" element={<TestDataSavePage />} />
-    </Routes>
+        {/* This route is outside the main Layout, so it will be a blank page */}
+        <Route path="/seed-data" element={<TestDataSavePage />} />
+      </Routes>
+    </AppProvider>
   );
 }
 

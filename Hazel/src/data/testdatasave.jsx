@@ -1,103 +1,223 @@
 import React, { useState } from 'react';
 import supabase from '../supabaseClient';
-import { initialProductData, initialSimulatedUsers, initialRentalHistoryData, initialTagsData, initialProductTagsData } from './initialData';
+import { initialProductData } from './initialData';
+
+// --- NEW MOCK DATA FOR SEEDING ---
+// IMPORTANT: These users must be created in Supabase Auth first.
+// You can get their UUIDs from the Supabase dashboard's Auth section.
+const ownersToSeed = [
+    {
+        user_id: 'YOUR_ALICE_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        email: 'alice.photo@example.com',
+        name: 'Alice Photo',
+        phone: '555-0101',
+        address: '123 Photography Lane'
+    },
+    {
+        user_id: 'YOUR_BOB_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        email: 'bob.rider@example.com',
+        name: 'Bob Rider',
+        phone: '555-0102',
+        address: '456 Adventure Trail'
+    },
+    {
+        user_id: 'YOUR_JOHN_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        email: 'john.doe@example.com',
+        name: 'John Doe',
+        phone: '555-0103',
+        address: '789 Tool Street'
+    },
+    {
+        user_id: 'YOUR_JANE_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        email: 'jane.smith@example.com',
+        name: 'Jane Smith',
+        phone: '555-0104',
+        address: '101 Gaming Blvd'
+    },
+    {
+        user_id: 'YOUR_CAROL_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        email: 'carol.camper@example.com',
+        name: 'Carol Camper',
+        phone: '555-0105',
+        address: '212 Forest Drive'
+    }
+];
+
 const TestDataSavePage = () => {
-const [status, setStatus] = useState('Ready to seed data.');
-const [isLoading, setIsLoading] = useState(false);
+    const [status, setStatus] = useState('Ready to seed data.');
+    const [isLoading, setIsLoading] = useState(false);
 
-// Helper to transform user data for the database
-const transformUserForDb = (user) => {
-    const transformedUser = { ...user, myListingIds: user.myListingIds.join(','), favoriteListingIds: user.favoriteListingIds.join(','), paymentCardNumber: user.paymentInfo ? user.paymentInfo.cardNumber : null, paymentExpiryDate: user.paymentInfo ? user.paymentInfo.expiryDate : null, paymentCvv: user.paymentInfo ? user.paymentInfo.cvv : null, };
-    delete transformedUser.paymentInfo;
-    return transformedUser;
-};
+    const handleClearAll = async () => {
+        setIsLoading(true);
+        setStatus('Starting database clear...');
 
+        // Note: We cannot and should not delete from auth.users from the client.
+        // This must be done manually in the Supabase dashboard.
+        // The trigger on auth.users will create corresponding profiles in renters/owners/admins.
+        // Deleting from these tables will de-sync them from auth.users.
+        // The correct way to clear is to delete users from the Supabase Auth UI.
 
-const seedTable = async (tableName, data, isProfile = false) => {
-    setIsLoading(true);
-    setStatus(`Clearing table: ${tableName}...`);
-    
-    const { error: deleteError } = await supabase.from(tableName).delete().neq(isProfile ? 'email' : 'id', 'a_non_existent_value');
-    if (deleteError) {
-        setStatus(`Error clearing ${tableName}: ${deleteError.message}`);
+        setStatus('Clearing favorites...');
+        const { error: fError } = await supabase.from('favorites').delete().neq('favorite_id', -1);
+        if (fError) { setStatus(`Error clearing favorites: ${fError.message}`); setIsLoading(false); return; }
+
+        setStatus('Clearing transactions...');
+        const { error: tError } = await supabase.from('transactions').delete().neq('transaction_id', -1);
+        if (tError) { setStatus(`Error clearing transactions: ${tError.message}`); setIsLoading(false); return; }
+
+        setStatus('Clearing items...');
+        const { error: iError } = await supabase.from('items').delete().neq('item_id', -1);
+        if (iError) { setStatus(`Error clearing items: ${iError.message}`); setIsLoading(false); return; }
+
+        setStatus('Clearing categories...');
+        const { error: cError } = await supabase.from('categories').delete().neq('category_id', -1);
+        if (cError) { setStatus(`Error clearing categories: ${cError.message}`); setIsLoading(false); return; }
+
+        // It's generally not safe to mass-delete profiles that are linked to auth.users
+        // as the trigger only works on INSERT.
+        setStatus('Skipping profile tables (renters, owners, admins). Please manage users in Supabase Auth UI.');
+
+        setStatus('All non-user tables cleared successfully!');
         setIsLoading(false);
-        return false;
-    }
+    };
 
-    const dataToInsert = isProfile ? data.map(transformUserForDb) : data;
+    const handleSeedData = async () => {
+        setIsLoading(true);
+        setStatus('Starting data seeding...');
 
-    setStatus(`Seeding ${dataToInsert.length} records into ${tableName}...`);
-    const { error: insertError } = await supabase.from(tableName).insert(dataToInsert);
-    if (insertError) {
-        setStatus(`Error seeding ${tableName}: ${insertError.message}`);
-        setIsLoading(false);
-        return false;
-    }
+        if (ownersToSeed.some(o => o.user_id.startsWith('YOUR_'))) {
+            setStatus('Seeding failed: Please replace placeholder UUIDs in `src/data/testdatasave.jsx` with actual UUIDs from your Supabase Auth users.');
+            setIsLoading(false);
+            return;
+        }
 
-    setStatus(`Successfully seeded ${tableName}!`);
-    setIsLoading(false);
-    return true;
+        try {
+            // Step 1: Insert categories from initialProductData
+            setStatus('Inserting categories...');
+            const categoryNames = [...new Set(initialProductData.map(p => p.category))];
+            const categoriesForDb = categoryNames.map(name => ({ name }));
+            
+            const { error: catInsertError } = await supabase
+                .from('categories')
+                .insert(categoriesForDb)
+                .onConflict('name')
+                .ignore(); // Use ignore to avoid errors on duplicate names
+
+            if (catInsertError) throw new Error(`Error inserting categories: ${catInsertError.message}`);
+
+            // Retrieve all category IDs to create a map
+            setStatus('Retrieving category IDs...');
+            const { data: categories, error: catFetchError } = await supabase.from('categories').select('category_id, name');
+            if (catFetchError) throw new Error(`Error fetching categories: ${catFetchError.message}`);
+            const categoryMap = categories.reduce((acc, cat) => { acc[cat.name] = cat.category_id; return acc; }, {});
+
+            // Step 2: Ensure the owners exist
+            setStatus('Inserting owners...');
+            // IMPORTANT: The user_id MUST match a user in auth.users
+            const ownersForDb = ownersToSeed.map(o => ({ user_id: o.user_id, name: o.name, phone: o.phone, address: o.address }));
+            const { error: ownerInsertError } = await supabase
+                .from('owners')
+                .insert(ownersForDb)
+                .onConflict('user_id')
+                .ignore();
+
+            if (ownerInsertError) throw new Error(`Error inserting owners: ${ownerInsertError.message}`);
+
+            // Retrieve all owner IDs to create a map
+            setStatus('Retrieving owner IDs...');
+            const { data: owners, error: ownerFetchError } = await supabase.from('owners').select('owner_id, user_id');
+            if (ownerFetchError) throw new Error(`Error fetching owners: ${ownerFetchError.message}`);
+            
+            // Map the owner's auth UUID to their owner_id (PK)
+            const ownerUuidToPkMap = owners.reduce((acc, owner) => { acc[owner.user_id] = owner.owner_id; return acc; }, {});
+            
+            // Map the original email from initialData to the owner_id (PK)
+            const ownerEmailToPkMap = ownersToSeed.reduce((acc, owner) => {
+                const ownerPk = ownerUuidToPkMap[owner.user_id];
+                if (ownerPk) {
+                    acc[owner.email] = ownerPk;
+                }
+                return acc;
+            }, {});
+
+            // Step 3: Insert the items
+            setStatus('Preparing and inserting items...');
+            const itemsForDb = initialProductData.map(item => {
+                const owner_id = ownerEmailToPkMap[item.ownerId];
+                const category_id = categoryMap[item.category];
+                if (!owner_id) {
+                    console.warn(`Skipping item "${item.title}" because owner email "${item.ownerId}" was not found in the seed data.`);
+                    return null;
+                }
+                return {
+                    owner_id: owner_id,
+                    title: item.fullTitle || item.title,
+                    description: item.description,
+                    category_id: category_id,
+                    image_url: item.image,
+                    price_per_day: item.price,
+                    availability: item.status === 'approved', // Map status to availability
+                    tracking_tag_id: item.trackingTagId,
+                    owner_terms: item.ownerTerms
+                };
+            }).filter(Boolean); // Filter out null items
+
+            const { error: itemsInsertError } = await supabase.from('items').insert(itemsForDb);
+            if (itemsInsertError) throw new Error(`Error inserting items: ${itemsInsertError.message}`);
+
+            setStatus('Data seeded successfully! All items from initialData.jsx are now in the database.');
+
+        } catch (error) {
+            setStatus(`Seeding failed: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div style={{ fontFamily: 'sans-serif', padding: '2rem' }}>
+            <h1>Supabase Data Seeding</h1>
+            <p>Use these buttons to manage your Supabase database with test data.</p>
+            <p><strong>Warning:</strong> Clearing will delete all existing data in the `favorites`, `items`, `transactions`, and `categories` tables.</p>
+            <p><strong>Important:</strong> This tool does NOT seed new user data. You must create users (renters, owners, admins) through the application's sign-up form or directly in the Supabase Auth dashboard. The SQL trigger will handle creating their corresponding profiles.</p>
+
+            <div style={{ display: 'flex', gap: '1rem', margin: '1rem' }}>
+                <button
+                    onClick={handleClearAll}
+                    disabled={isLoading}
+                    style={{
+                        fontWeight: 'bold',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    CLEAR ALL NON-USER DATA
+                </button>
+                <button
+                    onClick={handleSeedData}
+                    disabled={isLoading}
+                    style={{
+                        fontWeight: 'bold',
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    SEED ALL DATA
+                </button>
+            </div>
+            <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f0f0', border: '1px solid #ccc' }}>
+                <strong>Status:</strong> {isLoading ? 'Processing...' : status}
+            </div>
+        </div>
+    );
 };
 
-const handleSeedAll = async () => {
-    setIsLoading(true);
-    setStatus('Starting full database seed...');
-    
-    // Clear tables in reverse order of dependency
-    setStatus('Clearing product_tags...');
-    await supabase.from('product_tags').delete().neq('product_id', -1);
-    setStatus('Clearing rental_history...');
-    await supabase.from('rental_history').delete().neq('id', -1);
-    setStatus('Clearing products...');
-    await supabase.from('products').delete().neq('id', -1);
-    setStatus('Clearing tags...');
-    await supabase.from('tags').delete().neq('id', -1);
-    setStatus('Clearing profiles...');
-    await supabase.from('profiles').delete().neq('email', 'non-existent@email.com');
-    
-    // Seed tables in order of dependency
-    const profilesSuccess = await seedTable('profiles', Object.values(initialSimulatedUsers), true);
-    if (!profilesSuccess) { setIsLoading(false); return; }
-    
-    const productsSuccess = await seedTable('products', initialProductData.map(({tags, ...rest}) => rest)); // Remove tags array before inserting
-    if (!productsSuccess) { setIsLoading(false); return; }
-
-    const rentalsSuccess = await seedTable('rental_history', initialRentalHistoryData);
-    if (!rentalsSuccess) { setIsLoading(false); return; }
-
-    const tagsSuccess = await seedTable('tags', initialTagsData);
-    if (!tagsSuccess) { setIsLoading(false); return; }
-
-    // Fetch tag IDs to map to product_tags
-    const { data: tagsMap, error: tagsError } = await supabase.from('tags').select('id, name');
-    if (tagsError) { setStatus('Error fetching tag IDs'); setIsLoading(false); return; }
-    const tagNameToId = tagsMap.reduce((acc, tag) => { acc[tag.name] = tag.id; return acc; }, {});
-    
-    const productTagsDataForDb = initialProductTagsData.map(pt => ({
-        product_id: pt.product_id,
-        tag_id: tagNameToId[pt.tag_name]
-    }));
-    
-    const productTagsSuccess = await seedTable('product_tags', productTagsDataForDb);
-    if (!productTagsSuccess) { setIsLoading(false); return; }
-
-
-    setStatus('All tables seeded successfully!');
-    setIsLoading(false);
-}
-
-return (
-    <div style={{ fontFamily: 'sans-serif', padding: '2rem' }}>
-        <h1>Supabase Data Seeding</h1>
-        <p>Use this button to populate your Supabase database with the initial test data.</p>
-        <p><strong>Warning:</strong> This will delete all existing data in the tables before inserting the new data.</p>
-        <div style={{ display: 'flex', gap: '1rem', margin: '1rem' }}>
-            <button onClick={handleSeedAll} disabled={isLoading} style={{fontWeight: 'bold'}}>SEED ALL DATA</button>
-        </div>
-        <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f0f0', border: '1px solid #ccc' }}>
-            <strong>Status:</strong> {isLoading ? 'Processing...' : status}
-        </div>
-    </div>
-);
-};
 export default TestDataSavePage;

@@ -38,7 +38,7 @@ const ListingDetailPage = () => {
     const handleOptionChange = (e) => setRentalOptions(prev => ({ ...prev, [e.target.name]: e.target.value }));
     const handleAddToCart = () => {
         if (!currentUser) { showToast("Please login to rent an item."); return; }
-        if (currentUser.email === product.ownerId) { showToast("You cannot rent your own item."); return; }
+        if (currentUser.id === product.ownerId) { showToast("You cannot rent your own item."); return; }
         if (!rentalOptions.startDate) { showToast("Please select a rental start date."); return; }
         const cartItem = {
             productId: product.id, rentalDurationDays: parseInt(rentalOptions.days),
@@ -68,7 +68,7 @@ const ListingDetailPage = () => {
                                 {parseInt(rentalOptions.days) > 1 && <span> (₱{rentalPriceDetails.perDay.toFixed(2)}/day)</span>}
                             </div>
                             <div className="listing-meta">
-                                {currentUser && (currentUser.email === product.ownerId || currentUser.role === 'admin') && (
+                                {currentUser && (currentUser.id === product.ownerId || currentUser.profile.role === 'admin') && (
                                     <div className="meta-item"><i className="fas fa-tag"></i> Tracking ID: <span className="listing-tracking-id">{product.trackingTagId || 'N/A'}</span></div>
                                 )}
                                 <div className="meta-item"><i className="fas fa-user"></i> Owner: <span className="listing-owner-name">{product.ownerName || 'N/A'}</span></div>
@@ -92,10 +92,10 @@ const ListingDetailPage = () => {
                                     <input type="date" id="rentalDate" name="startDate" min={getTodayString()} value={rentalOptions.startDate} onChange={handleOptionChange} />
                                 </div>
                             </div>
-                            {currentUser && currentUser.role === 'user' && (
+                            {currentUser && currentUser.profile.role === 'renter' && (
                                 <button className="btn btn-primary btn-block" onClick={handleAddToCart}><i className="fas fa-cart-plus"></i> Add to Cart</button>
                             )}
-                            {currentUser && currentUser.email !== product.ownerId && (
+                            {currentUser && currentUser.id !== product.ownerId && (
                                 <button className="btn btn-outline btn-block listing-chat-owner-btn" onClick={handleChatWithOwner}><i className="fas fa-comments"></i> Chat with Owner</button>
                             )}
                         </div>
@@ -103,7 +103,7 @@ const ListingDetailPage = () => {
                     <div className="reviews-section" id={`reviews-section-${product.id}`}>
                         <h3>Customer Reviews</h3>
                         {product.reviews && product.reviews.length > 0 ? (<p>Reviews would be displayed here.</p>) : (<p>No reviews yet for this listing.</p>)}
-                        {currentUser && currentUser.role === 'user' && (<button className="btn btn-outline" style={{ marginTop: '20px' }} onClick={() => setReviewModalOpen(true)}>Leave a Review</button>)}
+                        {currentUser && currentUser.profile.role === 'renter' && (<button className="btn btn-outline" style={{ marginTop: '20px' }} onClick={() => setReviewModalOpen(true)}>Leave a Review</button>)}
                     </div>
                 </div>
             </div>

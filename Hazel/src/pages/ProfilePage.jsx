@@ -16,6 +16,13 @@ const ProfilePage = () => {
         }
     }, [currentUser, isLoading, navigate]);
 
+    // FIX: Create an async handler to properly await logout before navigating
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        await logout();
+        navigate('/');
+    };
+
     if (isLoading || !currentUser || !currentUser.profile) {
         return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Loading Profile...</div>;
     }
@@ -54,7 +61,7 @@ const ProfilePage = () => {
                                     </NavLink>
                                 </li>
                             ))}
-                            <li><a href="#" onClick={logout}><i className="fas fa-sign-out-alt"></i> Logout</a></li>
+                            <li><a href="#" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> Logout</a></li>
                         </ul>
                     </aside>
                     <main className="profile-main-content">
