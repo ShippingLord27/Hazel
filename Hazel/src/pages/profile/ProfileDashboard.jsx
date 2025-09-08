@@ -11,7 +11,7 @@ const OwnerDashboard = ({ user, products, ownerLentHistory }) => {
     return (
         <>
             <div className="profile-view-header">
-                <h1>Welcome, {user.profile.name}!</h1>
+                <h1>Welcome, {user.name}!</h1>
                 <p>Here's an overview of your rental activity.</p>
             </div>
         <div className="analytics-grid">
@@ -28,19 +28,19 @@ const OwnerDashboard = ({ user, products, ownerLentHistory }) => {
                 <div className="analytics-label">Total Earnings</div>
             </div>
             </div>
-    </>
+        </>
     );
 };
 
-const UserDashboard = ({ user, rentalHistory }) => (
+const RenterDashboard = ({ user, rentalHistory }) => (
      <>
         <div className="profile-view-header">
-            <h1>Welcome, {user.profile.name}!</h1>
+            <h1>Welcome, {user.name}!</h1>
             <p>Here's a summary of your account.</p>
         </div>
         <div className="analytics-grid">
             <div className="analytics-card">
-                <div className="analytics-value">{rentalHistory.filter(r => r.status === 'Active').length}</div>
+                <div className="analytics-value">{rentalHistory ? rentalHistory.filter(r => r.status === 'Active').length : 0}</div>
                 <div className="analytics-label">Active Rentals</div>
             </div>
         </div>
@@ -53,9 +53,9 @@ const ProfileDashboard = () => {
 
     return (
         <div className="profile-view">
-           {currentUser.profile.role === 'owner' 
+           {currentUser.role === 'owner' 
                 ? <OwnerDashboard user={currentUser} products={products} ownerLentHistory={ownerLentHistory} /> 
-                : <UserDashboard user={currentUser} rentalHistory={rentalHistory} />
+                : <RenterDashboard user={currentUser} rentalHistory={rentalHistory} />
            }
         </div>
     );

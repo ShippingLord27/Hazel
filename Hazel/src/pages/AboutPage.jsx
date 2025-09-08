@@ -1,30 +1,28 @@
 import React, { useEffect } from 'react';
 
-// Data for the team members to avoid repetitive JSX
 const teamMembers = [
     {
         name: 'Jace R. Torres',
         role: 'Main Developer / Documentation',
-        imgSrc: 'https://i.ibb.co/HT0Nz7j1/download-12.jpg',
+        imgSrc: 'https://i.ibb.co/HT0Nz7j1/download-12.jpg'
     },
     {
         name: 'Gurkarn Q. Singh',
         role: 'Backup Developer / Documentation',
-        imgSrc: 'https://i.ibb.co/MDQJNcRS/download-14.jpg',
+        imgSrc: 'https://i.ibb.co/MDQJNcRS/download-14.jpg'
     },
     {
         name: 'Olive Leigh A. Mendoza',
         role: 'Front End Developer / Design / Documentation',
-        imgSrc: 'https://i.ibb.co/xt0g4cPP/download-13.jpg',
+        imgSrc: 'https://i.ibb.co/Rkm65MZZ/download-13.jpg'
     },
     {
         name: 'Romeo Victor D. Nogaliza',
         role: 'Spokeperson / Documentation',
-        imgSrc: 'https://i.ibb.co/fGCqLmjw/494888334-1322942232103903-4287235928389679842-n.jpg',
+        imgSrc: 'https://i.ibb.co/fGCqLmjw/494888334-1322942232103903-4287235928389679842-n.jpg'
     },
 ];
 
-// Data for the company values
 const valuesData = [
     {
         iconClass: 'fas fa-handshake',
@@ -48,9 +46,8 @@ const valuesData = [
     },
 ];
 
-
 const AboutPage = () => {
-    // Scroll to top when the component mounts
+    
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -59,7 +56,6 @@ const AboutPage = () => {
         <div className="page active" id="about-page" style={{ paddingTop: '70px' }}>
             <div className="container about-page-container">
                 
-                {/* Hero Section */}
                 <section className="about-hero">
                     <div className="about-hero-content">
                         <h1>About HAZEL</h1>
@@ -67,7 +63,6 @@ const AboutPage = () => {
                     </div>
                 </section>
 
-                {/* Our Story Section */}
                 <section className="our-story">
                     <div className="section-title">
                         <h2>Our Story</h2>
@@ -79,12 +74,11 @@ const AboutPage = () => {
                             <p>Today, we're proud to be the leading peer-to-peer rental platform, offering everything from power tools to party equipment and more.</p>
                         </div>
                         <div className="about-img">
-                            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Our Team collaborating" />
+                            <img src="https://images.unsplash.com/photo-1552581234-26160f608093?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="HAZEL team working" />
                         </div>
                     </div>
                 </section>
 
-                {/* Mission & Vision Section */}
                 <section className="mission-vision">
                     <div className="mission">
                         <h2>Our Mission</h2>
@@ -96,7 +90,6 @@ const AboutPage = () => {
                     </div>
                 </section>
 
-                {/* Meet Our Team Section */}
                 <section className="team-section">
                     <div className="section-title">
                         <h2>Meet Our Team</h2>
@@ -115,7 +108,6 @@ const AboutPage = () => {
                     </div>
                 </section>
 
-                {/* Our Values Section */}
                 <section className="values-section">
                     <div className="section-title">
                         <h2>Our Values</h2>

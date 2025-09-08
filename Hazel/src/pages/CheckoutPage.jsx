@@ -13,8 +13,8 @@ const CheckoutPage = () => {
     const [paymentDetails, setPaymentDetails] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
 
     useEffect(() => {
-        if (!currentUser || cart.length === 0) { if (!isConfirmed) { showToast("Your cart is empty or you are not logged in."); navigate('/products'); } } 
-        else if (currentUser.profile.payment_info) { setPaymentDetails({ cardNumber: currentUser.profile.payment_info.cardNumber || '', expiryDate: currentUser.profile.payment_info.expiryDate || '', cvv: currentUser.profile.payment_info.cvv || '', }); }
+        if (!currentUser || cart.length === 0) { if (!isConfirmed) { showToast("Your cart is empty or you are not logged in."); navigate('/products'); } }
+        else if (currentUser.payment_info) { setPaymentDetails({ cardNumber: currentUser.payment_info.cardNumber || '', expiryDate: currentUser.payment_info.expiryDate || '', cvv: currentUser.payment_info.cvv || '', }); }
     }, [currentUser, cart, navigate, showToast, isConfirmed]);
 
     const rentalCost = useMemo(() => cart.reduce((sum, item) => sum + item.rentalTotalCost, 0), [cart]);
@@ -23,7 +23,7 @@ const CheckoutPage = () => {
     const totalAmount = useMemo(() => rentalCost + deliveryFee + serviceFee, [rentalCost, deliveryFee, serviceFee]);
     
     const agreementContent = useMemo(() => {
-        const renterName = currentUser ? `${currentUser.profile.first_name} ${currentUser.profile.last_name}` : "The Renter";
+        const renterName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : "The Renter";
         const itemsList = cart.map(item => { const product = products.find(p => p.id === item.productId); return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${product?.ownerName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`; }).join('');
         return rentalAgreementTemplate.replace(/\[Renter Name\]/g, renterName).replace(/\[List of Items and Terms\]/g, `<ul>${itemsList}</ul>`);
     }, [cart, products, rentalAgreementTemplate, currentUser]);

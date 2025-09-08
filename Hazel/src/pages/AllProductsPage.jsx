@@ -1,44 +1,55 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import ProductCard from '../components/ProductCard';
 
 const AllProductsPage = () => {
-    const { products, currentUser, categories } = useApp();
+    const { products, categories, fetchProducts, productsLoading, productsCount, productsPerPage } = useApp();
     const [searchParams, setSearchParams] = useSearchParams();
-    const categoryQuery = searchParams.get('category');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeFilter, setActiveFilter] = useState(categoryQuery || 'all');
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const [activeFilter, setActiveFilter] = useState(searchParams.get('category') || 'all');
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
+
     const categoriesForFilter = ['all', ...categories.map(c => c.name).sort()];
+    const totalPages = Math.ceil(productsCount / productsPerPage);
+
+    const debounce = (func, delay) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), delay);
+        };
+    };
+
+    const handleFetchProducts = useCallback(debounce((page, filter, term) => {
+        fetchProducts({ page, categoryName: filter, searchTerm: term });
+        const params = {};
+        if (term) params.search = term;
+        if (filter !== 'all') params.category = filter;
+        if (page > 1) params.page = page;
+        setSearchParams(params);
+    }, 500), [fetchProducts, setSearchParams]); 
 
     useEffect(() => {
-        const categoryQuery = searchParams.get('category');
-        if (categoryQuery && categoriesForFilter.includes(categoryQuery)) {
-            setActiveFilter(categoryQuery);
-        } else {
-            setActiveFilter('all');
-        }
-    }, [searchParams, categoriesForFilter]);
-
-    const filteredProducts = useMemo(() => {
-        const isAdmin = currentUser?.profile?.role === 'admin';
-        const visibleProducts = isAdmin ? products : products.filter(p => p.status === 'approved');
-
-        return visibleProducts.filter(product => {
-            const matchesCategory = activeFilter === 'all' || product.category.toLowerCase() === activeFilter.toLowerCase();
-            const lowercasedTerm = searchTerm.toLowerCase();
-            const matchesSearch = searchTerm === '' ||
-                product.title.toLowerCase().includes(lowercasedTerm) ||
-                product.description.toLowerCase().includes(lowercasedTerm);
-            return matchesCategory && matchesSearch;
-        });
-    }, [products, searchTerm, activeFilter, currentUser, categories]);
+        handleFetchProducts(currentPage, activeFilter, searchTerm);
+    }, [currentPage, activeFilter, searchTerm, handleFetchProducts]);
 
     const handleFilterClick = (category) => {
         setActiveFilter(category);
-        setSearchParams(category === 'all' ? {} : { category });
+        setCurrentPage(1); 
+    };
+    
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); 
     };
 
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
+    
     return (
         <div className="page active" id="all-products-page" style={{ paddingTop: '70px' }}>
             <div className="container products-page-container">
@@ -49,7 +60,7 @@ const AllProductsPage = () => {
                 <section className="products-page-controls">
                     <div className="products-page-search-container">
                         <i className="fas fa-search search-icon"></i>
-                        <input type="text" className="search-input" placeholder="Search by name or tag..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <input type="text" className="search-input" placeholder="Search by name or tag..." value={searchTerm} onChange={handleSearchChange} />
                     </div>
                     <ul className="products-filter" id="productsPageFilter">
                         {categoriesForFilter.map(cat => (
@@ -59,12 +70,23 @@ const AllProductsPage = () => {
                         ))}
                     </ul>
                 </section>
-                {filteredProducts.length > 0 ? (
-                    <div className="products-grid" id="allProductsGrid">
-                        {filteredProducts.map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                {productsLoading ? (
+                    <div className="loading-spinner-container"><div className="loading-spinner"></div></div>
+                ) : products.length > 0 ? (
+                    <>
+                        <div className="products-grid" id="allProductsGrid">
+                            {products.map(product => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+                        {totalPages > 1 && (
+                            <div className="pagination-controls">
+                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+                                <span>Page {currentPage} of {totalPages}</span>
+                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="no-products-found">
                         <p>No products match your current filters or search term.</p>

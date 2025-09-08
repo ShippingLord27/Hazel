@@ -6,7 +6,7 @@ const ProductCard = ({ product }) => {
     const { currentUser, toggleFavorite } = useApp();
     const navigate = useNavigate();
 
-    const isFavorite = currentUser?.profile?.favorite_item_ids?.includes(product.id);
+    const isFavorite = currentUser?.favorite_item_ids?.includes(product.id);
 
     return (
         <div className="product-card" data-product-id={product.id}>
@@ -30,7 +30,7 @@ const ProductCard = ({ product }) => {
                          >
                             Details
                          </button>
-                         {currentUser && currentUser.profile.role === 'renter' && (
+                         {currentUser && currentUser.role === 'renter' && (
                             <button 
                                 className={`btn btn-icon favorite-toggle-btn ${isFavorite ? 'active' : ''}`} 
                                 aria-label="Toggle Favorite"

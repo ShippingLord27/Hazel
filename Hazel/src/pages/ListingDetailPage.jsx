@@ -18,7 +18,7 @@ const ListingDetailPage = () => {
         if (foundProduct) {
             setProduct(foundProduct);
             setSelectedImage(foundProduct.image);
-        } else {
+        } else if (products.length > 0) { // Avoid redirecting while products are still loading
             showToast("Sorry, that listing could not be found.");
             navigate('/products');
         }
@@ -48,7 +48,16 @@ const ListingDetailPage = () => {
         const success = addToCart(cartItem);
         if (success) { navigate('/cart'); }
     };
-    const handleChatWithOwner = () => { openChat({ id: product.ownerId, name: product.ownerName, context: `Regarding: ${product.title}` }); };
+    
+    const handleChatWithOwner = async () => {
+        if (!currentUser) { showToast("Please login to chat with the owner."); return; }
+        const partner = { id: product.ownerId, name: product.ownerName, profile_pic: null }; // Profile pic can be fetched in openChat
+        const threadId = await openChat(partner, product.id);
+        if (threadId) {
+            navigate(`/chat?thread_id=${threadId}`);
+        }
+    };
+
     const getTodayString = () => new Date().toISOString().split('T')[0];
     if (!product) { return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Loading listing...</div>; }
 
@@ -68,7 +77,7 @@ const ListingDetailPage = () => {
                                 {parseInt(rentalOptions.days) > 1 && <span> (₱{rentalPriceDetails.perDay.toFixed(2)}/day)</span>}
                             </div>
                             <div className="listing-meta">
-                                {currentUser && (currentUser.id === product.ownerId || currentUser.profile.role === 'admin') && (
+                                {currentUser && (currentUser.id === product.ownerId || currentUser.role === 'admin') && (
                                     <div className="meta-item"><i className="fas fa-tag"></i> Tracking ID: <span className="listing-tracking-id">{product.trackingTagId || 'N/A'}</span></div>
                                 )}
                                 <div className="meta-item"><i className="fas fa-user"></i> Owner: <span className="listing-owner-name">{product.ownerName || 'N/A'}</span></div>
@@ -92,7 +101,7 @@ const ListingDetailPage = () => {
                                     <input type="date" id="rentalDate" name="startDate" min={getTodayString()} value={rentalOptions.startDate} onChange={handleOptionChange} />
                                 </div>
                             </div>
-                            {currentUser && currentUser.profile.role === 'renter' && (
+                            {currentUser && currentUser.role === 'renter' && (
                                 <button className="btn btn-primary btn-block" onClick={handleAddToCart}><i className="fas fa-cart-plus"></i> Add to Cart</button>
                             )}
                             {currentUser && currentUser.id !== product.ownerId && (
@@ -103,7 +112,7 @@ const ListingDetailPage = () => {
                     <div className="reviews-section" id={`reviews-section-${product.id}`}>
                         <h3>Customer Reviews</h3>
                         {product.reviews && product.reviews.length > 0 ? (<p>Reviews would be displayed here.</p>) : (<p>No reviews yet for this listing.</p>)}
-                        {currentUser && currentUser.profile.role === 'renter' && (<button className="btn btn-outline" style={{ marginTop: '20px' }} onClick={() => setReviewModalOpen(true)}>Leave a Review</button>)}
+                        {currentUser && currentUser.role === 'renter' && (<button className="btn btn-outline" style={{ marginTop: '20px' }} onClick={() => setReviewModalOpen(true)}>Leave a Review</button>)}
                     </div>
                 </div>
             </div>

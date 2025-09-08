@@ -12,7 +12,7 @@ const Search = () => {
 
     useEffect(() => {
         if (searchTerm.length > 1) {
-            const visibleProducts = currentUser?.profile?.role === 'admin'
+            const visibleProducts = currentUser?.role === 'admin'
                 ? products
                 : products.filter(p => p.status === 'approved');
 

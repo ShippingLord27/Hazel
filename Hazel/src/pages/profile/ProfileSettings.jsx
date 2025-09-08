@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
+import supabase from '../../supabaseClient';
 
 const ProfileSettings = () => {
     const { currentUser, showToast, updateUser } = useApp();
@@ -8,12 +9,12 @@ const ProfileSettings = () => {
     const [passwordData, setPasswordData] = useState({ newPassword: '', confirmNewPassword: '' });
 
     useEffect(() => {
-        if (currentUser?.profile) {
+        if (currentUser) {
             setSettingsData({
-                name: currentUser.profile.name || '',
-                profilePic: currentUser.profile.profile_pic || '',
-                location: currentUser.profile.location || '',
-                phone: currentUser.profile.phone || '',
+                name: currentUser.name || '',
+                profilePic: currentUser.profile_pic || '',
+                location: currentUser.location || '',
+                phone: currentUser.phone || '',
             });
         }
     }, [currentUser]);
@@ -21,23 +22,33 @@ const ProfileSettings = () => {
     const handleSettingsChange = (e) => setSettingsData({ ...settingsData, [e.target.name]: e.target.value });
     const handlePasswordChange = (e) => setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
 
-    const handleSaveChanges = (e) => {
+    const handleSaveChanges = async (e) => {
         e.preventDefault();
         const [firstName, ...lastNameParts] = settingsData.name.split(' ');
         const lastName = lastNameParts.join(' ');
 
         const updates = {
-            firstName: firstName,
-            lastName: lastName,
+            first_name: firstName,
+            last_name: lastName,
             location: settingsData.location,
             phone: settingsData.phone,
         };
+        
+        await updateUser(currentUser.id, updates);
+        
         if (passwordData.newPassword) {
-            if (passwordData.newPassword !== passwordData.confirmNewPassword) { showToast("New passwords do not match."); return; }
-            updates.password = passwordData.newPassword;
+            if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+                showToast("New passwords do not match.");
+                return;
+            }
+            const { error: passwordError } = await supabase.auth.updateUser({ password: passwordData.newPassword });
+            if (passwordError) {
+                showToast(`Password update failed: ${passwordError.message}`);
+            } else {
+                showToast("Password updated successfully!");
+                setPasswordData({ newPassword: '', confirmNewPassword: '' });
+            }
         }
-        updateUser(currentUser.id, updates);
-        setPasswordData({ newPassword: '', confirmNewPassword: '' });
     };
 
     return (

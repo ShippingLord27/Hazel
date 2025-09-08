@@ -14,10 +14,10 @@ const Favorites = () => {
         );
     }
     
-    const favoriteProducts = currentUser?.profile?.favorite_item_ids
-        ? currentUser.profile.favorite_item_ids
+    const favoriteProducts = currentUser?.favorite_item_ids
+        ? currentUser.favorite_item_ids
             .map(id => products.find(p => p.id === id))
-            .filter(Boolean) // This removes any undefined items if a product was deleted
+            .filter(Boolean) 
         : [];
 
     return (

@@ -3,22 +3,18 @@ import { useApp } from '../hooks/useApp';
 import { runChat as runAiChat } from '../gemini';
 
 const ChatWidget = () => {
-    // FIX: Get the restored chat state from the context
     const { isChatOpen, closeChat, chatPartner, currentUser } = useApp();
-    
-    // Local state for AI chat sessions
     const [localMessages, setLocalMessages] = useState([]);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const isAiSupportChat = chatPartner?.id === 'support'; // Simplified check for AI
-    const messagesToDisplay = isAiSupportChat ? localMessages : []; // Real-time messages not implemented yet
+    const isAiSupportChat = chatPartner?.id === 'support'; 
+    const messagesToDisplay = isAiSupportChat ? localMessages : []; 
 
     useEffect(() => {
         if (isChatOpen && isAiSupportChat) {
-            // FIX: Use new currentUser structure to get user's name
-            const userName = currentUser?.profile?.name ? ` ${currentUser.profile.name}` : '';
+            const userName = currentUser?.name ? ` ${currentUser.name}` : '';
             setLocalMessages([{
                 content: `Hello${userName}! You are chatting with HAZEL's AI Assistant. How can I help you?`,
                 isUser: false,

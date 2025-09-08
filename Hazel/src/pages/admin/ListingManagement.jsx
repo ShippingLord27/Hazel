@@ -31,7 +31,12 @@ const ListingManagement = () => {
                             return (
                                 <tr key={product.id}>
                                     <td>{product.title}</td>
-                                    <td>{product.ownerName}</td>
+                                    <td>
+                                        {product.ownerName || 'N/A'}
+                                        <div className="admin-listing-owner-info">
+                                            {product.ownerEmail || 'No Email'} ({product.ownerId || 'No ID'})
+                                        </div>
+                                    </td>
                                     <td><span className={`status-${product.status}`}>{product.status}</span></td>
                                     <td className="actions-cell">
                                         {product.status === 'approved' ? (

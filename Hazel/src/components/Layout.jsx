@@ -7,7 +7,6 @@ import ChatWidget from './ChatWidget';
 import { useApp } from '../hooks/useApp';
 
 const Layout = () => {
-  // This line will now work correctly because toggleChat is provided by the context
   const { toggleChat } = useApp();
 
   return (

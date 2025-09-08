@@ -10,26 +10,26 @@ const ProfilePage = () => {
         if (!isLoading) {
             if (!currentUser) {
                 navigate('/');
-            } else if (currentUser.profile?.role === 'admin') {
+            } else if (currentUser.role === 'admin') {
                 navigate('/admin');
             }
         }
     }, [currentUser, isLoading, navigate]);
 
-    // FIX: Create an async handler to properly await logout before navigating
     const handleLogout = async (e) => {
         e.preventDefault();
         await logout();
-        navigate('/');
+        // The useEffect hook above handles navigation when currentUser becomes null.
     };
 
-    if (isLoading || !currentUser || !currentUser.profile) {
+    if (isLoading || !currentUser) {
         return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Loading Profile...</div>;
     }
 
     const ownerMenu = [
         { path: "/profile", end: true, icon: "fas fa-tachometer-alt", label: "Dashboard" },
         { path: "my-listings", icon: "fas fa-list", label: "My Listings" },
+        { path: "messages", icon: "fas fa-comments", label: "Messages" },
         { path: "rental-tracker", icon: "fas fa-route", label: "Rental Tracker" },
         { path: "settings", icon: "fas fa-cog", label: "Settings" }
     ];
@@ -37,21 +37,20 @@ const ProfilePage = () => {
     const renterMenu = [
         { path: "/profile", end: true, icon: "fas fa-tachometer-alt", label: "Dashboard" },
         { path: "favorites", icon: "fas fa-heart", label: "Favorites" },
+        { path: "messages", icon: "fas fa-comments", label: "Messages" },
         { path: "rental-tracker", icon: "fas fa-route", label: "Rental Tracker" },
         { path: "settings", icon: "fas fa-cog", label: "Settings" }
     ];
     
-    // --- THE FIX ---
-    const menuToRender = currentUser.profile.role === 'owner' ? ownerMenu : renterMenu;
+    const menuToRender = currentUser.role === 'owner' ? ownerMenu : renterMenu;
 
     return (
         <div className="page active" id="profilePage" style={{ paddingTop: '70px' }}>
             <div className="container profile-page-main-container"> 
                 <div className="profile-container">
                     <aside className="profile-sidebar">
-                        {/* --- THE FIX --- */}
-                        <img src={currentUser.profile.profile_pic || 'https://i.ibb.co/HT0Nz7j1/download-12.jpg'} alt="Profile" className="profile-pic" />
-                        <h3>{currentUser.profile.name}</h3>
+                        <img src={currentUser.profile_pic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1160&q=80'} alt="Profile" id="profilePicSidebar" />
+                        <h3>{currentUser.name}</h3>
                         <p>{currentUser.email}</p>
                         <ul className="sidebar-menu">
                             {menuToRender.map(item => (

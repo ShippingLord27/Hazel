@@ -79,7 +79,6 @@ header {
 .main-nav ul {
     display: flex;
     flex-shrink: 0;
-    align-items: center; /* FIX: This vertically aligns all nav items */
 }
 
 .main-nav li {
@@ -506,8 +505,8 @@ header {
 
 .main-nav ul li.has-dropdown {
     position: relative;
-    padding-bottom: 15px; /* THE FIX: Creates a hoverable bridge */
-    margin-bottom: -15px; /* Compensate for the padding to keep alignment */
+    padding-bottom: 15px; 
+    margin-bottom: -15px; 
 }
 
 .main-nav ul li.has-dropdown .categories-dropdown-toggle {
@@ -527,7 +526,7 @@ header {
 .main-nav ul li.has-dropdown .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%; /* THE FIX: Aligns menu to the bottom of the new padded area */
+    top: 100%; 
     left: 0;
     background-color: var(--light-color);
     border: 1px solid var(--border-color);
@@ -566,7 +565,6 @@ header {
 }
 
 @media (max-width: 768px) {
-    /* Reset the padding fix for mobile view where it's not needed */
     .main-nav ul li.has-dropdown {
         padding-bottom: 0;
         margin-bottom: 0;
@@ -1154,8 +1152,8 @@ footer {
 }
 
 .profile-pic {
-    width: 150px;
-    height: 150px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
     margin: 0 auto 20px;
@@ -1687,7 +1685,7 @@ footer {
     height: 20px;
     font-size: 12px;
     font-weight: bold;
-    display: none; /* Changed from flex to none */
+    display: none; 
     align-items: center;
     justify-content: center;
     border: 2px solid var(--light-color);
@@ -1791,7 +1789,7 @@ footer {
 
 .listing-details {
     padding: 20px;
-    min-width: 0; /* FIX: Prevents content from breaking grid layout */
+    min-width: 0; 
 }
 
 .listing-title {
@@ -2688,17 +2686,15 @@ body.dark-mode {
     box-shadow: 0 5px 20px rgba(255,255,255,0.06);
 }
 
-#adminSidebarPic {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
+.admin-sidebar #adminSidebarPic {
+    width: 80px !important;
+    height: 80px !important;
     object-fit: cover;
-    margin: 0 auto 15px;
-    display: block;
-    border: 4px solid var(--light-gray);
 }
-.dark-mode #adminSidebarPic {
-    border-color: var(--footer-bg);
+.admin-sidebar #adminSidebarPic {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: cover;
 }
 
 #adminSidebarName {
@@ -2733,7 +2729,7 @@ body.dark-mode {
     text-align: center;
 }
 .admin-sidebar .sidebar-menu a:hover,
-.admin-sidebar .sidebar-menu a.active-admin-view {
+.admin-sidebar .sidebar-menu a.active {
     background-color: var(--primary-color);
     color: var(--light-color);
 }
@@ -3297,15 +3293,15 @@ body.mobile-menu-active {
 }
 
 .faq-answer {
-    padding: 0 20px; /* Adjusted padding for animation */
+    padding: 0 20px; 
     line-height: 1.7;
     color: var(--secondary-color);
-    max-height: 0; /* Changed from display: none */
-    overflow: hidden; /* Added for animation */
-    transition: max-height 0.4s ease-out, padding 0.4s ease-out; /* Added transition */
+    max-height: 0; 
+    overflow: hidden; 
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out; 
 }
 .faq-item.active .faq-answer {
-    padding: 20px; /* Add padding back when active */
+    padding: 20px; 
     border-top: 1px solid var(--border-color);
 }
 .dark-mode .faq-answer {
@@ -3397,7 +3393,7 @@ body.mobile-menu-active {
     margin-bottom: 15px;
     line-height: 1.7;
     color: var(--secondary-color);
-    overflow-wrap: break-word; /* FIX: ensures text wraps correctly */
+    overflow-wrap: break-word; 
 }
 .dark-mode .privacy-policy-content p {
     color: var(--light-gray);
@@ -3413,7 +3409,7 @@ body.mobile-menu-active {
     margin-bottom: 8px;
     line-height: 1.7;
     color: var(--secondary-color);
-    overflow-wrap: break-word; /* FIX: ensures text wraps correctly */
+    overflow-wrap: break-word; 
 }
 .dark-mode .privacy-policy-content ul li {
     color: var(--light-gray);
@@ -3479,7 +3475,6 @@ body.mobile-menu-active {
     }
 }
 
-/* Cart Page Styles */
 .cart-page-container {
     padding-top: 30px;
     padding-bottom: 50px;
@@ -3579,17 +3574,14 @@ body.mobile-menu-active {
 
 
 
-/* Verification Status Styles */
 #verificationStatus .status-verified { color: var(--success-color); font-weight: bold; }
 #verificationStatus .status-pending { color: #ffc107; font-weight: bold; }
 #verificationStatus .status-unverified { color: var(--danger-color); font-weight: bold; }
 
-/* Admin User Management Verification Status */
 .admin-table .status-verified { color: var(--success-color); font-weight: bold; text-transform: capitalize;}
 .admin-table .status-pending { color: #ffc107; font-weight: bold; text-transform: capitalize;}
 .admin-table .status-unverified { color: var(--danger-color); font-weight: bold; text-transform: capitalize;}
 
-/* Rental Tracker Styles */
 .rental-tracker-item {
     display: flex;
     gap: 15px;
@@ -3601,10 +3593,10 @@ body.mobile-menu-active {
 }
 .dark-mode .rental-tracker-item { background: var(--footer-bg); }
 .rental-tracker-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
-.rental-tracker-info { flex-grow: 1; } /* Allow info to take up space */
+.rental-tracker-info { flex-grow: 1; } 
 .rental-tracker-info h4 { margin-bottom: 5px; }
 .rental-tracker-info p { font-size: 0.9em; }
-.rental-tracker-actions { margin-left: auto; flex-shrink: 0; } /* Push button to the right */
+.rental-tracker-actions { margin-left: auto; flex-shrink: 0; } 
 .status-active { color: var(--success-color); font-weight: bold; }
 .status-rented { color: var(--primary-color); font-weight: bold; }
 #rentalTrackerGrid h3 {
@@ -3652,7 +3644,6 @@ body.mobile-menu-active {
     color: var(--primary-color);
 }
 
-/* Loading dots for chat widget */
 .loading-dots span {
     animation: blink 1.4s infinite both;
     font-size: 1.5rem;
@@ -3678,7 +3669,6 @@ body.mobile-menu-active {
     }
 }
 
-/* Quick Questions in Chat Widget */
 .quick-questions-area {
     padding: 10px 15px;
     border-top: 1px solid var(--border-color);
@@ -3695,7 +3685,6 @@ body.mobile-menu-active {
     border-radius: 15px;
 }
 
-/* Chat message structure improvements */
 .chat-message .message-content {
     display: flex;
     flex-direction: column;
@@ -3716,7 +3705,6 @@ body.mobile-menu-active {
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* --- Chat Inbox Page Styles --- */
 #chat-page {
     height: calc(100vh - 70px);
     overflow: hidden;
@@ -3732,7 +3720,6 @@ body.mobile-menu-active {
     border-top-color: #444;
 }
 
-/* Conversation List Styles */
 .conversation-list {
     background-color: var(--light-gray);
     border-right: 1px solid var(--border-color);
@@ -3831,7 +3818,6 @@ body.mobile-menu-active {
 }
 
 
-/* Active Chat Window Styles */
 .active-chat-window {
     display: flex;
     flex-direction: column;
@@ -3861,7 +3847,6 @@ body.mobile-menu-active {
     color: var(--gray-color);
 }
 
-/* Header Messages Link & Badge */
 .header-messages-link {
     position: relative;
     padding: 6px 10px;
@@ -3885,7 +3870,6 @@ body.mobile-menu-active {
 .dark-mode .notification-badge {
     border-color: var(--dark-color);
 }
-/* Review Modal Star Rating */
 .star-rating-container {
     margin-bottom: 20px;
 }

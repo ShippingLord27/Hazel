@@ -7,7 +7,6 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// This is the context we provide to the AI about the website.
 const systemPrompt = `
 You are a friendly and helpful customer support assistant for a rental website called HAZEL.
 Your goal is to answer user questions based on the information provided below.
@@ -33,7 +32,7 @@ const safetySettings = [
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
   safetySettings,
-  systemInstruction: systemPrompt, // Teach the model its role and context
+  systemInstruction: systemPrompt, 
 });
 
 export const runChat = async (prompt) => {

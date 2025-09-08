@@ -9,7 +9,7 @@ const HomePage = () => {
     const [activeFilter, setActiveFilter] = useState('all');
 
     const popularProducts = useMemo(() => {
-        const visibleProducts = currentUser?.profile?.role === 'admin' 
+        const visibleProducts = currentUser?.role === 'admin' 
             ? products 
             : products.filter(p => p.status === 'approved');
 
@@ -50,7 +50,7 @@ const HomePage = () => {
             <section className="about" id="about">
                 <div className="container">
                     <div className="about-container">
-                        <div className="about-img"><img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="About Us" /></div>
+                        <div className="about-img"><img src="https://images.unsplash.com/photo-1552581234-26160f608093?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Rental items" /></div>
                         <div className="about-content">
                             <h2>About Our Rental Service</h2>
                             <p>We started with a simple idea: to make renting items as easy as possible. Our platform connects people who need items with those who have them to rent.</p>

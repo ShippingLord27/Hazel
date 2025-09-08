@@ -12,7 +12,6 @@ const Header = () => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        // FIX: Wait for the logout process to complete before navigating
         await logout();
         navigate('/');
     };
@@ -36,20 +35,20 @@ const Header = () => {
 
         return (
             <div id="loggedInNavButtons" className="auth-nav-state">
-                {currentUser.profile?.role === 'renter' && (
+                {currentUser.role === 'renter' && (
                     <Link to="/cart" className="header-cart-link">
                         <i className="fas fa-shopping-cart"></i>
                         {cartItemCount > 0 && <span id="cartItemCount" style={{ display: 'flex' }}>{cartItemCount}</span>}
                     </Link>
                 )}
                 
-                {currentUser.profile?.role === 'admin' && (
+                {currentUser.role === 'admin' && (
                     <Link to="/admin" className="header-admin-link">
                         <i className="fas fa-user-shield"></i> Admin
                     </Link>
                 )}
 
-                {currentUser.profile?.role !== 'admin' && (
+                {currentUser.role !== 'admin' && (
                     <Link to="/profile" className="header-profile-link">
                         <i className="fas fa-user-circle"></i> Profile
                     </Link>

@@ -11,14 +11,14 @@ const ContactPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Basic validation
+        
         if (!formData.name || !formData.email || !formData.subject || !formData.message) {
             showToast("Please fill out all required fields.", "error");
             return;
         }
-        console.log("Form submitted:", formData); // Mock submission
+        console.log("Form submitted:", formData); 
         showToast("Thank you! Your message has been sent.");
-        setFormData({ name: '', email: '', subject: '', message: '' }); // Reset form
+        setFormData({ name: '', email: '', subject: '', message: '' }); 
     };
 
     return (

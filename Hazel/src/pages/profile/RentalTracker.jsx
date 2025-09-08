@@ -54,7 +54,7 @@ const RentalTracker = () => {
         generateAndPrintReceipt(orderDetails);
     };
 
-    const history = currentUser.profile.role === 'owner' ? ownerLentHistory : rentalHistory;
+    const history = currentUser.role === 'owner' ? ownerLentHistory : rentalHistory;
     const activeRentals = history.filter(r => r.status === 'Active');
     const completedRentals = history.filter(r => r.status === 'Completed');
 
@@ -64,7 +64,7 @@ const RentalTracker = () => {
             <div className="profile-view-header">
                 <h1>Rental Tracker</h1>
                 <p>
-                    {currentUser.profile.role === 'owner' 
+                    {currentUser.role === 'owner' 
                         ? "Track items you've lent out."
                         : "Track items you've rented."
                     }
@@ -80,7 +80,7 @@ const RentalTracker = () => {
                                     key={rental.transactionId} 
                                     rental={rental} 
                                     product={product} 
-                                    isOwnerView={currentUser.profile.role === 'owner'}
+                                    isOwnerView={currentUser.role === 'owner'}
                                     onStatusUpdate={updateRentalStatus}
                                     onPrint={handlePrintReceipt}
                                 />;
@@ -98,7 +98,7 @@ const RentalTracker = () => {
                                     key={rental.transactionId}
                                     rental={rental}
                                     product={product}
-                                    isOwnerView={currentUser.profile.role === 'owner'}
+                                    isOwnerView={currentUser.role === 'owner'}
                                     onPrint={handlePrintReceipt}
                                 />;
                     })

@@ -2,40 +2,40 @@ import React, { useState } from 'react';
 import supabase from '../supabaseClient';
 import { initialProductData } from './initialData';
 
-// --- NEW MOCK DATA FOR SEEDING ---
-// IMPORTANT: These users must be created in Supabase Auth first.
-// You can get their UUIDs from the Supabase dashboard's Auth section.
+
+
+
 const ownersToSeed = [
     {
-        user_id: 'YOUR_ALICE_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        user_id: 'YOUR_ALICE_UUID_HERE', 
         email: 'alice.photo@example.com',
         name: 'Alice Photo',
         phone: '555-0101',
         address: '123 Photography Lane'
     },
     {
-        user_id: 'YOUR_BOB_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        user_id: 'YOUR_BOB_UUID_HERE', 
         email: 'bob.rider@example.com',
         name: 'Bob Rider',
         phone: '555-0102',
         address: '456 Adventure Trail'
     },
     {
-        user_id: 'YOUR_JOHN_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        user_id: 'YOUR_JOHN_UUID_HERE', 
         email: 'john.doe@example.com',
         name: 'John Doe',
         phone: '555-0103',
         address: '789 Tool Street'
     },
     {
-        user_id: 'YOUR_JANE_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        user_id: 'YOUR_JANE_UUID_HERE', 
         email: 'jane.smith@example.com',
         name: 'Jane Smith',
         phone: '555-0104',
         address: '101 Gaming Blvd'
     },
     {
-        user_id: 'YOUR_CAROL_UUID_HERE', // Replace with actual UUID from Supabase Auth
+        user_id: 'YOUR_CAROL_UUID_HERE', 
         email: 'carol.camper@example.com',
         name: 'Carol Camper',
         phone: '555-0105',
@@ -50,12 +50,6 @@ const TestDataSavePage = () => {
     const handleClearAll = async () => {
         setIsLoading(true);
         setStatus('Starting database clear...');
-
-        // Note: We cannot and should not delete from auth.users from the client.
-        // This must be done manually in the Supabase dashboard.
-        // The trigger on auth.users will create corresponding profiles in renters/owners/admins.
-        // Deleting from these tables will de-sync them from auth.users.
-        // The correct way to clear is to delete users from the Supabase Auth UI.
 
         setStatus('Clearing favorites...');
         const { error: fError } = await supabase.from('favorites').delete().neq('favorite_id', -1);
@@ -73,8 +67,6 @@ const TestDataSavePage = () => {
         const { error: cError } = await supabase.from('categories').delete().neq('category_id', -1);
         if (cError) { setStatus(`Error clearing categories: ${cError.message}`); setIsLoading(false); return; }
 
-        // It's generally not safe to mass-delete profiles that are linked to auth.users
-        // as the trigger only works on INSERT.
         setStatus('Skipping profile tables (renters, owners, admins). Please manage users in Supabase Auth UI.');
 
         setStatus('All non-user tables cleared successfully!');
@@ -92,7 +84,6 @@ const TestDataSavePage = () => {
         }
 
         try {
-            // Step 1: Insert categories from initialProductData
             setStatus('Inserting categories...');
             const categoryNames = [...new Set(initialProductData.map(p => p.category))];
             const categoriesForDb = categoryNames.map(name => ({ name }));
@@ -101,19 +92,16 @@ const TestDataSavePage = () => {
                 .from('categories')
                 .insert(categoriesForDb)
                 .onConflict('name')
-                .ignore(); // Use ignore to avoid errors on duplicate names
+                .ignore(); 
 
             if (catInsertError) throw new Error(`Error inserting categories: ${catInsertError.message}`);
 
-            // Retrieve all category IDs to create a map
             setStatus('Retrieving category IDs...');
             const { data: categories, error: catFetchError } = await supabase.from('categories').select('category_id, name');
             if (catFetchError) throw new Error(`Error fetching categories: ${catFetchError.message}`);
             const categoryMap = categories.reduce((acc, cat) => { acc[cat.name] = cat.category_id; return acc; }, {});
 
-            // Step 2: Ensure the owners exist
             setStatus('Inserting owners...');
-            // IMPORTANT: The user_id MUST match a user in auth.users
             const ownersForDb = ownersToSeed.map(o => ({ user_id: o.user_id, name: o.name, phone: o.phone, address: o.address }));
             const { error: ownerInsertError } = await supabase
                 .from('owners')
@@ -123,15 +111,10 @@ const TestDataSavePage = () => {
 
             if (ownerInsertError) throw new Error(`Error inserting owners: ${ownerInsertError.message}`);
 
-            // Retrieve all owner IDs to create a map
             setStatus('Retrieving owner IDs...');
             const { data: owners, error: ownerFetchError } = await supabase.from('owners').select('owner_id, user_id');
             if (ownerFetchError) throw new Error(`Error fetching owners: ${ownerFetchError.message}`);
-            
-            // Map the owner's auth UUID to their owner_id (PK)
             const ownerUuidToPkMap = owners.reduce((acc, owner) => { acc[owner.user_id] = owner.owner_id; return acc; }, {});
-            
-            // Map the original email from initialData to the owner_id (PK)
             const ownerEmailToPkMap = ownersToSeed.reduce((acc, owner) => {
                 const ownerPk = ownerUuidToPkMap[owner.user_id];
                 if (ownerPk) {
@@ -140,7 +123,6 @@ const TestDataSavePage = () => {
                 return acc;
             }, {});
 
-            // Step 3: Insert the items
             setStatus('Preparing and inserting items...');
             const itemsForDb = initialProductData.map(item => {
                 const owner_id = ownerEmailToPkMap[item.ownerId];
@@ -156,11 +138,11 @@ const TestDataSavePage = () => {
                     category_id: category_id,
                     image_url: item.image,
                     price_per_day: item.price,
-                    availability: item.status === 'approved', // Map status to availability
+                    availability: item.status === 'approved', 
                     tracking_tag_id: item.trackingTagId,
                     owner_terms: item.ownerTerms
                 };
-            }).filter(Boolean); // Filter out null items
+            }).filter(Boolean); 
 
             const { error: itemsInsertError } = await supabase.from('items').insert(itemsForDb);
             if (itemsInsertError) throw new Error(`Error inserting items: ${itemsInsertError.message}`);

@@ -7,11 +7,8 @@ const ChatPage = () => {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        // Automatically scroll to the bottom of the active chat
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatMessages]);
-    
-    // Automatically open the first chat thread if none is selected
     useEffect(() => {
         if (!chatPartner && chatThreads.length > 0) {
             openChat(chatThreads[0].partner);
@@ -41,7 +38,7 @@ const ChatPage = () => {
                             className={`conversation-item ${chatPartner?.email === thread.partner.email ? 'active' : ''}`}
                             onClick={() => openChat(thread.partner)}
                         >
-                            <img src={thread.partner.profilePic || 'https://i.ibb.co/HT0Nz7j1/download-12.jpg'} alt={thread.partner.name} />
+                            <img src={thread.partner.profilePic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1160&q=80'} alt={thread.partner.name} className="conversation-avatar" />
                             <div className="conversation-details">
                                 <h4>{thread.partner.name}</h4>
                                 <p>{thread.messages.length > 0 ? thread.messages[thread.messages.length - 1].content : 'No messages yet'}</p>

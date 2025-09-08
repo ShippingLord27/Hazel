@@ -40,8 +40,6 @@ const ReviewModal = ({ productId, productTitle, closeModal }) => {
             return;
         }
 
-        // In a real app, you would send this to a backend.
-        // Here we just log it and show a success message.
         console.log({
             productId,
             rating,
@@ -71,7 +69,7 @@ const ReviewModal = ({ productId, productTitle, closeModal }) => {
                             <input
                                 type="text"
                                 id="reviewerName"
-                                value={currentUser.profile.name || ''}
+                                value={currentUser.name || ''}
                                 readOnly
                                 required
                             />

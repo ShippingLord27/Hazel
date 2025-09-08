@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../hooks/useApp';
 
 const ChatListPage = () => {
-    const { chatThreads, openChat, users } = useApp();
+    const { chatThreads } = useApp();
     const navigate = useNavigate();
 
-    const handleThreadClick = (partner) => {
-        openChat(partner);
-        // On smaller screens, you might want to navigate to a dedicated chat view
-        // For this app, opening the widget is sufficient.
+    const handleThreadClick = (threadId) => {
+        navigate(`/chat?thread_id=${threadId}`);
     };
 
     return (
@@ -19,20 +17,21 @@ const ChatListPage = () => {
                 <p>Select a conversation to view your chat history.</p>
             </div>
             <div className="chat-thread-list">
-                {Object.values(chatThreads).length > 0 ? (
-                    Object.values(chatThreads).map(thread => {
-                        const partner = users[thread.partnerEmail];
-                        if (!partner) return null; // Don't render if partner data isn't loaded yet
+                {!chatThreads ? (
+                    <p>Loading conversations...</p>
+                ) : chatThreads.length > 0 ? (
+                    chatThreads.map(thread => {
+                        if (!thread.partner) return null; 
 
                         return (
-                            <div key={thread.thread_id} className="chat-thread-item" onClick={() => handleThreadClick(partner)}>
-                                <img src={partner.profilePic} alt={partner.firstName} className="chat-thread-avatar" />
+                            <div key={thread.thread_id} className="chat-thread-item" onClick={() => handleThreadClick(thread.thread_id)}>
+                                <img src={thread.partner.profile_pic} alt={thread.partner.name} className="chat-thread-avatar" />
                                 <div className="chat-thread-info">
-                                    <h4>{partner.firstName} {partner.lastName}</h4>
-                                    <p>{thread.lastMessage ? thread.lastMessage.content.substring(0, 40) + '...' : 'No messages yet'}</p>
+                                    <h4>{thread.partner.name}</h4>
+                                    <p>{thread.last_message_content ? `${thread.last_message_content.substring(0, 40)}...` : 'No messages yet'}</p>
                                 </div>
-                                {thread.unreadCount > 0 && (
-                                    <span className="unread-count-badge">{thread.unreadCount}</span>
+                                {thread.unread_count > 0 && (
+                                    <span className="unread-count-badge">{thread.unread_count}</span>
                                 )}
                             </div>
                         );
