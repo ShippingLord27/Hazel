@@ -19,9 +19,6 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import ChatPage from './pages/ChatPage'; 
 
 
-import TestDataSavePage from './data/testdatasave';
-
-
 import ProfileDashboard from './pages/profile/ProfileDashboard';
 import MyListings from './pages/profile/MyListings';
 import Favorites from './pages/profile/Favorites';
@@ -67,8 +64,6 @@ function App() {
              <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Route>
-
-        <Route path="/seed-data" element={<TestDataSavePage />} />
       </Routes>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
-import supabase from '../../supabaseClient';
 
 const AdminSettings = () => {
     const { currentUser, showToast, updateUser } = useApp();
@@ -37,13 +36,7 @@ const AdminSettings = () => {
                 showToast("New passwords do not match.");
                 return;
             }
-            const { error: passwordError } = await supabase.auth.updateUser({ password: passwordData.newPassword });
-            if (passwordError) {
-                showToast(`Password update failed: ${passwordError.message}`);
-            } else {
-                showToast("Password updated successfully!");
-                setPasswordData({ newPassword: '', confirmNewPassword: '' });
-            }
+            showToast("Password update functionality is not currently implemented.");
         }
     };
 

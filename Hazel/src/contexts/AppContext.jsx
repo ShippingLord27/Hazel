@@ -1,13 +1,19 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import supabase from '../supabaseClient';
+// import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+// import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; 
+// import firebaseApp from '../firebase-config'; // Assuming you have this file
+
 import { initialProductData, initialRentalAgreement } from '../data/initialData';
 
 export const AppContext = createContext();
 
+// const auth = getAuth(firebaseApp);
+// const db = getFirestore(firebaseApp);
+
 export const AppProvider = ({ children }) => {
     // State declarations
     const [theme, setTheme] = useState(() => { const savedTheme = localStorage.getItem('theme') || 'light'; document.body.classList.toggle('dark-mode', savedTheme === 'dark'); return savedTheme; });
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState(initialProductData);
     const [allTags, setAllTags] = useState([]);
     const [session, setSession] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
@@ -22,139 +28,93 @@ export const AppProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [productsLoading, setProductsLoading] = useState(true);
 
-    // Auth & Profile Management
     useEffect(() => {
-        const fetchAllUserProfiles = async () => {
-            const { data, error } = await supabase.from('profiles').select('*');
-            if (error) { console.warn("Could not fetch all user profiles.", error.message); return []; }
-            return data || [];
-        };
-
-        const setupAuthAndProfileListener = async () => {
-            setIsLoading(true);
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
-
-            if (session) {
-                const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-                if (profile) setCurrentUser({ ...profile, email: session.user.email });
-                if (profile?.role === 'admin') setAllProfiles(await fetchAllUserProfiles());
-            }
-            setIsLoading(false);
-
-            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-                setSession(session);
-                if (session) {
-                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-                    setCurrentUser(profile ? { ...profile, email: session.user.email } : null);
-                    if (profile?.role === 'admin') {
-                        setAllProfiles(await fetchAllUserProfiles());
-                    } else {
-                        setAllProfiles([]);
-                    }
-                } else {
-                    setCurrentUser(null);
-                    setAllProfiles([]);
-                }
-            });
-
-            return () => subscription.unsubscribe();
-        };
-
-        setupAuthAndProfileListener();
+        // Mockup of an auth listener
+        // onAuthStateChanged(auth, async (user) => {
+        //     if (user) {
+        //         const docRef = doc(db, "users", user.uid);
+        //         const docSnap = await getDoc(docRef);
+        //         if (docSnap.exists()) {
+        //             setCurrentUser({ uid: user.uid, email: user.email, ...docSnap.data() });
+        //         } else {
+        //             // Handle case where user exists in auth but not in firestore
+        //         }
+        //     } else {
+        //         setCurrentUser(null);
+        //     }
+        //     setIsLoading(false);
+        // });
+        setIsLoading(false);
+        setProductsLoading(false);
     }, []);
-    
-    // --- SIGNUP FUNCTION (Verified Correct) ---
+
     const signup = async (userData, role) => {
-        const { email, password, firstName, lastName } = userData; // Expects camelCase
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    first_name: firstName, // Correctly maps to snake_case
-                    last_name: lastName,   // Correctly maps to snake_case
-                    role: role,
-                    profile_pic: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 9)}.jpg`
-                }
-            }
-        });
-        if (error) { showToast(error.message); return null; }
-        showToast('Account created! Please check your email to verify.');
-        return data.user;
+        console.log("Signup with Firebase would happen here", { userData, role });
+        showToast('Signup functionality not yet implemented with Firebase.');
+        // try {
+        //     const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+        //     const user = userCredential.user;
+        //     await setDoc(doc(db, "users", user.uid), {
+        //         firstName: userData.firstName,
+        //         lastName: userData.lastName,
+        //         role: role,
+        //         profile_pic: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 9)}.jpg`
+        //     });
+        //     showToast('Account created! Please check your email to verify.');
+        //     return user;
+        // } catch (error) {
+        //     showToast(error.message);
+        //     return null;
+        // }
     };
 
     const login = async (email, password, role) => {
-        const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            showToast(error.message);
-            return null;
-        }
-        if (loginData.user) {
-            try {
-                const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', loginData.user.id).single();
-                if (profileError || !profile) {
-                    await supabase.auth.signOut();
-                    showToast("Login failed: Could not retrieve user profile.");
-                    return null;
-                }
-                if (profile.role !== role) {
-                    await supabase.auth.signOut();
-                    showToast(`Incorrect portal: A '${profile.role}' account cannot log in via the '${role}' portal.`);
-                    return null;
-                }
-                showToast('Login successful!');
-                return { ...profile, email: loginData.user.email };
-            } catch (error) {
-                console.error("Error during profile retrieval or role check:", error);
-                showToast("An error occurred during login. Please try again.");
-                await supabase.auth.signOut(); // Ensure logout on error
-                return null;
-            }
-        }
-        return null;
+        console.log("Login with Firebase would happen here", { email, password, role });
+        showToast('Login functionality not yet implemented with Firebase.');
+
+        // try {
+        //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        //     const user = userCredential.user;
+
+        //     const docRef = doc(db, "users", user.uid);
+        //     const docSnap = await getDoc(docRef);
+
+        //     if (docSnap.exists() && docSnap.data().role === role) {
+        //         showToast('Login successful!');
+        //         return { uid: user.uid, ...docSnap.data() };
+        //     } else {
+        //         await signOut(auth);
+        //         showToast(`Incorrect portal or role not found.`);
+        //         return null;
+        //     }
+
+        // } catch (error) {
+        //     showToast(error.message);
+        //     return null;
+        // }
     };
 
     const logout = async () => {
-        await supabase.auth.signOut();
+        // await signOut(auth);
+        showToast("Logged out.");
     };
 
     const updateUser = async (userId, updatedData) => {
-        const { error } = await supabase.from('profiles').update(updatedData).eq('id', userId);
-        if (error) { showToast("Failed to update profile."); console.error("Update user error:", error); return; }
+        console.log("Update with Firebase would happen here", { userId, updatedData });
+        showToast('Update functionality not yet implemented with Firebase.');
 
-        if (currentUser && currentUser.id === userId) setCurrentUser(prev => ({ ...prev, ...updatedData }));
-        if (currentUser && currentUser.role === 'admin') {
-            const refreshedProfiles = await supabase.from('profiles').select('*');
-            if (refreshedProfiles.data) setAllProfiles(refreshedProfiles.data);
-        }
-        showToast("Profile updated successfully!");
+        // try {
+        //     const userRef = doc(db, "users", userId);
+        //     await setDoc(userRef, updatedData, { merge: true });
+        //     showToast("Profile updated successfully!");
+        // } catch (error) {
+        //     showToast("Failed to update profile.");
+        // }
     };
 
     const fetchProducts = useCallback(async () => {
-        setProductsLoading(true);
-        const { data, error } = await supabase
-            .from('items')
-            .select('*, categories(name), owners(user_id, name)');
-
-        if (error) {
-            console.error("Error fetching products:", error);
-            showToast("Error fetching products.", "error");
-        } else {
-            const transformed = data.map(p => ({
-                id: p.item_id,
-                title: p.title,
-                category: p.categories.name,
-                price: p.price_per_day,
-                priceDisplay: `₱${p.price_per_day}/day`,
-                image: p.image_url,
-                description: p.description,
-                ownerId: p.owners.user_id,
-                ownerName: p.owners.name,
-                status: p.availability ? 'approved' : 'unavailable',
-            }));
-            setProducts(transformed);
-        }
+        // This will need to be adapted to fetch from Firestore
+        setProducts(initialProductData); // Using initial data for now
         setProductsLoading(false);
     }, []);
 
