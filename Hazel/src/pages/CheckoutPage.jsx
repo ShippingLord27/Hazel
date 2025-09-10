@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const CheckoutPage = () => {
-    const { cart, currentUser, products, clearCart, showToast, rentalAgreementTemplate, generateAndPrintReceipt, addRentalRecord } = useApp();
+    const { cart, currentUser, items, clearCart, showToast, rentalAgreementTemplate, generateAndPrintReceipt, addRentalRecord } = useApp();
     const navigate = useNavigate();
     
     const [agreed, setAgreed] = useState(false);
@@ -13,9 +13,9 @@ const CheckoutPage = () => {
     const [paymentDetails, setPaymentDetails] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
 
     useEffect(() => {
-        if (!currentUser || cart.length === 0) { if (!isConfirmed) { showToast("Your cart is empty or you are not logged in."); navigate('/products'); } }
+        if (!currentUser || cart.length === 0) { if (!isConfirmed) { navigate('/items'); } }
         else if (currentUser.payment_info) { setPaymentDetails({ cardNumber: currentUser.payment_info.cardNumber || '', expiryDate: currentUser.payment_info.expiryDate || '', cvv: currentUser.payment_info.cvv || '', }); }
-    }, [currentUser, cart, navigate, showToast, isConfirmed]);
+    }, [currentUser, cart, navigate, isConfirmed]);
 
     const rentalCost = useMemo(() => cart.reduce((sum, item) => sum + item.rentalTotalCost, 0), [cart]);
     const deliveryFee = useMemo(() => cart.reduce((sum, item) => sum + item.deliveryFee, 0), [cart]);
@@ -24,11 +24,15 @@ const CheckoutPage = () => {
     
     const agreementContent = useMemo(() => {
         const renterName = currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : "The Renter";
-        const itemsList = cart.map(item => { const product = products.find(p => p.id === item.productId); return `<li><b>${product?.title || 'Unknown Item'}</b> (owned by ${product?.ownerName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${product?.ownerTerms || ''}</li>`; }).join('');
+        const itemsList = cart.map(item => { const currentItem = items.find(p => p.id === item.itemId); return `<li><b>${currentItem?.title || 'Unknown Item'}</b> (owned by ${currentItem?.ownerName || 'Owner'}) - ${item.rentalDurationDays} day(s) starting ${new Date(item.rentalStartDate).toLocaleDateString()}. ${currentItem?.ownerTerms || ''}</li>`; }).join('');
         return rentalAgreementTemplate.replace(/\[Renter Name\]/g, renterName).replace(/\[List of Items and Terms\]/g, `<ul>${itemsList}</ul>`);
-    }, [cart, products, rentalAgreementTemplate, currentUser]);
+    }, [cart, items, rentalAgreementTemplate, currentUser]);
 
-    const handlePaymentChange = (e) => { setPaymentDetails({ ...paymentDetails, [e.target.id.replace('checkout', '')]: e.target.value }); };
+    const handlePaymentChange = (e) => {
+        const { id, value } = e.target;
+        const key = id.replace('checkout', '').charAt(0).toLowerCase() + id.replace('checkout', '').slice(1);
+        setPaymentDetails({ ...paymentDetails, [key]: value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -103,7 +107,7 @@ const CheckoutPage = () => {
                         <aside className="checkout-order-summary">
                             <h2>Order Summary</h2>
                             <div id="checkoutItemDetails">
-                                {cart.map(item => { const product = products.find(p => p.id === item.productId); if (!product) return null; return ( <div className="checkout-summary-item" key={item.productId}><img src={product.image} alt={product.title} /><div className="checkout-summary-item-info"><h4>{product.title}</h4><p>{item.rentalDurationDays} day(s) at ₱{item.rentalTotalCost.toFixed(2)}</p></div></div> ); })}
+                                {cart.map(item => { const currentItem = items.find(p => p.id === item.itemId); return ( <div className="checkout-summary-item" key={item.itemId}><img src={item.image_url} alt={item.title} /><div className="checkout-summary-item-info"><h4>{item.title}</h4><p>{item.rentalDurationDays} day(s) at ₱{item.rentalTotalCost.toFixed(2)}</p></div></div> ); })}
                             </div>
                             <div className="checkout-price-breakdown">
                                 <div className="price-row"><span className="label">Rental Cost:</span> <span>₱{rentalCost.toFixed(2)}</span></div>

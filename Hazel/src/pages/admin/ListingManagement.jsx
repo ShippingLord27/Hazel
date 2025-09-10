@@ -1,13 +1,28 @@
+
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const ListingManagement = () => {
-    const { products, updateProductStatus, deleteProduct } = useApp();
+    const { items, updateItemStatus, deleteItem, allProfiles } = useApp();
 
-    const handleDelete = (productId) => {
+    const handleUpdateStatus = (itemId, status) => {
+        updateItemStatus(itemId, status);
+    };
+
+    const handleDelete = (itemId) => {
         if (window.confirm("ADMIN: Are you sure you want to PERMANENTLY delete this listing? This is irreversible.")) {
-            deleteProduct(productId);
+            deleteItem(itemId);
         }
+    }
+
+    const getOwnerName = (ownerId) => {
+        const owner = allProfiles.find(p => p.id === ownerId);
+        return owner ? `${owner.firstName} ${owner.lastName}` : 'N/A';
+    }
+
+    const getOwnerEmail = (ownerId) => {
+        const owner = allProfiles.find(p => p.id === ownerId);
+        return owner ? owner.email : 'No Email';
     }
 
     return (
@@ -27,24 +42,21 @@ const ListingManagement = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(product => {
+                        {items.map(item => {
                             return (
-                                <tr key={product.id}>
-                                    <td>{product.title}</td>
+                                <tr key={item.id}>
+                                    <td>{item.title}</td>
                                     <td>
-                                        {product.ownerName || 'N/A'}
+                                        {getOwnerName(item.ownerId)}
                                         <div className="admin-listing-owner-info">
-                                            {product.ownerEmail || 'No Email'} ({product.ownerId || 'No ID'})
+                                            {getOwnerEmail(item.ownerId)} ({item.ownerId || 'No ID'})
                                         </div>
                                     </td>
-                                    <td><span className={`status-${product.status}`}>{product.status}</span></td>
-                                    <td className="actions-cell">
-                                        {product.status === 'approved' ? (
-                                            <button className="btn btn-secondary btn-small" onClick={() => updateProductStatus(product.id, 'unavailable')}>Make Unavailable</button>
-                                        ) : (
-                                            <button className="btn btn-success btn-small" onClick={() => updateProductStatus(product.id, 'approved')}>Make Available</button>
-                                        )}
-                                         <button className="btn btn-danger btn-small" onClick={() => handleDelete(product.id)}>Delete</button>
+                                    <td><span className={`status-${item.status}`}>{item.status}</span></td>
+                                    <td className="admin-actions">
+                                        <button onClick={() => handleUpdateStatus(item.id, 'approved')} className="btn btn-success btn-small">Accept</button>
+                                        <button onClick={() => handleUpdateStatus(item.id, 'rejected')} className="btn btn-secondary btn-small">Reject</button>
+                                        <button onClick={() => handleDelete(item.id)} className="btn btn-danger btn-small">Delete</button>
                                     </td>
                                 </tr>
                             );

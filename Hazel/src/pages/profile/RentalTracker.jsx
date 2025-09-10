@@ -1,15 +1,15 @@
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
-const RentalItem = ({ rental, product, isOwnerView, onStatusUpdate, onPrint }) => (
+const RentalItem = ({ rental, item, isOwnerView, onStatusUpdate, onPrint }) => (
     <div className="rental-tracker-item">
-        <img src={product.image} alt={product.title} />
+        <img src={item.image_url} alt={item.title} />
         <div className="rental-tracker-info">
-            <h4>{product.title}</h4>
+            <h4>{item.title}</h4>
             {isOwnerView ? (
                 <p>Rented by: {rental.renterName}</p>
             ) : (
-                <p>Owner: {product.ownerName}</p>
+                <p>Owner: {item.ownerName}</p>
             )}
             <p>Start Date: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
             <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
@@ -33,7 +33,7 @@ const RentalItem = ({ rental, product, isOwnerView, onStatusUpdate, onPrint }) =
 );
 
 const RentalTracker = () => {
-    const { currentUser, products, rentalHistory, ownerLentHistory, generateAndPrintReceipt, updateRentalStatus } = useApp();
+    const { currentUser, items, rentalHistory, ownerLentHistory, generateAndPrintReceipt, updateRentalStatus } = useApp();
 
     if (!currentUser) {
         return (
@@ -47,7 +47,7 @@ const RentalTracker = () => {
     const handlePrintReceipt = (rental) => {
         const orderDetails = {
             transactionId: rental.transactionId, date: rental.rentalStartDate,
-            items: [{ productId: rental.productId, rentalDurationDays: rental.rentalDurationDays, rentalTotalCost: rental.rentalTotalCost }],
+            items: [{ itemId: rental.itemId, rentalDurationDays: rental.rentalDurationDays, rentalTotalCost: rental.rentalTotalCost }],
             rentalCost: rental.rentalTotalCost, deliveryFee: rental.deliveryFee,
             serviceFee: rental.serviceFee, totalAmount: rental.totalAmount
         };
@@ -74,12 +74,12 @@ const RentalTracker = () => {
                 <h3>Active Rentals</h3>
                 {activeRentals.length > 0 ? (
                     activeRentals.map(rental => {
-                        const product = products.find(p => p.id === rental.productId);
-                        if (!product) return null;
+                        const item = items.find(p => p.id === rental.itemId);
+                        if (!item) return null;
                         return <RentalItem 
                                     key={rental.transactionId} 
                                     rental={rental} 
-                                    product={product} 
+                                    item={item} 
                                     isOwnerView={currentUser.role === 'owner'}
                                     onStatusUpdate={updateRentalStatus}
                                     onPrint={handlePrintReceipt}
@@ -92,12 +92,12 @@ const RentalTracker = () => {
                 <h3>Completed Rentals</h3>
                 {completedRentals.length > 0 ? (
                     completedRentals.map(rental => {
-                        const product = products.find(p => p.id === rental.productId);
-                        if (!product) return null;
+                        const item = items.find(p => p.id === rental.itemId);
+                        if (!item) return null;
                         return <RentalItem 
                                     key={rental.transactionId}
                                     rental={rental}
-                                    product={product}
+                                    item={item}
                                     isOwnerView={currentUser.role === 'owner'}
                                     onPrint={handlePrintReceipt}
                                 />;

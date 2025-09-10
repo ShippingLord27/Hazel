@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const Search = () => {
-    const { products, currentUser } = useApp();
+    const { items, currentUser } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState([]);
     const [isResultsVisible, setResultsVisible] = useState(false);
@@ -12,12 +12,12 @@ const Search = () => {
 
     useEffect(() => {
         if (searchTerm.length > 1) {
-            const visibleProducts = currentUser?.role === 'admin'
-                ? products
-                : products.filter(p => p.status === 'approved');
+            const visibleItems = currentUser?.role === 'admin'
+                ? items
+                : items.filter(p => p.status === 'approved');
 
             const lowercasedTerm = searchTerm.toLowerCase();
-            const filtered = visibleProducts.filter(p =>
+            const filtered = visibleItems.filter(p =>
                 p.title.toLowerCase().includes(lowercasedTerm) ||
                 p.category.toLowerCase().includes(lowercasedTerm) ||
                 (p.tags && p.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm)))
@@ -28,7 +28,7 @@ const Search = () => {
             setResults([]);
             setResultsVisible(false);
         }
-    }, [searchTerm, products, currentUser]);
+    }, [searchTerm, items, currentUser]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -53,14 +53,14 @@ const Search = () => {
             {isResultsVisible && (
                 <div className="search-results active">
                     {results.length > 0 ? (
-                        results.map(product => (
-                            <div key={product.id} className="search-result-item" onClick={() => handleResultClick(product.id)}>
-                                <div className="product-title">{product.title}</div>
-                                <div className="product-price">{product.priceDisplay}</div>
+                        results.map(item => (
+                            <div key={item.id} className="search-result-item" onClick={() => handleResultClick(item.id)}>
+                                <div className="item-title">{item.title}</div>
+                                <div className="item-price">{item.priceDisplay}</div>
                             </div>
                         ))
                     ) : (
-                        <div className="no-results">No products found</div>
+                        <div className="no-results">No items found</div>
                     )}
                 </div>
             )}

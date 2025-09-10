@@ -2,14 +2,14 @@ import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const AdminOverview = () => {
-    const { allProfiles, products, isLoading } = useApp();
+    const { allProfiles, items, isLoading } = useApp();
 
     if (isLoading) {
         return <p>Loading overview...</p>;
     }
 
     const userCount = allProfiles ? allProfiles.length : 0;
-    const productCount = products ? products.length : 0;
+    const itemCount = items ? items.length : 0;
 
     return (
         <div className="admin-view">
@@ -20,7 +20,7 @@ const AdminOverview = () => {
                     <div className="analytics-label">Total Users</div>
                 </div>
                 <div className="analytics-card">
-                    <div className="analytics-value">{productCount}</div>
+                    <div className="analytics-value">{itemCount}</div>
                     <div className="analytics-label">Total Listings</div>
                 </div>
             </div>

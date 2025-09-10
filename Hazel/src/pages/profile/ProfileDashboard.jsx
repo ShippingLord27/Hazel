@@ -1,8 +1,8 @@
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
 
-const OwnerDashboard = ({ user, products, ownerLentHistory }) => {
-    const myListingsCount = products.filter(p => p.ownerId === user.id).length;
+const OwnerDashboard = ({ user, items, ownerLentHistory }) => {
+    const myListingsCount = items.filter(p => p.ownerId === user.id).length;
     const activeLentCount = ownerLentHistory.filter(r => r.status === 'Active').length;
     const totalEarnings = ownerLentHistory
         .filter(r => r.status === 'Completed')
@@ -48,13 +48,13 @@ const RenterDashboard = ({ user, rentalHistory }) => (
 );
 
 const ProfileDashboard = () => {
-    const { currentUser, products, rentalHistory, ownerLentHistory } = useApp();
+    const { currentUser, items, rentalHistory, ownerLentHistory } = useApp();
     if (!currentUser) return null;
 
     return (
         <div className="profile-view">
            {currentUser.role === 'owner' 
-                ? <OwnerDashboard user={currentUser} products={products} ownerLentHistory={ownerLentHistory} /> 
+                ? <OwnerDashboard user={currentUser} items={items} ownerLentHistory={ownerLentHistory} /> 
                 : <RenterDashboard user={currentUser} rentalHistory={rentalHistory} />
            }
         </div>
