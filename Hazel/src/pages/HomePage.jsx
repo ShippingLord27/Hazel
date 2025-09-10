@@ -1,8 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import ProductCard from '../components/ProductCard';
+import CategoryFilter from '../components/CategoryFilter'; // Import the new component
 
 const HomePage = () => {
     const { items, itemsLoading, categories } = useApp();
@@ -10,9 +10,11 @@ const HomePage = () => {
     const [activeFilter, setActiveFilter] = useState('all');
 
     const popularItems = useMemo(() => {
+        // Only show approved items on the homepage
+        const approvedItems = items.filter(item => item.status === 'approved');
         const filtered = activeFilter === 'all'
-            ? items
-            : items.filter(p => p.category.toLowerCase() === activeFilter.toLowerCase());
+            ? approvedItems
+            : approvedItems.filter(p => p.category.toLowerCase() === activeFilter.toLowerCase());
         return filtered.slice(0, 6);
     }, [items, activeFilter]);
 
@@ -31,13 +33,13 @@ const HomePage = () => {
                 <div className="container">
                     <div className="products-header">
                         <div className="section-title"><h2>Popular Items</h2></div>
-                        <ul className="products-filter">
-                            {categoryFilters.map(filter => (
-                                <li key={filter} className={activeFilter === filter ? 'active' : ''} onClick={() => setActiveFilter(filter)}>
-                                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                                </li>
-                            ))}
-                        </ul>
+                        {/* Replace the old ul with the new CategoryFilter component */}
+                        <CategoryFilter
+                            categories={categoryFilters}
+                            activeFilter={activeFilter}
+                            onFilterClick={setActiveFilter}
+                            listClassName="products-filter"
+                        />
                     </div>
                     <div className="products-grid">
                         {itemsLoading ? (

@@ -1,8 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import ProductCard from '../components/ProductCard';
+import CategoryFilter from '../components/CategoryFilter'; // Import the new component
 
 const AllProductsPage = () => {
     const { items, categories, itemsLoading } = useApp();
@@ -13,7 +13,8 @@ const AllProductsPage = () => {
     const categoriesForFilter = useMemo(() => ['all', ...categories.map(c => c.name).sort()], [categories]);
 
     const filteredItems = useMemo(() => {
-        let results = items;
+        // Only show approved items on the products page
+        let results = items.filter(item => item.status === 'approved');
         if (activeFilter !== 'all') {
             results = results.filter(item => item.category.toLowerCase() === activeFilter.toLowerCase());
         }
@@ -28,12 +29,14 @@ const AllProductsPage = () => {
 
     const handleFilterClick = (category) => {
         setActiveFilter(category);
-        setSearchParams({ category: category, search: searchTerm });
+        const currentSearch = searchParams.get('search') || '';
+        setSearchParams({ category, search: currentSearch });
     };
     
     const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setSearchParams({ category: activeFilter, search: e.target.value });
+        const newSearchTerm = e.target.value;
+        setSearchTerm(newSearchTerm);
+        setSearchParams({ category: activeFilter, search: newSearchTerm });
     };
     
     return (
@@ -48,16 +51,17 @@ const AllProductsPage = () => {
                         <i className="fas fa-search search-icon"></i>
                         <input type="text" className="search-input" placeholder="Search by name or tag..." value={searchTerm} onChange={handleSearchChange} />
                     </div>
-                    <ul className="products-filter" id="productsPageFilter">
-                        {categoriesForFilter.map(cat => (
-                             <li key={cat} className={activeFilter === cat ? 'active' : ''} onClick={() => handleFilterClick(cat)}>
-                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                            </li>
-                        ))}
-                    </ul>
+                    {/* Replace the old ul with the new CategoryFilter component */}
+                    <CategoryFilter
+                        categories={categoriesForFilter}
+                        activeFilter={activeFilter}
+                        onFilterClick={handleFilterClick}
+                        listClassName="products-filter"
+                        listId="productsPageFilter"
+                    />
                 </section>
                 {itemsLoading ? (
-                    <div className="loading-spinner-container"><div className="loading-spinner"></div></div>
+                    <div className="loading-dots"><span>.</span><span>.</span><span>.</span></div>
                 ) : filteredItems.length > 0 ? (
                     <div className="products-grid" id="allProductsGrid">
                         {filteredItems.map(item => (

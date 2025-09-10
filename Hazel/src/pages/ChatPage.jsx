@@ -9,11 +9,12 @@ const ChatPage = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatMessages]);
+
     useEffect(() => {
         if (!chatPartner && chatThreads.length > 0) {
             openChat(chatThreads[0].partner);
         }
-    }, [chatThreads, chatPartner]);
+    }, [chatThreads, chatPartner, openChat]); // Added openChat to dependency array
 
     const handleSendMessage = () => {
         if (!message.trim()) return;

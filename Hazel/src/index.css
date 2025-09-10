@@ -2804,6 +2804,20 @@ body.dark-mode {
 .admin-table .actions-cell .btn:last-child {
     margin-right: 0;
 }
+.admin-table .status-rejected {
+    color: var(--gray-color);
+    font-weight: bold;
+    text-transform: capitalize;
+}
+.dark-mode .admin-table .status-rejected {
+    color: #a0a0a0;
+}
+
+.admin-table .status-approved {
+    color: var(--success-color);
+    font-weight: bold;
+    text-transform: capitalize;
+}
 
 @media (max-width: 992px) {
     .admin-dashboard-container {
@@ -3952,4 +3966,157 @@ body.mobile-menu-active {
 .btn-small {
     padding: 5px 10px;
     font-size: 0.9em;
+}
+.category-filter-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.scroll-wrapper {
+    flex-grow: 1;
+    overflow-x: auto;
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+    scroll-behavior: smooth;
+    min-width: 0;
+}
+
+.scroll-wrapper::-webkit-scrollbar {
+    display: none; 
+}
+
+.scroll-wrapper ul {
+    display: flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    padding-bottom: 5px; 
+    margin-bottom: -5px;
+}
+
+.scroll-arrow {
+    background-color: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+    flex-shrink: 0;
+}
+.scroll-arrow:hover {
+    background-color: var(--light-gray);
+    transform: scale(1.1);
+}
+.dark-mode .scroll-arrow {
+    background-color: var(--secondary-color);
+    border-color: #444;
+    color: var(--light-color);
+}
+.dark-mode .scroll-arrow:hover {
+    background-color: var(--footer-bg);
+}
+
+.scroll-arrow.left {
+    margin-right: 10px;
+}
+.scroll-arrow.right {
+    margin-left: 10px;
+}
+
+.products-header {
+    flex-wrap: wrap;
+    align-items: center; 
+}
+
+@media(min-width: 768px) {
+    .products-header {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+}
+.products-header .section-title {
+    flex-shrink: 0; 
+    margin-right: 25px; 
+    margin-bottom: 0; 
+}
+
+.products-header .category-filter-container {
+    flex-grow: 1; 
+    min-width: 0; 
+}
+@media (min-width: 768px) {
+    .products-page-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 25px;
+    }
+    .products-page-search-container {
+        max-width: 300px;
+        flex-shrink: 0;
+    }
+    .products-page-controls .category-filter-container {
+        flex-grow: 1;
+        min-width: 0; 
+    }
+}
+#productsPageFilter {
+    display: flex;
+    flex-wrap: nowrap; /* Keep items in a single line */
+    padding-left: 0;
+    gap: 25px; /* Use gap for consistent spacing between items */
+}
+
+#productsPageFilter li {
+    /* Remove all bubble styling */
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    margin-left: 0; /* Remove old margin, we use gap now */
+    
+    /* Apply text-link styling */
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+/* Hover effect: change text color (NO CHANGE NEEDED HERE) */
+#productsPageFilter li:hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--primary-color);
+}
+
+/* Active state: primary text color (NO CHANGE NEEDED HERE) */
+#productsPageFilter li.active {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--primary-color);
+}
+
+/* Dark Mode Overrides (NO CHANGE NEEDED HERE) */
+.dark-mode #productsPageFilter li {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--light-color);
+}
+
+.dark-mode #productsPageFilter li:hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--primary-color);
+}
+
+.dark-mode #productsPageFilter li.active {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--primary-color);
 }
