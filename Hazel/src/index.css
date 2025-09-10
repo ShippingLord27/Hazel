@@ -3888,3 +3888,68 @@ body.mobile-menu-active {
 .star-rating .star.active {
     color: #ffc107;
 }
+
+.admin-table .admin-actions {
+    white-space: nowrap;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.btn-accept, .btn-reject, .btn-delete {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-size: 0.9em;
+    color: var(--light-color); 
+}
+.btn-accept:disabled, .btn-reject:disabled, .btn-delete:disabled {
+    background-color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+    color: #666;
+}
+
+.btn-accept {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+.btn-accept:hover:not(:disabled) {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-reject {
+    background-color: var(--gray-color);
+    border-color: var(--gray-color);
+}
+.btn-reject:hover:not(:disabled) {
+    background-color: #6a6a6a;
+    border-color: #6a6a6a;
+}
+.dark-mode .btn-reject {
+    background-color: #444;
+    border-color: #444;
+}
+.dark-mode .btn-reject:hover:not(:disabled) {
+    background-color: #555;
+    border-color: #555;
+}
+
+.btn-delete {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+.btn-delete:hover:not(:disabled) {
+     background-color: #c82333;
+     border-color: #bd2130;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
