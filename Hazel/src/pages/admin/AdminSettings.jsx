@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const AdminSettings = () => {
-    const { currentUser, showToast, updateUser } = useApp();
+    const { currentUser, showToast, updateUser, updateUserPassword } = useApp();
     const [settingsData, setSettingsData] = useState({
         first_name: '', last_name: '', profile_pic_url: ''
     });
@@ -29,14 +29,15 @@ const AdminSettings = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        await updateUser(currentUser.id, settingsData);
+        await updateUser(currentUser.uid, settingsData);
 
         if (passwordData.newPassword) {
             if (passwordData.newPassword !== passwordData.confirmNewPassword) {
                 showToast("New passwords do not match.");
                 return;
             }
-            showToast("Password update functionality is not currently implemented.");
+            await updateUserPassword(passwordData.newPassword);
+            setPasswordData({ newPassword: '', confirmNewPassword: '' });
         }
     };
 

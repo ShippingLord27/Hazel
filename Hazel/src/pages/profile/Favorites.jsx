@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { useApp } from '../../hooks/useApp';
 import ProductCard from '../../components/ProductCard';
 
 const Favorites = () => {
-    const { currentUser, products, isLoading } = useApp();
+    const { items, favorites, itemsLoading } = useApp();
 
-    if (isLoading) {
+    if (itemsLoading) {
         return (
             <div className="profile-view">
                 <div className="profile-view-header"><h1>My Favorites</h1></div>
@@ -14,21 +15,19 @@ const Favorites = () => {
         );
     }
     
-    const favoriteProducts = currentUser?.favorite_item_ids
-        ? currentUser.favorite_item_ids
-            .map(id => products.find(p => p.id === id))
-            .filter(Boolean) 
-        : [];
+    const favoriteItems = favorites
+        .map(id => items.find(p => p.id === id))
+        .filter(Boolean); // Filter out any undefined items that might result from a mismatch
 
     return (
         <div className="profile-view">
             <div className="profile-view-header"><h1>My Favorites</h1></div>
-            {favoriteProducts.length > 0 ? (
+            {favoriteItems.length > 0 ? (
                 <div className="products-grid">
-                    {favoriteProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                    {favoriteItems.map(item => <ProductCard key={item.id} item={item} />)}
                 </div>
             ) : (
-                <p>You haven't favorited any items yet. Click the heart icon on any product to save it here.</p>
+                <p>You haven't favorited any items yet. Click the heart icon on any item to save it here.</p>
             )}
         </div>
     );

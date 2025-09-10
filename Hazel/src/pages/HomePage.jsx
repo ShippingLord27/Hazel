@@ -1,25 +1,22 @@
+
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import ProductCard from '../components/ProductCard';
 
 const HomePage = () => {
-    const { products, currentUser, categories } = useApp();
+    const { items, itemsLoading, categories } = useApp();
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
 
-    const popularProducts = useMemo(() => {
-        const visibleProducts = currentUser?.role === 'admin' 
-            ? products 
-            : products.filter(p => p.status === 'approved');
-
+    const popularItems = useMemo(() => {
         const filtered = activeFilter === 'all'
-            ? visibleProducts
-            : visibleProducts.filter(p => p.category.toLowerCase() === activeFilter.toLowerCase());
+            ? items
+            : items.filter(p => p.category.toLowerCase() === activeFilter.toLowerCase());
         return filtered.slice(0, 6);
-    }, [products, activeFilter, currentUser, categories]);
+    }, [items, activeFilter]);
 
-    const filters = ['all', 'outdoor', 'electronics', 'party', 'tools', 'adventure'];
+    const categoryFilters = useMemo(() => ['all', ...categories.map(c => c.name)], [categories]);
 
     return (
         <div className="page active" id="home-page">
@@ -35,7 +32,7 @@ const HomePage = () => {
                     <div className="products-header">
                         <div className="section-title"><h2>Popular Items</h2></div>
                         <ul className="products-filter">
-                            {filters.map(filter => (
+                            {categoryFilters.map(filter => (
                                 <li key={filter} className={activeFilter === filter ? 'active' : ''} onClick={() => setActiveFilter(filter)}>
                                     {filter.charAt(0).toUpperCase() + filter.slice(1)}
                                 </li>
@@ -43,7 +40,11 @@ const HomePage = () => {
                         </ul>
                     </div>
                     <div className="products-grid">
-                        {popularProducts.map(product => <ProductCard key={product.id} product={product} />)}
+                        {itemsLoading ? (
+                            <p>Loading items...</p>
+                        ) : (
+                            popularItems.map(item => <ProductCard key={item.id} item={item} />)
+                        )}
                     </div>
                 </div>
             </section>

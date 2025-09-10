@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 
 const CartPage = () => {
-    const { cart, products, removeFromCart, currentUser } = useApp();
+    const { cart, removeFromCart, currentUser } = useApp();
     const navigate = useNavigate();
     
     if (!currentUser) {
@@ -18,7 +19,7 @@ const CartPage = () => {
     }
     
     const subtotal = cart.reduce((sum, item) => sum + item.rentalTotalCost, 0);
-    const serviceFee = subtotal * 0.05;
+    const serviceFee = subtotal * 0.05; // 5% service fee
     const total = subtotal + serviceFee;
 
     return (
@@ -33,37 +34,34 @@ const CartPage = () => {
                 ) : (
                     <div className="cart-grid">
                         <div className="cart-items-list">
-                            {cart.map(item => {
-                                const product = products.find(p => p.id === item.productId);
-                                if (!product) return null;
-                                return (
-                                    <div className="cart-item" key={item.productId}>
-                                        <img src={product.image} alt={product.title} className="cart-item-image" />
-                                        <div className="cart-item-details">
-                                            <h3>{product.fullTitle}</h3>
-                                            <p>Duration: {item.rentalDurationDays} day(s)</p>
-                                            <p>Start Date: {new Date(item.rentalStartDate).toLocaleDateString()}</p>
-                                        </div>
-                                        <div className="cart-item-price">₱{item.rentalTotalCost.toFixed(2)}</div>
-                                        <button className="cart-item-remove-btn" onClick={() => removeFromCart(item.productId)}>&times;</button>
+                            {cart.map(item => (
+                                <div className="cart-item" key={item.itemId}>
+                                    <img src={item.image_url} alt={item.title} className="cart-item-image" />
+                                    <div className="cart-item-details">
+                                        <h3>{item.title}</h3>
+                                        <p>Duration: {item.rentalDurationDays} day(s)</p>
+                                        <p>Start Date: {new Date(item.rentalStartDate).toLocaleDateString()}</p>
+                                        <p>Delivery: {item.deliveryOption}</p>
                                     </div>
-                                );
-                            })}
+                                    <div className="cart-item-price">${item.rentalTotalCost.toFixed(2)}</div>
+                                    <button className="cart-item-remove-btn" onClick={() => removeFromCart(item.itemId)}>&times;</button>
+                                </div>
+                            ))}
                         </div>
                         <aside className="cart-summary">
                             <h2>Summary</h2>
                             <div className="price-row">
                                 <span>Subtotal:</span>
-                                <span id="cartSubtotal">₱{subtotal.toFixed(2)}</span>
+                                <span id="cartSubtotal">${subtotal.toFixed(2)}</span>
                             </div>
                             <div className="price-row">
                                 <span>Service Fee (5%):</span>
-                                <span id="cartServiceFee">₱{serviceFee.toFixed(2)}</span>
+                                <span id="cartServiceFee">${serviceFee.toFixed(2)}</span>
                             </div>
                             <hr />
                             <div className="price-row total-row">
                                 <span>Total:</span>
-                                <span id="cartTotal">₱{total.toFixed(2)}</span>
+                                <span id="cartTotal">${total.toFixed(2)}</span>
                             </div>
                             <button className="btn btn-primary btn-block" onClick={() => navigate('/checkout')}>Proceed to Checkout</button>
                         </aside>

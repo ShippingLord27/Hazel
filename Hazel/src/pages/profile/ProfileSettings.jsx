@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
 
 const ProfileSettings = () => {
-    const { currentUser, showToast, updateUser } = useApp();
+    const { currentUser, showToast, updateUser, updateUserPassword } = useApp();
 
-    const [settingsData, setSettingsData] = useState({ name: '', profilePic: '', location: '', phone: '' });
+    const [settingsData, setSettingsData] = useState({ name: '', profile_pic_url: '', location: '', phone: '' });
     const [passwordData, setPasswordData] = useState({ newPassword: '', confirmNewPassword: '' });
 
     useEffect(() => {
         if (currentUser) {
             setSettingsData({
-                name: currentUser.name || '',
-                profilePic: currentUser.profile_pic || '',
+                name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim(),
+                profile_pic_url: currentUser.profile_pic_url || '',
                 location: currentUser.location || '',
                 phone: currentUser.phone || '',
             });
@@ -29,18 +29,20 @@ const ProfileSettings = () => {
         const updates = {
             first_name: firstName,
             last_name: lastName,
+            profile_pic_url: settingsData.profile_pic_url,
             location: settingsData.location,
             phone: settingsData.phone,
         };
         
-        await updateUser(currentUser.id, updates);
+        await updateUser(currentUser.uid, updates);
         
         if (passwordData.newPassword) {
             if (passwordData.newPassword !== passwordData.confirmNewPassword) {
                 showToast("New passwords do not match.");
                 return;
             }
-            showToast("Password update functionality is not currently implemented.");
+            await updateUserPassword(passwordData.newPassword);
+            setPasswordData({ newPassword: '', confirmNewPassword: '' });
         }
     };
 
@@ -51,7 +53,7 @@ const ProfileSettings = () => {
                 <h3>Personal Information</h3>
                 <div className="form-group"><label>Full Name*</label><input type="text" name="name" value={settingsData.name} onChange={handleSettingsChange} required /></div>
                 <div className="form-group"><label>Email</label><input type="email" name="email" value={currentUser?.email || ''} readOnly /></div>
-                <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profilePic" value={settingsData.profilePic} onChange={handleSettingsChange} /></div>
+                <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profile_pic_url" value={settingsData.profile_pic_url} onChange={handleSettingsChange} /></div>
                 <div className="form-group"><label>Location</label><input type="text" name="location" value={settingsData.location} onChange={handleSettingsChange} /></div>
                 <div className="form-group"><label>Phone Number</label><input type="text" name="phone" value={settingsData.phone} onChange={handleSettingsChange} /></div>
                 <hr/>

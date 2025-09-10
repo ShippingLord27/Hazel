@@ -2,23 +2,22 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCVnC7Z-28g1f5d7S8jG6k9p0f3bI1aM2c",
+  apiKey: "AIzaSyCPn0x4Y8PBF6HuczOqeG0Q3ldjNArgPMM",
   authDomain: "hazel-v2.firebaseapp.com",
   projectId: "hazel-v2",
-  storageBucket: "hazel-v2.appspot.com",
-  messagingSenderId: "869755085121",
-  appId: "1:869755085121:web:68d9082bbff21bd06601c0",
-  measurementId: "G-MBF4YYF05P"
+  storageBucket: "hazel-v2.firebasestorage.app",
+  messagingSenderId: "719736052006",
+  appId: "1:719736052006:web:d4a88136eb2bdd7a3749e7"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-export { auth, db, app };
+export { auth, db, storage, firebaseConfig };
