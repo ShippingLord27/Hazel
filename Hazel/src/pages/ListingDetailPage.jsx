@@ -88,8 +88,8 @@ const ListingDetailPage = () => {
                         <div className="listing-details">
                             <h1 className="listing-title">{item.title}</h1>
                             <div className="listing-price">
-                                ${rentalPriceDetails.total.toFixed(2)} for {rentalOptions.days} day(s)
-                                {parseInt(rentalOptions.days) > 1 && <span> (${rentalPriceDetails.perDay.toFixed(2)}/day)</span>}
+                                ₱{rentalPriceDetails.total.toFixed(2)} for {rentalOptions.days} day(s)
+                                {parseInt(rentalOptions.days) > 1 && <span> (₱{rentalPriceDetails.perDay.toFixed(2)}/day)</span>}
                             </div>
                             <div className="listing-meta">
                                 <div className="meta-item"><i className="fas fa-user"></i> Owner: <span className="listing-owner-name">{itemOwner ? `${itemOwner.firstName} ${itemOwner.lastName}` : 'N/A'}</span></div>
@@ -110,7 +110,7 @@ const ListingDetailPage = () => {
                                 <div className="option-group"><label htmlFor="deliveryOption">Delivery Option</label>
                                     <select id="deliveryOption" name="deliveryFee" value={rentalOptions.deliveryFee} onChange={handleOptionChange}>
                                         <option value="0">Pickup - Free</option>
-                                        <option value="15">Delivery - $15</option>
+                                        <option value="15">Delivery - ₱15</option>
                                     </select>
                                 </div>
                                 <div className="option-group"><label htmlFor="rentalDate">Rental Start Date</label>

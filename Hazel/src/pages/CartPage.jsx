@@ -43,7 +43,7 @@ const CartPage = () => {
                                         <p>Start Date: {new Date(item.rentalStartDate).toLocaleDateString()}</p>
                                         <p>Delivery: {item.deliveryOption}</p>
                                     </div>
-                                    <div className="cart-item-price">${item.rentalTotalCost.toFixed(2)}</div>
+                                    <div className="cart-item-price">₱{item.rentalTotalCost.toFixed(2)}</div>
                                     <button className="cart-item-remove-btn" onClick={() => removeFromCart(item.itemId)}>&times;</button>
                                 </div>
                             ))}
@@ -52,16 +52,16 @@ const CartPage = () => {
                             <h2>Summary</h2>
                             <div className="price-row">
                                 <span>Subtotal:</span>
-                                <span id="cartSubtotal">${subtotal.toFixed(2)}</span>
+                                <span id="cartSubtotal">₱{subtotal.toFixed(2)}</span>
                             </div>
                             <div className="price-row">
                                 <span>Service Fee (5%):</span>
-                                <span id="cartServiceFee">${serviceFee.toFixed(2)}</span>
+                                <span id="cartServiceFee">₱{serviceFee.toFixed(2)}</span>
                             </div>
                             <hr />
                             <div className="price-row total-row">
                                 <span>Total:</span>
-                                <span id="cartTotal">${total.toFixed(2)}</span>
+                                <span id="cartTotal">₱{total.toFixed(2)}</span>
                             </div>
                             <button className="btn btn-primary btn-block" onClick={() => navigate('/checkout')}>Proceed to Checkout</button>
                         </aside>
