@@ -13,7 +13,6 @@ const AuthModal = ({ closeModal, initialTab }) => {
     const [loginData, setLoginData] = useState({ email: '', password: '' });
     const [signupData, setSignupData] = useState({ firstName: '', lastName: '', email: '', username: '', password: '', confirmPassword: '' });
     const [showPassword, setShowPassword] = useState(false);
-    const [isAdminSignupAllowed, setIsAdminSignupAllowed] = useState(false); // Placeholder for admin signup control
 
     const toggleShowPassword = () => setShowPassword(!showPassword);
 
@@ -52,6 +51,10 @@ const AuthModal = ({ closeModal, initialTab }) => {
             setErrorMessage('Passwords do not match.');
             return;
         }
+        if (!signupData.username) {
+            setErrorMessage('Username is required.');
+            return;
+        }
         setErrorMessage('');
         setIsLoading(true);
         try {
@@ -85,7 +88,7 @@ const AuthModal = ({ closeModal, initialTab }) => {
                         {view === 'initial' && 'Join or Sign In'}
                         {view === 'renter' && (activeTab === 'login' ? 'Renter Login' : 'Renter Sign Up')}
                         {view === 'owner' && (activeTab === 'login' ? 'Owner Login' : 'Owner Sign Up')}
-                        {view === 'admin' && (activeTab === 'login' ? 'Admin Login' : 'Admin Sign Up')}
+                        {view === 'admin' && 'Admin Login'}
                     </h2>
                     <button className="modal-close-btn" aria-label="Close modal" onClick={closeModal}>×</button>
                 </div>
@@ -99,7 +102,7 @@ const AuthModal = ({ closeModal, initialTab }) => {
                         </div>
                     )}
 
-                    {(view === 'renter' || view === 'owner' || view === 'admin') && (
+                    {(view === 'renter' || view === 'owner') && (
                         <>
                             <div className="tab-container">
                                 <div className={`tab ${activeTab === 'login' ? 'active' : ''}`} onClick={() => setActiveTab('login')}>Login</div>
@@ -111,7 +114,7 @@ const AuthModal = ({ closeModal, initialTab }) => {
                                 <div className="form-group">
                                     <label>Password</label>
                                     <input type={showPassword ? "text" : "password"} name="password" value={loginData.password} onChange={handleLoginChange} required />
-                                    <button type="button" onClick={toggleShowPassword}>
+                                    <button type="button" onClick={toggleShowPassword} className="btn-show-password">
                                         {showPassword ? "Hide" : "Show"}
                                     </button>
                                 </div>
@@ -131,12 +134,30 @@ const AuthModal = ({ closeModal, initialTab }) => {
                                 <div className="form-group">
                                     <label>Confirm Password</label>
                                     <input type={showPassword ? "text" : "password"} name="confirmPassword" value={signupData.confirmPassword} onChange={handleSignupChange} required />
-                                    <button type="button" onClick={toggleShowPassword}>
+                                    <button type="button" onClick={toggleShowPassword} className="btn-show-password">
                                         {showPassword ? "Hide" : "Show"}
                                     </button>
                                 </div>
                                 {errorMessage && activeTab === 'signup' && <div className="error-message">{errorMessage}</div>}
-                                <button type="submit" className="btn btn-primary" disabled={isLoading || (view === 'admin' && !isAdminSignupAllowed)}>{isLoading ? 'Signing up...' : `Sign Up as ${view.charAt(0).toUpperCase() + view.slice(1)}`}</button>
+                                <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Signing up...' : `Sign Up as ${view.charAt(0).toUpperCase() + view.slice(1)}`}</button>
+                            </form>
+                            <BackLink />
+                        </>
+                    )}
+
+                    {view === 'admin' && (
+                        <>
+                            <form id="loginForm" className={`form-container active`} onSubmit={handleLoginSubmit}>
+                                <div className="form-group"><label>Email</label><input type="email" name="email" value={loginData.email} onChange={handleLoginChange} required /></div>
+                                <div className="form-group">
+                                    <label>Password</label>
+                                    <input type={showPassword ? "text" : "password"} name="password" value={loginData.password} onChange={handleLoginChange} required />
+                                    <button type="button" onClick={toggleShowPassword} className="btn-show-password">
+                                        {showPassword ? "Hide" : "Show"}
+                                    </button>
+                                </div>
+                                {errorMessage && <div className="error-message">{errorMessage}</div>}
+                                <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Logging in...' : 'Login'}</button>
                             </form>
                             <BackLink />
                         </>

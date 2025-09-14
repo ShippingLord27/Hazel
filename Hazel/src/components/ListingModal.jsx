@@ -10,7 +10,7 @@ const ListingModal = ({ itemToEdit, closeModal }) => {
         title: '',
         categoryId: '',
         price_per_day: '',
-        image_url: '',
+        image_file: null,
         description: '',
         tags: '' // Comma-separated string for input
     };
@@ -24,6 +24,7 @@ const ListingModal = ({ itemToEdit, closeModal }) => {
                 title: itemToEdit.title || '',
                 categoryId: category ? category.id : '',
                 price_per_day: itemToEdit.price_per_day ? String(itemToEdit.price_per_day) : '',
+                image_file: null,
                 image_url: itemToEdit.image_url || '',
                 description: itemToEdit.description || '',
                 tags: itemToEdit.tags ? itemToEdit.tags.join(', ') : ''
@@ -33,7 +34,13 @@ const ListingModal = ({ itemToEdit, closeModal }) => {
         }
     }, [itemToEdit, isEditMode, categories]);
 
-    const handleChange = (e) => { setFormData({ ...formData, [e.target.name]: e.target.value }); };
+    const handleChange = (e) => {
+        if (e.target.name === 'image_file') {
+            setFormData({ ...formData, image_file: e.target.files[0] });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        }
+    };
 
     const getTagIds = (tagString) => {
         if (!tagString.trim()) return [];
@@ -46,7 +53,12 @@ const ListingModal = ({ itemToEdit, closeModal }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!formData.title || !formData.categoryId || !formData.price_per_day || !formData.image_url || !formData.description) {
+        if (!isEditMode && !formData.image_file) {
+            showToast("Please select an image to upload.");
+            return;
+        }
+
+        if (!formData.title || !formData.categoryId || !formData.price_per_day || !formData.description) {
             showToast("Please fill out all required fields marked with *.");
             return;
         }
@@ -61,10 +73,14 @@ const ListingModal = ({ itemToEdit, closeModal }) => {
             title: formData.title,
             categoryId: formData.categoryId,
             price_per_day: priceNumber,
-            image_url: formData.image_url,
             description: formData.description,
             tags: getTagIds(formData.tags),
         };
+        
+        if (formData.image_file) {
+            itemData.image_file = formData.image_file;
+        }
+
 
         if (isEditMode) {
             updateItem(itemToEdit.id, itemData);
@@ -96,7 +112,13 @@ const ListingModal = ({ itemToEdit, closeModal }) => {
                             <label>Price per day ($)*</label>
                             <input type="number" name="price_per_day" value={formData.price_per_day} onChange={handleChange} required placeholder="25.00" step="0.01" min="0.01" />
                         </div>
-                        <div className="form-group"><label>Image URL*</label><input type="url" name="image_url" value={formData.image_url} onChange={handleChange} required /></div>
+                        <div className="form-group">
+                            <label>Image*</label>
+                            <input type="file" name="image_file" onChange={handleChange} />
+                            {isEditMode && formData.image_url && (
+                                <p>Current image: <img src={formData.image_url} alt="listing" width="100" /></p>
+                            )}
+                        </div>
                         <div className="form-group"><label>Tags (comma-separated)</label><input type="text" name="tags" value={formData.tags} onChange={handleChange} /></div>
                         <div className="form-group"><label>Description*</label><textarea name="description" rows="4" value={formData.description} onChange={handleChange} required></textarea></div>
                         <button type="submit" className="btn btn-primary btn-block">{isEditMode ? 'Save Changes' : 'Submit Listing'}</button>

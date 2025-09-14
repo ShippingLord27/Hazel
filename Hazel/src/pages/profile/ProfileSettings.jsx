@@ -1,51 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../hooks/useApp';
+import HistoryTracker from './HistoryTracker';
 
 const ProfileSettings = () => {
-    const { currentUser, showToast, updateUser, updateUserPassword } = useApp();
-
-    const [settingsData, setSettingsData] = useState({ name: '', profile_pic_url: '', location: '', phone: '' });
-    const [passwordData, setPasswordData] = useState({ newPassword: '', confirmNewPassword: '' });
-    const [showPassword, setShowPassword] = useState(false);
-
-    const toggleShowPassword = () => setShowPassword(!showPassword);
+    const { currentUser, showToast, updateUser } = useApp();
+    const [settingsData, setSettingsData] = useState({
+        name: '',
+        profile_pic: null,
+        location: ''
+    });
 
     useEffect(() => {
         if (currentUser) {
             setSettingsData({
-                name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim(),
-                profile_pic_url: currentUser.profile_pic_url || '',
-                location: currentUser.location || '',
-                phone: currentUser.phone || '',
+                name: currentUser.name || '',
+                profile_pic: currentUser.profile_pic || null,
+                location: currentUser.location || ''
             });
         }
     }, [currentUser]);
 
-    const handleSettingsChange = (e) => setSettingsData({ ...settingsData, [e.target.name]: e.target.value });
-    const handlePasswordChange = (e) => setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    const handleSettingsChange = (e) => {
+        if (e.target.name === 'profile_pic') {
+            setSettingsData({ ...settingsData, profile_pic: e.target.files[0] });
+        } else {
+            setSettingsData({ ...settingsData, [e.target.name]: e.target.value });
+        }
+    };
 
     const handleSaveChanges = async (e) => {
         e.preventDefault();
-        const [firstName, ...lastNameParts] = settingsData.name.split(' ');
-        const lastName = lastNameParts.join(' ');
-
-        const updates = {
-            first_name: firstName,
-            last_name: lastName,
-            profile_pic_url: settingsData.profile_pic_url,
-            location: settingsData.location,
-            phone: settingsData.phone,
-        };
-        
-        await updateUser(currentUser.uid, updates);
-        
-        if (passwordData.newPassword) {
-            if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-                showToast("New passwords do not match.");
-                return;
-            }
-            await updateUserPassword(passwordData.newPassword);
-            setPasswordData({ newPassword: '', confirmNewPassword: '' });
+        try {
+            await updateUser(currentUser.uid, settingsData);
+            showToast('Profile updated successfully!', 'success');
+        } catch (error) {
+            showToast('Error updating profile. Please try again.', 'error');
         }
     };
 
@@ -54,23 +43,28 @@ const ProfileSettings = () => {
             <div className="profile-view-header"><h1>Settings</h1></div>
             <form onSubmit={handleSaveChanges}>
                 <h3>Personal Information</h3>
-                <div className="form-group"><label>Full Name*</label><input type="text" name="name" value={settingsData.name} onChange={handleSettingsChange} required /></div>
-                <div className="form-group"><label>Email</label><input type="email" name="email" value={currentUser?.email || ''} readOnly /></div>
-                <div className="form-group"><label>Profile Picture URL</label><input type="url" name="profile_pic_url" value={settingsData.profile_pic_url} onChange={handleSettingsChange} /></div>
-                <div className="form-group"><label>Location</label><input type="text" name="location" value={settingsData.location} onChange={handleSettingsChange} /></div>
-                <div className="form-group"><label>Phone Number</label><input type="text" name="phone" value={settingsData.phone} onChange={handleSettingsChange} /></div>
-                <hr/>
-                <h3>Change Password</h3>
-                <div className="form-group"><label>New Password</label><input type={showPassword ? "text" : "password"} name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} /></div>
                 <div className="form-group">
-                    <label>Confirm New Password</label>
-                    <input type={showPassword ? "text" : "password"} name="confirmNewPassword" value={passwordData.confirmNewPassword} onChange={handlePasswordChange} />
-                    <button type="button" onClick={toggleShowPassword}>
-                        {showPassword ? "Hide" : "Show"}
-                    </button>
+                    <label>Full Name*</label>
+                    <input type="text" name="name" value={settingsData.name} onChange={handleSettingsChange} required />
                 </div>
-                <button type="submit" className="btn btn-primary">Save All Changes</button>
+                <div className="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value={currentUser?.email || ''} readOnly />
+                </div>
+                <div className="form-group">
+                    <label>Profile Picture</label>
+                    <input type="file" name="profile_pic" onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" value={settingsData.location} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                    <button type="submit" className="btn btn-primary">Update Info</button>
+                </div>
             </form>
+
+            <HistoryTracker />
         </div>
     );
 };

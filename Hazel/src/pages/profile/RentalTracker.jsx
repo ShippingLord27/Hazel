@@ -12,10 +12,34 @@ const RentalItem = ({ rental, item, isOwnerView, onStatusUpdate, onPrint }) => (
                 <p>Owner: {item.ownerName}</p>
             )}
             <p>Start Date: {new Date(rental.rentalStartDate).toLocaleDateString()}</p>
-            <p>Status: <span className={rental.status === 'Active' ? 'status-active' : 'status-rented'}>{rental.status}</span></p>
+            <p>Status: <span className={`status-${rental.status.toLowerCase()}`}>{rental.status}</span></p>
         </div>
         <div className="rental-tracker-actions">
-            {isOwnerView && rental.status === 'Active' && (
+            {isOwnerView && rental.status === 'Pending' && (
+                <>
+                    <button 
+                        className="btn btn-success btn-small"
+                        onClick={() => onStatusUpdate(rental.transactionId, 'Approved')}
+                    >
+                        Approve
+                    </button>
+                    <button 
+                        className="btn btn-danger btn-small"
+                        onClick={() => onStatusUpdate(rental.transactionId, 'Rejected')}
+                    >
+                        Reject
+                    </button>
+                </>
+            )}
+            {isOwnerView && rental.status === 'Approved' && (
+                <button 
+                    className="btn btn-success btn-small"
+                    onClick={() => onStatusUpdate(rental.transactionId, 'Active')}
+                >
+                    Mark as Active
+                </button>
+            )}
+             {isOwnerView && rental.status === 'Active' && (
                 <button 
                     className="btn btn-success btn-small"
                     onClick={() => onStatusUpdate(rental.transactionId, 'Completed')}
@@ -55,8 +79,11 @@ const RentalTracker = () => {
     };
 
     const history = currentUser.role === 'owner' ? ownerLentHistory : rentalHistory;
+    const pendingRentals = history.filter(r => r.status === 'Pending');
+    const approvedRentals = history.filter(r => r.status === 'Approved');
     const activeRentals = history.filter(r => r.status === 'Active');
     const completedRentals = history.filter(r => r.status === 'Completed');
+    const rejectedRentals = history.filter(r => r.status === 'Rejected');
 
 
     return (
@@ -71,6 +98,42 @@ const RentalTracker = () => {
                 </p>
             </div>
             <div id="rentalTrackerGrid">
+                <h3>Pending Rentals</h3>
+                {pendingRentals.length > 0 ? (
+                    pendingRentals.map(rental => {
+                        const item = items.find(p => p.id === rental.itemId);
+                        if (!item) return null;
+                        return <RentalItem 
+                                    key={rental.transactionId} 
+                                    rental={rental} 
+                                    item={item} 
+                                    isOwnerView={currentUser.role === 'owner'}
+                                    onStatusUpdate={updateRentalStatus}
+                                    onPrint={handlePrintReceipt}
+                                />;
+                    })
+                ) : (
+                    <p>You have no pending rentals.</p>
+                )}
+
+                <h3>Approved Rentals</h3>
+                {approvedRentals.length > 0 ? (
+                    approvedRentals.map(rental => {
+                        const item = items.find(p => p.id === rental.itemId);
+                        if (!item) return null;
+                        return <RentalItem 
+                                    key={rental.transactionId} 
+                                    rental={rental} 
+                                    item={item} 
+                                    isOwnerView={currentUser.role === 'owner'}
+                                    onStatusUpdate={updateRentalStatus}
+                                    onPrint={handlePrintReceipt}
+                                />;
+                    })
+                ) : (
+                    <p>You have no approved rentals.</p>
+                )}
+
                 <h3>Active Rentals</h3>
                 {activeRentals.length > 0 ? (
                     activeRentals.map(rental => {
@@ -104,6 +167,23 @@ const RentalTracker = () => {
                     })
                 ) : (
                     <p>You have no completed rentals.</p>
+                )}
+
+                <h3>Rejected Rentals</h3>
+                {rejectedRentals.length > 0 ? (
+                    rejectedRentals.map(rental => {
+                        const item = items.find(p => p.id === rental.itemId);
+                        if (!item) return null;
+                        return <RentalItem 
+                                    key={rental.transactionId}
+                                    rental={rental}
+                                    item={item}
+                                    isOwnerView={currentUser.role === 'owner'}
+                                    onPrint={handlePrintReceipt}
+                                />;
+                    })
+                ) : (
+                    <p>You have no rejected rentals.</p>
                 )}
             </div>
         </div>
