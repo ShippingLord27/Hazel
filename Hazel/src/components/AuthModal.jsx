@@ -11,11 +11,15 @@ const AuthModal = ({ closeModal, initialTab }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [loginData, setLoginData] = useState({ email: '', password: '' });
-    const [signupData, setSignupData] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+    const [signupData, setSignupData] = useState({ firstName: '', lastName: '', email: '', username: '', password: '', confirmPassword: '' });
+    const [showPassword, setShowPassword] = useState(false);
+    const [isAdminSignupAllowed, setIsAdminSignupAllowed] = useState(false); // Placeholder for admin signup control
+
+    const toggleShowPassword = () => setShowPassword(!showPassword);
 
     const handleLoginChange = (e) => setLoginData({ ...loginData, [e.target.name]: e.target.value });
     const handleSignupChange = (e) => setSignupData({ ...signupData, [e.target.name]: e.target.value });
-    const resetForms = () => { setErrorMessage(''); setLoginData({ email: '', password: '' }); setSignupData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' }); };
+    const resetForms = () => { setErrorMessage(''); setLoginData({ email: '', password: '' }); setSignupData({ firstName: '', lastName: '', email: '', username: '', password: '', confirmPassword: '' }); };
     const handleViewChange = (newView) => { setView(newView); setActiveTab(initialTab || 'login'); resetForms(); };
 
     const handleLoginSubmit = async (e) => {
@@ -55,6 +59,7 @@ const AuthModal = ({ closeModal, initialTab }) => {
                 firstName: signupData.firstName, 
                 lastName: signupData.lastName, 
                 email: signupData.email, 
+                username: signupData.username,
                 password: signupData.password 
             }, role);
             if (user) {
@@ -103,7 +108,13 @@ const AuthModal = ({ closeModal, initialTab }) => {
 
                             <form id="loginForm" className={`form-container ${activeTab === 'login' ? 'active' : ''}`} onSubmit={handleLoginSubmit}>
                                 <div className="form-group"><label>Email</label><input type="email" name="email" value={loginData.email} onChange={handleLoginChange} required /></div>
-                                <div className="form-group"><label>Password</label><input type="password" name="password" value={loginData.password} onChange={handleLoginChange} required /></div>
+                                <div className="form-group">
+                                    <label>Password</label>
+                                    <input type={showPassword ? "text" : "password"} name="password" value={loginData.password} onChange={handleLoginChange} required />
+                                    <button type="button" onClick={toggleShowPassword}>
+                                        {showPassword ? "Hide" : "Show"}
+                                    </button>
+                                </div>
                                 {errorMessage && activeTab === 'login' && <div className="error-message">{errorMessage}</div>}
                                 <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Logging in...' : 'Login'}</button>
                             </form>
@@ -112,10 +123,20 @@ const AuthModal = ({ closeModal, initialTab }) => {
                                 <div className="form-group"><label>First Name</label><input type="text" name="firstName" value={signupData.firstName} onChange={handleSignupChange} required /></div>
                                 <div className="form-group"><label>Last Name</label><input type="text" name="lastName" value={signupData.lastName} onChange={handleSignupChange} required /></div>
                                 <div className="form-group"><label>Email</label><input type="email" name="email" value={signupData.email} onChange={handleSignupChange} required /></div>
-                                <div className="form-group"><label>Password</label><input type="password" name="password" value={signupData.password} onChange={handleSignupChange} required /></div>
-                                <div className="form-group"><label>Confirm Password</label><input type="password" name="confirmPassword" value={signupData.confirmPassword} onChange={handleSignupChange} required /></div>
+                                <div className="form-group"><label>Username</label><input type="text" name="username" value={signupData.username} onChange={handleSignupChange} required /></div>
+                                <div className="form-group">
+                                    <label>Password</label>
+                                    <input type={showPassword ? "text" : "password"} name="password" value={signupData.password} onChange={handleSignupChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Confirm Password</label>
+                                    <input type={showPassword ? "text" : "password"} name="confirmPassword" value={signupData.confirmPassword} onChange={handleSignupChange} required />
+                                    <button type="button" onClick={toggleShowPassword}>
+                                        {showPassword ? "Hide" : "Show"}
+                                    </button>
+                                </div>
                                 {errorMessage && activeTab === 'signup' && <div className="error-message">{errorMessage}</div>}
-                                <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Signing up...' : `Sign Up as ${view.charAt(0).toUpperCase() + view.slice(1)}`}</button>
+                                <button type="submit" className="btn btn-primary" disabled={isLoading || (view === 'admin' && !isAdminSignupAllowed)}>{isLoading ? 'Signing up...' : `Sign Up as ${view.charAt(0).toUpperCase() + view.slice(1)}`}</button>
                             </form>
                             <BackLink />
                         </>

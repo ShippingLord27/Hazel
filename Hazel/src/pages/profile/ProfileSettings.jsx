@@ -6,6 +6,9 @@ const ProfileSettings = () => {
 
     const [settingsData, setSettingsData] = useState({ name: '', profile_pic_url: '', location: '', phone: '' });
     const [passwordData, setPasswordData] = useState({ newPassword: '', confirmNewPassword: '' });
+    const [showPassword, setShowPassword] = useState(false);
+
+    const toggleShowPassword = () => setShowPassword(!showPassword);
 
     useEffect(() => {
         if (currentUser) {
@@ -58,8 +61,14 @@ const ProfileSettings = () => {
                 <div className="form-group"><label>Phone Number</label><input type="text" name="phone" value={settingsData.phone} onChange={handleSettingsChange} /></div>
                 <hr/>
                 <h3>Change Password</h3>
-                <div className="form-group"><label>New Password</label><input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} /></div>
-                <div className="form-group"><label>Confirm New Password</label><input type="password" name="confirmNewPassword" value={passwordData.confirmNewPassword} onChange={handlePasswordChange} /></div>
+                <div className="form-group"><label>New Password</label><input type={showPassword ? "text" : "password"} name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} /></div>
+                <div className="form-group">
+                    <label>Confirm New Password</label>
+                    <input type={showPassword ? "text" : "password"} name="confirmNewPassword" value={passwordData.confirmNewPassword} onChange={handlePasswordChange} />
+                    <button type="button" onClick={toggleShowPassword}>
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
                 <button type="submit" className="btn btn-primary">Save All Changes</button>
             </form>
         </div>
